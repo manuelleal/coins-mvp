@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Lingo-Coins</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-dashboard">
+    <div class="decor-overlay" aria-hidden="true"></div>
+    <div class="container-custom page-container" style="max-width: 960px;">
+        <div class="card card-premium" style="padding: 0; overflow: hidden;">
+            <nav class="admin-nav">
+                <span class="greeting">Hello <strong id="adminName"></strong>, welcome back!</span>
+                <a href="#" id="navUsers" class="active" onclick="return window.showAdminView('users')">Users</a>
+                <a href="#" id="navGroups" onclick="return window.showAdminView('groups')">Groups</a>
+                <a href="#" id="navAttendance" onclick="return window.showAdminView('attendance')">Attendance</a>
+                <a href="#" id="navChallenges" onclick="return window.showAdminView('challenges')">Challenges</a>
+                <a href="#" id="navStore" onclick="return window.showAdminView('store')">Store/Auctions</a>
+                <a href="#" id="navCobros" onclick="return window.showAdminView('cobros')">Cobros</a>
+                <a href="#" id="navAnnouncements" onclick="return window.showAdminView('announcements')">Announcements</a>
+                <a href="#" id="navAdmins" onclick="return window.showAdminView('admins')">Admins</a>
+                <button type="button" class="nav-btn" id="btnLogout">Logout</button>
+            </nav>
+
+            <!-- VIEW: Users -->
+            <div id="viewUsers" class="admin-view active">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Users">Manage students</h5>
+                <p class="small text-muted">Filter students by group and search by name or document ID.</p>
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                    <label class="mb-0">Group:</label>
+                    <select id="adminGroupFilter" class="form-select" style="max-width: 180px;">
+                        <option value="">All groups</option>
+                    </select>
+                    <input type="text" id="studentSearch" class="form-control" style="max-width:220px;" placeholder="Search name or document">
+                    <button type="button" class="btn btn-primary" id="btnRefreshUsers">Refresh</button>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="text" id="newGroupCode" class="form-control" placeholder="New group code" style="width: 140px;">
+                        <button type="button" class="btn btn-success" id="btnCreateGroup">Create group</button>
+                    </div>
+                </div>
+                <div id="contentUsers">
+                    <p class="text-muted">Loading students...</p>
+                </div>
+            </div>
+
+            <!-- VIEW: Attendance -->
+            <div id="viewAttendance" class="admin-view">
+                <h5 class="mb-3 section-title"><img src="assets/images/icono-asistencia.webp" class="ui-icon" loading="lazy" alt="Attendance">Attendance & QR</h5>
+                <p class="small text-muted">Select a group first. Generate a QR session plus a manual code. Geolocation is optional.</p>
+                <div class="mb-3">
+                    <label class="form-label">Group (required):</label>
+                    <select id="qrGroup" class="form-select" style="max-width: 200px;">
+                        <option value="">Select group</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary mb-2" id="btnGenerateQR">Generate Attendance Session (QR + code)</button>
+                <div id="qrError" class="alert alert-danger mt-2" style="display: none;"></div>
+                <div id="qrcode"></div>
+                <div id="manualAttendanceCodeWrap" class="mt-3" style="display:none;">
+                    <label class="form-label mb-1">Manual attendance code (same session as QR):</label>
+                    <div class="input-group" style="max-width: 520px;">
+                        <input type="text" id="manualAttendanceCode" class="form-control" readonly>
+                        <button type="button" class="btn btn-outline-secondary" id="btnCopyAttendanceCode">Copy</button>
+                    </div>
+                    <div class="small text-muted mt-1">Students can open attendance page and enter this code manually if camera scan fails.</div>
+                </div>
+                <div class="mt-4">
+                    <h6 class="mb-2">Who checked in today (this group)</h6>
+                    <div id="attendanceTodayList"><p class="text-muted small">Select a group to see list.</p></div>
+                </div>
+                <button type="button" class="btn btn-success mt-2" id="btnExportCSV">Export today's attendance (CSV)</button>
+            </div>
+
+            <!-- VIEW: Groups -->
+            <div id="viewGroups" class="admin-view">
+                <h5 class="mb-3">Manage Groups</h5>
+                <p class="small text-muted">Create, edit, and delete groups.</p>
+                <div class="d-flex gap-2 mb-3">
+                    <input type="text" id="newGroupCodeInput" class="form-control" placeholder="New group code" style="max-width:200px;">
+                    <input type="number" id="newGroupCapacity" class="form-control" placeholder="Max capacity" style="max-width:150px;" min="1">
+                    <button type="button" class="btn btn-success" id="btnCreateGroupView">Create Group</button>
+                </div>
+                <div class="small text-muted mb-2">Tip: edit lets you change code, capacity and geofence coordinates.</div>
+                <div id="groupsList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Challenges -->
+            <div id="viewChallenges" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-challenge.webp" class="ui-icon" loading="lazy" alt="Challenges">English Challenges</h5>
+                <p class="small text-muted">Build challenges like a form: add multiple questions, set correct answers, then publish once.</p>
+                <div class="mb-3">
+                    <div class="mb-2">
+                        <label class="form-label">Challenge Title</label>
+                        <input type="text" id="challengeTitle" class="form-control" placeholder="Example: Unit 2 Grammar Sprint">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Challenge Description</label>
+                        <textarea id="challengeDescription" class="form-control" placeholder="Brief instructions for students" rows="2"></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Challenge Scope</label>
+                        <select id="challengeScope" class="form-select">
+                            <option value="all">For all groups</option>
+                            <option value="group">For one specific group</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Target Group</label>
+                        <select id="challengeTargetGroup" class="form-select" style="display:none;">
+                            <option value="">Select target group</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Questions</h6>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="btnAddChallengeQuestion"><i class="bi bi-plus-circle"></i> Add Question</button>
+                    </div>
+                    <div id="challengeQuestionsBuilder"></div>
+                    <button type="button" class="btn btn-primary" id="btnCreateChallenge">Create Challenge</button>
+                </div>
+                <div id="challengesList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Store / Auctions -->
+            <div id="viewStore" class="admin-view">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 auction-header mb-2">
+                    <div>
+                        <h5 class="mb-2 section-title auction-banner"><img src="assets/images/icono-tienda.webp" class="ui-icon" loading="lazy" alt="Store">Store / Auctions</h5>
+                        <div class="store-decor">
+                            <img src="assets/images/cofre-tesoro.webp" loading="lazy" alt="Treasure chest">
+                            <img src="assets/images/corona-flotante.webp" loading="lazy" alt="Floating crown">
+                            <img src="assets/images/icono-moneda.webp" loading="lazy" alt="Coins icon">
+                        </div>
+                    </div>
+                </div>
+                <p class="small text-muted">Publish either a Store Item (fixed price) or an Auction Item (bidding).</p>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-3"><label class="form-label small mb-1">Mode</label><select id="auctionItemType" class="form-select"><option value="auction">Auction Item (Bidding)</option><option value="shop">Store Item (Fixed price)</option></select></div>
+                    <div class="col-md-3"><label class="form-label small mb-1">Item Name</label><input type="text" id="auctionItemName" class="form-control" placeholder="Virtual reward name"></div>
+                    <div class="col-md-2"><label class="form-label small mb-1">Price / Starting Bid</label><input type="number" id="auctionBasePrice" class="form-control" placeholder="Coins" min="0"></div>
+                    <div class="col-md-2"><label class="form-label small mb-1">Group Target</label><select id="auctionGroup" class="form-select"><option value="">All groups</option></select></div>
+                    <div class="col-md-2"><label class="form-label small mb-1">Stock (Shop only)</label><input type="number" id="auctionStock" class="form-control" placeholder="Units" min="1" value="1"></div>
+                    <div class="col-md-2"><label class="form-label small mb-1">Duration (Auction)</label><input type="number" id="auctionDuration" class="form-control" placeholder="Seconds" min="30" value="120"></div>
+                    <div class="col-md-4"><label class="form-label small mb-1">Virtual Reward Description</label><input type="text" id="auctionDescription" class="form-control" placeholder="What student receives"></div>
+                    <div class="col-md-3"><button type="button" class="btn btn-primary w-100" id="btnCreateAuction">Publish Item</button></div>
+                </div>
+                <div id="auctionList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Cobros (Billing) -->
+            <div id="viewCobros" class="admin-view">
+                <h5 class="mb-3">Cobros (Billing Claims)</h5>
+                <p class="small text-muted">Students who activated items from their bag. Confirm delivery here.</p>
+                <div id="billingClaimsList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Announcements -->
+            <div id="viewAnnouncements" class="admin-view">
+                <h5 class="mb-3 section-title"><img src="assets/images/icono-challenge.webp" class="ui-icon" loading="lazy" alt="Announcements">Announcements</h5>
+                <p class="small text-muted">Create alert-style messages with optional resource links.</p>
+                <div class="mb-3">
+                    <input type="hidden" id="announcementEditId">
+                    <label class="form-label">Title</label>
+                    <input type="text" id="announcementTitle" class="form-control mb-2" placeholder="Announcement title">
+                    <label class="form-label">Message</label>
+                    <textarea id="announcementMessage" class="form-control mb-2" placeholder="Announcement message" rows="3"></textarea>
+                    <label class="form-label">Alert Type</label>
+                    <select id="announcementType" class="form-select mb-2">
+                        <option value="info">Info</option>
+                        <option value="success">Success</option>
+                        <option value="warning">Warning</option>
+                        <option value="danger">Danger</option>
+                    </select>
+                    <label class="form-label">Links</label>
+                    <textarea id="announcementLinks" class="form-control mb-2" rows="2" placeholder="One per line: Label|https://url"></textarea>
+                    <label class="form-label">Target Group</label>
+                    <select id="announcementGroup" class="form-select mb-2">
+                        <option value="">All groups</option>
+                    </select>
+                    <label class="form-label">Expiry Date</label>
+                    <input type="date" id="announcementExpiry" class="form-control mb-2">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary" id="btnCreateAnnouncement">Create Announcement</button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnCancelAnnouncementEdit" style="display:none;">Cancel Edit</button>
+                    </div>
+                </div>
+                <div id="announcementsList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Admins (super_admin only) -->
+            <div id="viewAdmins" class="admin-view">
+                <h5 class="mb-3 section-title"><img src="assets/images/rey-con-dragon.webp" class="ui-icon" loading="lazy" alt="Admin">Admin Management</h5>
+                <p class="small text-muted">Create and review teacher/admin accounts.</p>
+                <div id="adminCreateBlock" class="glass-panel mb-3" style="padding:1rem;">
+                    <div class="row g-2">
+                        <div class="col-md-3"><input type="text" id="newAdminName" class="form-control" placeholder="Full name"></div>
+                        <div class="col-md-2"><input type="text" id="newAdminDoc" class="form-control" placeholder="Document"></div>
+                        <div class="col-md-2"><input type="password" id="newAdminPin" class="form-control" placeholder="PIN"></div>
+                        <div class="col-md-2"><select id="newAdminRole" class="form-select"><option value="teacher">teacher</option><option value="admin">admin</option></select></div>
+                        <div class="col-md-3"><button type="button" class="btn btn-primary w-100" id="btnCreateAdminUser">Create Admin User</button></div>
+                    </div>
+                </div>
+                <div id="adminUsersList"><p class="text-muted small">Loading...</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index:1080;"></div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit user</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="editProfileId">
+                    <div class="mb-3"><label class="form-label">Full name (nombre_completo)</label><input type="text" id="editName" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Document ID</label><input type="text" id="editDoc" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">PIN</label><input type="password" id="editPin" class="form-control" placeholder="Leave blank to keep current"></div>
+                    <div class="mb-3" id="editRoleWrap"><label class="form-label">Role</label><select id="editRole" class="form-select"><option value="student">student</option><option value="admin">admin</option></select></div>
+                    <div class="mb-3"><label class="form-label">Group</label><select id="editGroup" class="form-select"></select></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="btnSaveEdit">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="groupEditModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Group</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="editGroupOldCode">
+                    <div class="mb-2"><label class="form-label">Group code</label><input type="text" id="editGroupCode" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label">Student limit</label><input type="number" id="editGroupCapacity" class="form-control" min="1"></div>
+                    <div class="mb-2"><label class="form-label">Last admin latitude</label><input type="number" id="editGroupLat" class="form-control" step="any"></div>
+                    <div class="mb-2"><label class="form-label">Last admin longitude</label><input type="number" id="editGroupLng" class="form-control" step="any"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="btnSaveGroupEdit">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs2@0.0.2/qrcode.min.js"></script>
+    <script src="./app.js"></script>
+    <script>
+// SAFE localStorage parsing with try/catch - BEFORE DOMContentLoaded
+var user;
+try {
+    user = JSON.parse(localStorage.getItem('lingoCoins_user') || '{}');
+} catch (e) {
+    console.error('[ADMIN] Failed to parse user data:', e);
+    localStorage.removeItem('lingoCoins_user');
+    window.location.href = 'index.html';
+}
+if (!user || !user.id || !isAdminRole(user.rol)) {
+    console.warn('[ADMIN] Not authorized, redirecting to login');
+    window.location.href = 'index.html';
+}
+var isSuperAdmin = (user.rol === 'super_admin');
+
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[ADMIN] DOM loaded, initializing admin panel...');
+    console.log('[ADMIN] User:', user.nombre_completo, '| Role:', user.rol);
+    
+    document.getElementById('adminName').textContent = user.nombre_completo || 'Admin';
+
+    // --- Logout: ensure it clears storage and redirects ---
+    window.logout = function() {
+        localStorage.removeItem('lingoCoins_user');
+        window.location.href = 'index.html';
+    };
+    document.getElementById('btnLogout').addEventListener('click', window.logout);
+
+    // --- SPA view switching ---
+    window.showAdminView = function(viewId) {
+        document.querySelectorAll('.admin-view').forEach(function(el) { el.classList.remove('active'); });
+        document.querySelectorAll('.admin-nav a').forEach(function(el) { el.classList.remove('active'); });
+        var view = document.getElementById('view' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
+        var nav = document.getElementById('nav' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
+        if (view) view.classList.add('active');
+        if (nav) nav.classList.add('active');
+        document.body.classList.remove('bg-dashboard', 'bg-challenges', 'bg-store', 'bg-auctions');
+        if (viewId === 'challenges') document.body.classList.add('bg-challenges');
+        else if (viewId === 'store') document.body.classList.add('bg-auctions');
+        else document.body.classList.add('bg-dashboard');
+        if (viewId === 'groups') window.loadGroupsList();
+        if (viewId === 'attendance') window.refreshAttendanceList();
+        if (viewId === 'challenges') window.loadChallengesList();
+        if (viewId === 'store') window.loadAuctionList();
+        if (viewId === 'cobros') window.loadBillingClaims();
+        if (viewId === 'announcements') window.loadAnnouncementsList();
+        if (viewId === 'admins') window.loadAdminUsers();
+        return false;
+    };
+    document.body.classList.add('bg-dashboard');
+
+    function getSelectedGroup() {
+        var el = document.getElementById('adminGroupFilter');
+        return el ? el.value : '';
+    }
+
+    function getSelectedQRGroup() {
+        var el = document.getElementById('qrGroup');
+        return el ? el.value : '';
+    }
+
+    function toBase64Url(raw) {
+        try {
+            return btoa(raw).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+        } catch (_) {
+            return '';
+        }
+    }
+
+    function encodeAttendanceSession(payload) {
+        return toBase64Url(JSON.stringify(payload || {}));
+    }
+
+    function parseAnnouncementLinks(raw) {
+        var lines = String(raw || '').split(/\r?\n/).map(function(x) { return x.trim(); }).filter(Boolean);
+        return lines.map(function(line) {
+            var parts = line.split('|');
+            if (parts.length < 2) return null;
+            var label = String(parts[0] || '').trim();
+            var url = String(parts.slice(1).join('|') || '').trim();
+            if (!label || !/^https?:\/\//i.test(url)) return null;
+            return { label: label, url: url, type: 'resource' };
+        }).filter(Boolean);
+    }
+
+    function parseChallengeOptions(raw) {
+        return String(raw || '').split(/\r?\n|,/).map(function(x) { return x.trim(); }).filter(Boolean);
+    }
+
+    function parseMatchingPairs(raw) {
+        var obj = {};
+        String(raw || '').split(/\r?\n/).forEach(function(line) {
+            var parts = line.split('=');
+            if (parts.length < 2) return;
+            var k = String(parts[0] || '').trim();
+            var v = String(parts.slice(1).join('=') || '').trim();
+            if (k && v) obj[k] = v;
+        });
+        return obj;
+    }
+
+    var challengeBuilderState = [];
+
+    function normalizeQuestionTypeAdmin(type) {
+        var t = String(type || 'open').trim().toLowerCase();
+        if (t === 'true/false' || t === 'boolean') return 'true_false';
+        if (t === 'multiple-choice' || t === 'mcq') return 'multiple_choice';
+        return t || 'open';
+    }
+
+    function defaultChallengeQuestion(type) {
+        var qType = normalizeQuestionTypeAdmin(type || 'multiple_choice');
+        var model = {
+            question_type: qType,
+            question_text: '',
+            options: [],
+            correct_answer: '',
+            matching_pairs_text: ''
+        };
+        if (qType === 'true_false') {
+            model.options = ['True', 'False'];
+            model.correct_answer = 'true';
+        } else if (qType === 'multiple_choice') {
+            model.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+            model.correct_answer = 'Option A';
+        } else if (qType === 'multiple_select') {
+            model.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+        }
+        return model;
+    }
+
+    function ensureQuestionModelDefaults(model) {
+        if (!model) return defaultChallengeQuestion('open');
+        model.question_type = normalizeQuestionTypeAdmin(model.question_type);
+        if (!Array.isArray(model.options)) model.options = [];
+        model.question_text = String(model.question_text || '');
+        model.correct_answer = String(model.correct_answer == null ? '' : model.correct_answer);
+        model.matching_pairs_text = String(model.matching_pairs_text || '');
+        if (model.question_type === 'true_false') {
+            model.options = ['True', 'False'];
+            if (!['true', 'false'].includes(String(model.correct_answer).toLowerCase())) model.correct_answer = 'true';
+        }
+        if ((model.question_type === 'multiple_choice' || model.question_type === 'multiple_select') && model.options.length < 2) {
+            model.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+        }
+        return model;
+    }
+
+    function updateQuestionOrderLabels() {
+        var cards = document.querySelectorAll('.question-builder-card');
+        cards.forEach(function(card, idx) {
+            var badge = card.querySelector('[data-question-order]');
+            if (badge) badge.textContent = 'Question ' + (idx + 1);
+        });
+    }
+
+    function renderChallengeBuilder() {
+        var wrap = document.getElementById('challengeQuestionsBuilder');
+        if (!wrap) return;
+        if (!challengeBuilderState.length) challengeBuilderState = [defaultChallengeQuestion('multiple_choice')];
+        wrap.innerHTML = challengeBuilderState.map(function(q, idx) {
+            var qType = normalizeQuestionTypeAdmin(q.question_type);
+            var removeBtn = challengeBuilderState.length > 1
+                ? '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeChallengeQuestion(' + idx + ')"><i class="bi bi-trash"></i> Delete</button>'
+                : '';
+            var optionsBlock = '';
+            if (qType === 'true_false') {
+                optionsBlock = '<div class="mb-2"><label class="form-label">Options</label><div class="small text-muted">True / False (fixed)</div></div>' +
+                    '<div class="mb-2"><label class="form-label">Correct Answer</label><select class="form-select" onchange="updateQuestionCorrect(' + idx + ', this.value)"><option value="true" ' + (String(q.correct_answer).toLowerCase() === 'true' ? 'selected' : '') + '>True</option><option value="false" ' + (String(q.correct_answer).toLowerCase() === 'false' ? 'selected' : '') + '>False</option></select></div>';
+            } else if (qType === 'multiple_choice') {
+                optionsBlock = '<div class="mb-2"><label class="form-label">Options</label>' + q.options.map(function(opt, oIdx) {
+                    var label = 'Option ' + String.fromCharCode(65 + oIdx);
+                    return '<div class="input-group input-group-sm mb-1"><span class="input-group-text">' + label + '</span><input type="text" class="form-control" value="' + escapeAttr(opt || '') + '" oninput="updateQuestionOption(' + idx + ',' + oIdx + ', this.value)"><button type="button" class="btn btn-outline-danger" onclick="removeQuestionOption(' + idx + ',' + oIdx + ')" ' + (q.options.length <= 2 ? 'disabled' : '') + '><i class="bi bi-x"></i></button></div>';
+                }).join('') + '<button type="button" class="btn btn-outline-secondary btn-sm" onclick="addQuestionOption(' + idx + ')">+ Add option</button></div>' +
+                '<div class="mb-2"><label class="form-label">Correct Answer</label><select class="form-select" onchange="updateQuestionCorrect(' + idx + ', this.value)">' + q.options.map(function(opt) {
+                    var safe = String(opt || '').trim();
+                    return '<option value="' + escapeAttr(safe) + '" ' + (String(q.correct_answer) === safe ? 'selected' : '') + '>' + escapeHtml(safe || '(empty)') + '</option>';
+                }).join('') + '</select></div>';
+            } else if (qType === 'multiple_select') {
+                optionsBlock = '<div class="mb-2"><label class="form-label">Options</label>' + q.options.map(function(opt, oIdx) {
+                    var label = 'Option ' + String.fromCharCode(65 + oIdx);
+                    return '<div class="input-group input-group-sm mb-1"><span class="input-group-text">' + label + '</span><input type="text" class="form-control" value="' + escapeAttr(opt || '') + '" oninput="updateQuestionOption(' + idx + ',' + oIdx + ', this.value)"><button type="button" class="btn btn-outline-danger" onclick="removeQuestionOption(' + idx + ',' + oIdx + ')" ' + (q.options.length <= 2 ? 'disabled' : '') + '><i class="bi bi-x"></i></button></div>';
+                }).join('') + '<button type="button" class="btn btn-outline-secondary btn-sm" onclick="addQuestionOption(' + idx + ')">+ Add option</button></div>' +
+                '<div class="mb-2"><label class="form-label">Correct Answer</label><input type="text" class="form-control" value="' + escapeAttr(q.correct_answer || '') + '" placeholder="Use comma-separated correct options" oninput="updateQuestionCorrect(' + idx + ', this.value)"></div>';
+            } else if (qType === 'matching') {
+                optionsBlock = '<div class="mb-2"><label class="form-label">Correct Answer</label><textarea class="form-control" rows="3" placeholder="One pair per line: Term=Definition" oninput="updateQuestionPairs(' + idx + ', this.value)">' + escapeHtml(q.matching_pairs_text || '') + '</textarea></div>';
+            } else if (qType === 'fill_blank') {
+                optionsBlock = '<div class="mb-2"><label class="form-label">Correct Answer</label><input type="text" class="form-control" value="' + escapeAttr(q.correct_answer || '') + '" placeholder="Accepted blanks, separated by comma" oninput="updateQuestionCorrect(' + idx + ', this.value)"></div>';
+            } else {
+                optionsBlock = '<div class="mb-2"><label class="form-label">Correct Answer</label><input type="text" class="form-control" value="' + escapeAttr(q.correct_answer || '') + '" placeholder="Accepted answer(s), separated by comma" oninput="updateQuestionCorrect(' + idx + ', this.value)"></div>';
+            }
+            return '<div class="question-builder-card"><div class="card-title-row"><strong data-question-order>Question ' + (idx + 1) + '</strong>' + removeBtn + '</div>' +
+                '<div class="mb-2"><label class="form-label">Question Type</label><select class="form-select" onchange="updateQuestionType(' + idx + ', this.value)">' +
+                '<option value="open" ' + (qType === 'open' ? 'selected' : '') + '>Open Answer</option>' +
+                '<option value="true_false" ' + (qType === 'true_false' ? 'selected' : '') + '>True / False</option>' +
+                '<option value="multiple_choice" ' + (qType === 'multiple_choice' ? 'selected' : '') + '>Multiple Choice</option>' +
+                '<option value="multiple_select" ' + (qType === 'multiple_select' ? 'selected' : '') + '>Multiple Select</option>' +
+                '<option value="matching" ' + (qType === 'matching' ? 'selected' : '') + '>Matching</option>' +
+                '<option value="fill_blank" ' + (qType === 'fill_blank' ? 'selected' : '') + '>Fill in the Blank</option>' +
+                '</select></div>' +
+                '<div class="mb-2"><label class="form-label">Question</label><textarea class="form-control" rows="2" placeholder="Write the question" oninput="updateQuestionText(' + idx + ', this.value)">' + escapeHtml(q.question_text || '') + '</textarea></div>' +
+                optionsBlock +
+                '</div>';
+        }).join('');
+        updateQuestionOrderLabels();
+    }
+
+    window.addChallengeQuestion = function(type) {
+        challengeBuilderState.push(defaultChallengeQuestion(type || 'multiple_choice'));
+        renderChallengeBuilder();
+    };
+    window.removeChallengeQuestion = function(index) {
+        challengeBuilderState.splice(index, 1);
+        if (!challengeBuilderState.length) challengeBuilderState = [defaultChallengeQuestion('multiple_choice')];
+        renderChallengeBuilder();
+    };
+    window.updateQuestionType = function(index, newType) {
+        var next = defaultChallengeQuestion(newType);
+        next.question_text = challengeBuilderState[index].question_text || '';
+        challengeBuilderState[index] = next;
+        renderChallengeBuilder();
+    };
+    window.updateQuestionText = function(index, value) {
+        challengeBuilderState[index].question_text = String(value || '');
+    };
+    window.updateQuestionOption = function(index, optIndex, value) {
+        challengeBuilderState[index].options[optIndex] = String(value || '');
+    };
+    window.addQuestionOption = function(index) {
+        challengeBuilderState[index].options.push('');
+        renderChallengeBuilder();
+    };
+    window.removeQuestionOption = function(index, optIndex) {
+        challengeBuilderState[index].options.splice(optIndex, 1);
+        renderChallengeBuilder();
+    };
+    window.updateQuestionCorrect = function(index, value) {
+        challengeBuilderState[index].correct_answer = String(value == null ? '' : value);
+    };
+    window.updateQuestionPairs = function(index, value) {
+        challengeBuilderState[index].matching_pairs_text = String(value || '');
+    };
+
+    function collectChallengeQuestionsForSave() {
+        var out = [];
+        for (var i = 0; i < challengeBuilderState.length; i++) {
+            var q = ensureQuestionModelDefaults(challengeBuilderState[i]);
+            var qType = normalizeQuestionTypeAdmin(q.question_type);
+            var qText = String(q.question_text || '').trim();
+            if (!qText) throw new Error('Question ' + (i + 1) + ': question text is required');
+
+            var model = {
+                question_type: qType,
+                question_text: qText,
+                payload: {},
+                correct_answer: ''
+            };
+
+            if (qType === 'true_false') {
+                var tf = String(q.correct_answer || 'true').toLowerCase() === 'false' ? 'false' : 'true';
+                model.payload = { options: ['True', 'False'], correct_answer: tf };
+                model.correct_answer = tf;
+            } else if (qType === 'multiple_choice') {
+                var options = q.options.map(function(x) { return String(x || '').trim(); }).filter(Boolean);
+                if (options.length < 2) throw new Error('Question ' + (i + 1) + ': add at least 2 options');
+                var correct = String(q.correct_answer || '').trim();
+                if (!correct || !options.includes(correct)) throw new Error('Question ' + (i + 1) + ': correct answer must match one option');
+                model.payload = { options: options, correct_answer: correct };
+                model.correct_answer = correct;
+            } else if (qType === 'multiple_select') {
+                var multiOpts = q.options.map(function(x) { return String(x || '').trim(); }).filter(Boolean);
+                var multiCorrect = parseChallengeOptions(q.correct_answer || '');
+                if (multiOpts.length < 2) throw new Error('Question ' + (i + 1) + ': add at least 2 options');
+                if (!multiCorrect.length) throw new Error('Question ' + (i + 1) + ': add at least one correct option');
+                model.payload = { options: multiOpts, correct_answers: multiCorrect };
+                model.correct_answer = multiCorrect.join(',');
+            } else if (qType === 'matching') {
+                var pairs = parseMatchingPairs(q.matching_pairs_text || '');
+                if (!Object.keys(pairs).length) throw new Error('Question ' + (i + 1) + ': add matching pairs using Term=Definition');
+                model.payload = { pairs: pairs };
+                model.correct_answer = JSON.stringify(pairs);
+            } else if (qType === 'fill_blank') {
+                var blanks = parseChallengeOptions(q.correct_answer || '');
+                if (!blanks.length) throw new Error('Question ' + (i + 1) + ': add accepted blank answers');
+                model.payload = { answers: blanks };
+                model.correct_answer = blanks.join(',');
+            } else {
+                var accepted = parseChallengeOptions(q.correct_answer || '');
+                if (!accepted.length) throw new Error('Question ' + (i + 1) + ': add at least one accepted answer');
+                model.payload = { accepted_answers: accepted };
+                model.correct_answer = accepted.join(',');
+            }
+
+            out.push(model);
+        }
+        return out;
+    }
+
+    function getChallengeTypeHelp(type) {
+        var t = String(type || 'open');
+        if (t === 'multiple_choice') return 'Multiple Choice: put options in "Options" (comma or line). Set one exact correct answer below.';
+        if (t === 'multiple_select') return 'Multiple Select: put options in "Options". Put correct options in "Correct answer" separated by comma.';
+        if (t === 'true_false') return 'True/False: set "Correct answer" as true or false.';
+        if (t === 'matching') return 'Matching: use one pair per line in "Options": Term=Definition.';
+        if (t === 'fill_blank') return 'Fill Blank: put accepted blank answers in "Correct answer" separated by comma.';
+        return 'Open: put one or more accepted answers in "Correct answer" separated by comma.';
+    }
+
+    function extractChallengeTarget(c) {
+        if (!c) return null;
+        if (c.target_group != null && String(c.target_group).trim() !== '') return String(c.target_group).trim();
+        if (c.group_code != null && String(c.group_code).trim() !== '') return String(c.group_code).trim();
+        if (Array.isArray(c.target_groups) && c.target_groups.length) return String(c.target_groups[0]).trim();
+        if (typeof c.target_groups === 'string' && c.target_groups.trim()) {
+            var raw = c.target_groups.trim();
+            try {
+                var parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length) return String(parsed[0]).trim();
+            } catch (_) {}
+            var first = raw.split(',')[0];
+            return first ? String(first).trim() : null;
+        }
+        return null;
+    }
+
+    function escapeHtml(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+    function escapeAttr(t) {
+        return escapeHtml(t).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    var DEBUG_MODE = true;
+    function showToast(message, type) {
+        var container = document.getElementById('toastContainer');
+        if (!container || typeof bootstrap === 'undefined') {
+            alert(message);
+            return;
+        }
+        var tone = type || 'info';
+        var klass = tone === 'danger' ? 'text-bg-danger' : (tone === 'success' ? 'text-bg-success' : 'text-bg-primary');
+        var el = document.createElement('div');
+        el.className = 'toast align-items-center ' + klass + ' border-0';
+        el.setAttribute('role', 'alert');
+        el.setAttribute('aria-live', 'assertive');
+        el.setAttribute('aria-atomic', 'true');
+        el.innerHTML = '<div class="d-flex"><div class="toast-body">' + escapeHtml(String(message || 'Done')) + '</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>';
+        container.appendChild(el);
+        var toast = new bootstrap.Toast(el, { delay: 2800 });
+        toast.show();
+        el.addEventListener('hidden.bs.toast', function() { el.remove(); });
+    }
+    function logUiError(tag, err) {
+        console.error('[' + tag + ']', err);
+        if (DEBUG_MODE && err && err.message) console.debug('[' + tag + '_DETAIL]', err.message);
+    }
+
+    // --- Users: only show students when group is selected ---
+    window.refreshStudents = function() {
+        var group = getSelectedGroup();
+        var q = (document.getElementById('studentSearch').value || '').trim();
+        console.log('[ADMIN] Refreshing students for group:', group);
+        var content = document.getElementById('contentUsers');
+        content.innerHTML = '<p class="text-center">Loading...</p>';
+        loadStudentsFiltered(group || null, q).then(function(list) {
+            console.log('[ADMIN] Students loaded:', list ? list.length : 0);
+            if (!list || !list.length) {
+                content.innerHTML = '<div class="empty-state">No students match your filter.</div>';
+                return;
+            }
+            var html = '<table class="student-table"><thead><tr><th>Name</th><th>Document</th><th>Role</th><th>Group</th><th>Coins</th><th>Actions</th></tr></thead><tbody>';
+            list.forEach(function(s) {
+                var coins = s.monedas != null ? s.monedas : 0;
+                var sid = String(s.id || '').replace(/'/g, "\\'");
+                var sname = String(s.nombre_completo || '').replace(/'/g, "\\'");
+                var sdoc = String(s.documento_id || '').replace(/'/g, "\\'");
+                var spin = String(s.pin || '').replace(/'/g, "\\'");
+                var sgroup = String(s.grupo || '').replace(/'/g, "\\'");
+                var srol = String(s.rol || '').replace(/'/g, "\\'");
+                var isProtected = s.rol === 'super_admin';
+                var actionButtons = '<button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="window.openEdit(\'' + sid + '\',\'' + sname + '\',\'' + sdoc + '\',\'' + spin + '\',\'' + sgroup + '\',\'' + srol + '\')">Edit</button>';
+                if (!isProtected) {
+                    actionButtons += '<button type="button" class="btn btn-sm btn-outline-danger" onclick="window.deleteStudentRow(\'' + sid + '\',\'' + srol + '\')">Delete</button>';
+                }
+                html += '<tr data-id="' + s.id + '">' +
+                    '<td><strong>' + escapeHtml(s.nombre_completo || '') + '</strong></td>' +
+                    '<td>' + escapeHtml(s.documento_id || '') + '</td>' +
+                    '<td><span class="badge-role">' + escapeHtml(s.rol || '-') + '</span></td>' +
+                    '<td><span class="badge-group">' + escapeHtml(s.grupo || '-') + '</span></td>' +
+                    '<td class="coin-cell">' +
+                    '<span class="coin-display" id="coins-' + s.id + '">' + coins + '</span>' +
+                    '<button type="button" class="btn btn-success btn-coin" onclick="window.addCoins(\'' + s.id + '\', 10)">+10</button>' +
+                    '<button type="button" class="btn btn-danger btn-coin" onclick="window.addCoins(\'' + s.id + '\', -10)">-10</button>' +
+                    '</td><td>' +
+                    actionButtons +
+                    '</td></tr>';
+            });
+            html += '</tbody></table>';
+            content.innerHTML = html;
+        }).catch(function(e) {
+            logUiError('USERS_LOAD_ERROR', e);
+            content.innerHTML = '<div class="alert alert-danger">Error loading students: ' + (e.message || 'Unknown error') + '<br><small>Check console for details</small></div>';
+        });
+    };
+
+    window.deleteAuctionAdmin = function(auctionId, status) {
+        var safeStatus = String(status || '').toLowerCase();
+        if (safeStatus === 'active') {
+            showToast('Active auctions cannot be deleted. Close it first.', 'danger');
+            return;
+        }
+        if (!confirm('Delete this closed/finished auction? This cannot be undone.')) return;
+        deleteAuction(auctionId).then(function(result) {
+            if (!result.ok) {
+                showToast('Error deleting auction: ' + (result.error || 'Unknown'), 'danger');
+                return;
+            }
+            showToast('Auction deleted', 'success');
+            window.loadAuctionList();
+        }).catch(function(e) {
+            logUiError('AUCTION_DELETE_ERROR', e);
+            showToast('Failed to delete auction', 'danger');
+        });
+    };
+
+    document.getElementById('adminGroupFilter').addEventListener('change', window.refreshStudents);
+    document.getElementById('btnRefreshUsers').addEventListener('click', window.refreshStudents);
+    document.getElementById('studentSearch').addEventListener('input', window.refreshStudents);
+
+    window.addCoins = function(studentId, delta) {
+        addStudentCoins(studentId, delta).then(function(result) {
+            if (result.ok && result.newCoins !== undefined) {
+                var el = document.getElementById('coins-' + studentId);
+                if (el) el.textContent = result.newCoins;
+                showToast('Coins updated', 'success');
+            } else showToast('Error: ' + (result.error || 'Try again.'), 'danger');
+        }).catch(function(e) {
+            logUiError('COINS_UPDATE_ERROR', e);
+            showToast('Failed to update coins', 'danger');
+        });
+    };
+
+    var editModalEl;
+    var groupEditModalEl;
+    window.openEdit = function(profileId, name, doc, pin, group, role) {
+        document.getElementById('editProfileId').value = profileId;
+        document.getElementById('editName').value = name || '';
+        document.getElementById('editDoc').value = doc || '';
+        document.getElementById('editPin').value = '';
+        document.getElementById('editPin').placeholder = 'Leave blank to keep current';
+        var roleWrap = document.getElementById('editRoleWrap');
+        var roleSel = document.getElementById('editRole');
+        var currentRole = role || 'student';
+        roleSel.value = (currentRole === 'admin') ? 'admin' : 'student';
+        roleWrap.style.display = currentRole === 'super_admin' ? 'none' : '';
+        var sel = document.getElementById('editGroup');
+        sel.innerHTML = '';
+        (window._editGroups || []).forEach(function(g) {
+            var opt = document.createElement('option');
+            opt.value = g.group_code;
+            opt.textContent = g.group_code;
+            if (g.group_code === group) opt.selected = true;
+            sel.appendChild(opt);
+        });
+        if (!editModalEl) editModalEl = new bootstrap.Modal(document.getElementById('editModal'));
+        editModalEl.show();
+    };
+
+    window.saveEdit = function() {
+        var id = document.getElementById('editProfileId').value;
+        var name = document.getElementById('editName').value.trim();
+        var doc = document.getElementById('editDoc').value.trim();
+        var pin = document.getElementById('editPin').value;
+        var roleWrap = document.getElementById('editRoleWrap');
+        var role = document.getElementById('editRole').value;
+        var group = document.getElementById('editGroup').value;
+        if (!name || !doc) { showToast('Name and document are required', 'danger'); return; }
+        var fields = { nombre_completo: name, documento_id: doc, grupo: group };
+        if (pin !== '') fields.pin = pin;
+        if (roleWrap.style.display !== 'none') fields.rol = role;
+        updateProfile(id, fields).then(function() {
+            editModalEl.hide();
+            window.refreshStudents();
+            showToast('User updated successfully', 'success');
+        }).catch(function(e) {
+            logUiError('USER_EDIT_ERROR', e);
+            showToast('Error saving user: ' + (e.message || 'Try again.'), 'danger');
+        });
+    };
+    document.getElementById('btnSaveEdit').addEventListener('click', window.saveEdit);
+
+    window.deleteStudentRow = function(profileId, role) {
+        if (role === 'super_admin') {
+            showToast('super_admin cannot be deleted from UI', 'danger');
+            return;
+        }
+        if (!confirm('Delete this student? This cannot be undone.')) return;
+        deleteStudent(profileId).then(function() {
+            showToast('User deleted', 'success');
+            window.refreshStudents();
+        }).catch(function(e) {
+            logUiError('USER_DELETE_ERROR', e);
+            showToast('Error deleting user: ' + (e.message || 'Maybe they have related records.'), 'danger');
+        });
+    };
+
+    document.getElementById('btnCreateGroup').addEventListener('click', function() {
+        var input = document.getElementById('newGroupCode');
+        var code = input.value.trim();
+        if (!code) { showToast('Enter a group code.', 'danger'); return; }
+        insertGroup(code).then(function() {
+            input.value = '';
+            window._editGroups.push({ group_code: code });
+            var sel = document.getElementById('adminGroupFilter');
+            var qrSel = document.getElementById('qrGroup');
+            var aucSel = document.getElementById('auctionGroup');
+            var annSel = document.getElementById('announcementGroup');
+            [sel, qrSel, aucSel, annSel].forEach(function(s) {
+                if (!s) return;
+                var opt = document.createElement('option');
+                opt.value = code;
+                opt.textContent = code;
+                s.appendChild(opt);
+            });
+            showToast('Group created', 'success');
+            window.loadGroupsList();
+        }).catch(function(e) {
+            logUiError('GROUP_CREATE_ERROR', e);
+            showToast('Error creating group: ' + (e.message || 'Try again.'), 'danger');
+        });
+    });
+
+    // --- Attendance: group required for QR; today's list ---
+    window.generateQR = function() {
+        var g = getSelectedQRGroup();
+        if (!g) { document.getElementById('qrError').style.display = 'block'; document.getElementById('qrError').textContent = 'Select a group first.'; return; }
+        var btn = document.getElementById('btnGenerateQR');
+        btn.disabled = true;
+        btn.textContent = 'Creating session...';
+        document.getElementById('qrError').style.display = 'none';
+        document.getElementById('qrcode').innerHTML = '';
+        function finishSession(lat, lng, geoStatus) {
+            var startTime = new Date().toISOString();
+            createAttendanceSession(g, {
+                adminLat: lat,
+                adminLng: lng,
+                createdBy: user.documento_id || user.id,
+                durationMinutes: 30,
+                qrPayload: { g: g, startTime: startTime, geoStatus: geoStatus || 'unknown' }
+            }).then(function(sessionRes) {
+                if (!sessionRes.ok || !sessionRes.session) throw new Error(sessionRes.error || 'Could not create attendance session');
+                var manualCode = String(sessionRes.session.session_code || '').toUpperCase();
+                var base = window.location.origin + window.location.pathname.replace('admin.html', '');
+                var url = base + 'attendance.html?session=' + encodeURIComponent(manualCode);
+                var container = document.getElementById('qrcode');
+                container.innerHTML = '';
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(container, { text: url, width: 256, height: 256 });
+                } else {
+                    container.innerHTML = '<p class="text-danger">QRCode library not loaded. Check script.</p>';
+                }
+                var manualWrap = document.getElementById('manualAttendanceCodeWrap');
+                var manualInput = document.getElementById('manualAttendanceCode');
+                if (manualWrap && manualInput) {
+                    manualInput.value = manualCode;
+                    manualWrap.style.display = '';
+                }
+                btn.disabled = false;
+                btn.textContent = 'Generate Attendance Session (QR + code)';
+                window.refreshAttendanceList();
+            }).catch(function(e) {
+                document.getElementById('qrError').textContent = 'Could not create attendance session: ' + (e.message || 'Unknown');
+                document.getElementById('qrError').style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Generate Attendance Session (QR + code)';
+            });
+        }
+        if (!navigator.geolocation) {
+            finishSession(null, null, 'no_geolocation');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            finishSession(pos.coords.latitude, pos.coords.longitude, 'ok');
+        }, function() {
+            finishSession(null, null, 'gps_failed');
+        }, { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 });
+    };
+    document.getElementById('btnGenerateQR').addEventListener('click', window.generateQR);
+    document.getElementById('btnCopyAttendanceCode').addEventListener('click', function() {
+        var input = document.getElementById('manualAttendanceCode');
+        if (!input || !input.value) {
+            showToast('Generate a QR first to create a manual code', 'danger');
+            return;
+        }
+        try {
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            showToast('Manual code copied', 'success');
+        } catch (e) {
+            logUiError('ATTENDANCE_CODE_COPY_ERROR', e);
+            showToast('Could not copy. Please copy manually.', 'danger');
+        }
+    });
+
+    window.refreshAttendanceList = function() {
+        var g = getSelectedQRGroup();
+        var el = document.getElementById('attendanceTodayList');
+        if (!g) { el.innerHTML = '<p class="text-muted small">Select a group to see who checked in today.</p>'; return; }
+        getTodayAttendanceByGroup(g).then(function(list) {
+            if (!list.length) el.innerHTML = '<p class="text-muted small">No check-ins today for this group.</p>';
+            else el.innerHTML = '<ul class="list-group">' + list.map(function(r) {
+                var time = r.created_at ? new Date(r.created_at).toLocaleTimeString() : '';
+                return '<li class="list-group-item d-flex justify-content-between"><span>' + escapeHtml(r.nombre_completo) + '</span><span class="text-muted small">' + time + '</span></li>';
+            }).join('') + '</ul>';
+        });
+    };
+    document.getElementById('qrGroup').addEventListener('change', window.refreshAttendanceList);
+
+    document.getElementById('btnExportCSV').addEventListener('click', function() {
+        getTodayAttendanceForReport().then(function(rows) {
+            if (!rows.length) { showToast('No attendance recorded today.', 'danger'); return; }
+            var csv = 'Name,Group,Date,Time\n';
+            rows.forEach(function(r) {
+                var time = r.created_at ? new Date(r.created_at).toLocaleTimeString() : '';
+                csv += '"' + (r.nombre_completo || '').replace(/"/g, '""') + '","' + (r.group_code || '') + '","' + (r.attendance_date || '') + '","' + time + '"\n';
+            });
+            var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'attendance_' + new Date().toISOString().slice(0, 10) + '.csv';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        });
+    });
+
+    // --- Store: create auctions with group + duration ---
+    var createAuctionBusy = false;
+    window.createAuctionItem = function() {
+        if (createAuctionBusy) return;
+        var name = document.getElementById('auctionItemName').value.trim();
+        var desc = document.getElementById('auctionDescription').value.trim();
+        var price = parseInt(document.getElementById('auctionBasePrice').value, 10) || 0;
+        var groupCode = document.getElementById('auctionGroup').value || null;
+        var duration = Math.max(30, parseInt(document.getElementById('auctionDuration').value, 10) || 120);
+        var itemType = document.getElementById('auctionItemType').value || 'auction';
+        var stock = Math.max(1, parseInt(document.getElementById('auctionStock').value, 10) || 1);
+        if (!name) { showToast('Enter an item name.', 'danger'); return; }
+        if (name.length > 120) { showToast('Item name is too long (max 120)', 'danger'); return; }
+        var btn = document.getElementById('btnCreateAuction');
+        createAuctionBusy = true;
+        if (btn) { btn.disabled = true; btn.textContent = 'Publishing...'; }
+        createAuction(name, desc || null, price, 'active', {
+            item_type: itemType,
+            stock_quantity: itemType === 'shop' ? stock : 1,
+            group_code: groupCode,
+            duration_seconds: itemType === 'auction' ? duration : 86400
+        }).then(function() {
+            document.getElementById('auctionItemName').value = '';
+            document.getElementById('auctionDescription').value = '';
+            document.getElementById('auctionBasePrice').value = '';
+            document.getElementById('auctionDuration').value = '120';
+            document.getElementById('auctionStock').value = '1';
+            window.loadAuctionList();
+            showToast(itemType === 'shop' ? 'Shop item published' : 'Auction launched', 'success');
+        }).catch(function(e) {
+            logUiError('AUCTION_CREATE_ERROR', e);
+            showToast('Error creating auction: ' + (e.message || 'Try again.'), 'danger');
+        }).finally(function() {
+            createAuctionBusy = false;
+            if (btn) { btn.disabled = false; btn.textContent = 'Publish Item'; }
+        });
+    };
+    document.getElementById('btnCreateAuction').addEventListener('click', window.createAuctionItem);
+
+    window.closeAuctionAdmin = function(auctionId) {
+        if (!confirm('Close this auction now?')) return;
+        closeAuction(auctionId).then(function(result) {
+            if (!result.ok) {
+                showToast('Error closing auction: ' + (result.error || 'Unknown'), 'danger');
+                return;
+            }
+            showToast(result.warning || ('Auction closed. Winner: ' + (result.winnerName || 'No winner')), 'success');
+            window.loadAuctionList();
+        }).catch(function(e) {
+            logUiError('AUCTION_CLOSE_ERROR', e);
+            showToast('Failed to close auction', 'danger');
+        });
+    };
+
+    window.loadAuctionList = function() {
+        console.log('[ADMIN] Loading auction list...');
+        closeExpiredAuctions().then(function() {
+            return supabaseClient
+                .from(CONFIG.tables.auctions)
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(30);
+        }).then(function(result) {
+            var list = result.data || [];
+            console.log('[ADMIN] Auctions loaded:', list ? list.length : 0);
+            var el = document.getElementById('auctionList');
+            if (!list || !list.length) { el.innerHTML = '<p class="text-muted small">No auctions yet. Create one above.</p>'; return; }
+            Promise.all(list.map(function(a) {
+                return getAuctionBids(a.id).then(function(bids) {
+                    var bidsHtml = !bids.length
+                        ? '<div class="small text-muted mt-2">No bids yet.</div>'
+                        : '<div class="mt-2"><strong class="small">Live bids</strong><ul class="small mb-0">' + bids.slice(0, 10).map(function(b) {
+                            var ts = b.created_at ? new Date(b.created_at).toLocaleTimeString() : '-';
+                            return '<li>' + escapeHtml(b.bidder_name || b.bidder_id || 'Unknown') + ': <strong>' + (b.bid_amount || 0) + ' coins</strong> <span class="text-muted">(' + escapeHtml(ts) + ')</span></li>';
+                        }).join('') + '</ul></div>';
+                    var leaderName = a.highest_bidder_name || (a.highest_bidder_id ? ('ID ' + a.highest_bidder_id) : null);
+                    var closeBtn = a.status === 'active'
+                        ? '<button class="btn btn-sm btn-danger" onclick="closeAuctionAdmin(\'' + a.id + '\')">Close</button>'
+                        : '<span class="badge bg-secondary">Closed</span>';
+                    var deleteBtn = (a.status === 'closed' || a.status === 'finished')
+                        ? '<button class="btn btn-sm btn-outline-danger" onclick="deleteAuctionAdmin(\'' + a.id + '\',\'' + String(a.status || '').replace(/'/g, "\\'") + '\')">Delete</button>'
+                        : '';
+                    return '<div class="auction-card">' +
+                        '<div class="d-flex justify-content-between align-items-center gap-2">' +
+                        '<strong>' + escapeHtml(a.item_name || '') + '</strong>' +
+                        '<div class="d-flex gap-2">' + closeBtn + deleteBtn + '</div></div>' +
+                        (a.description ? '<div class="small text-muted mt-1">' + escapeHtml(a.description) + '</div>' : '') +
+                        '<div class="small mt-1">Type: <strong>' + escapeHtml(a.item_type || 'auction') + '</strong> · Group: <strong>' + escapeHtml(a.group_code || 'All') + '</strong> · Current: <strong>' + (a.current_bid || 0) + '</strong> coins · Stock: <strong>' + (a.stock_quantity || 1) + '</strong> · Status: <strong>' + escapeHtml(a.status || 'active') + '</strong></div>' +
+                        (leaderName ? '<div class="small mt-1">Leader: <strong>' + escapeHtml(leaderName) + '</strong> · Bid: <strong>' + (a.current_bid || 0) + ' coins</strong></div>' : '<div class="small mt-1 text-muted">Leader: No bids yet</div>') +
+                        (a.status === 'closed' ? '<div class="small mt-1">Winner: <strong>' + escapeHtml(a.highest_bidder_name || leaderName || (a.winner_id ? ('ID ' + a.winner_id) : 'No winner')) + '</strong></div>' : '') +
+                        bidsHtml +
+                        '</div>';
+                });
+            })).then(function(cards) {
+                el.innerHTML = cards.join('');
+            });
+        }).catch(function(e) {
+            console.error('[ADMIN] Failed to load auctions:', e);
+            var el = document.getElementById('auctionList');
+            el.innerHTML = '<div class="alert alert-danger">Error loading auctions: ' + (e.message || 'Unknown error') + '<br><small>Check console for details</small></div>';
+        });
+    };
+
+    (async function init() {
+        console.log('[ADMIN INIT] Starting admin panel initialization...');
+        console.log('[ADMIN INIT] User:', user.nombre_completo, '| Role:', user.rol);
+        
+        try {
+            console.log('[ADMIN INIT] Loading groups...');
+            var groups = await getGroups();
+            window._editGroups = groups || [];
+            console.log('[ADMIN INIT] Groups loaded:', groups ? groups.length : 0);
+            
+            var select = document.getElementById('adminGroupFilter');
+            var qrSelect = document.getElementById('qrGroup');
+            
+            if (!groups || !groups.length) {
+                console.warn('[ADMIN INIT] No groups found in database');
+                if (select) select.innerHTML = '<option value="">No groups available - create one first</option>';
+                if (qrSelect) qrSelect.innerHTML = '<option value="">No groups available</option>';
+            } else {
+                console.log('[ADMIN INIT] Populating group dropdowns with:', groups.map(g => g.group_code).join(', '));
+                var auctionGroup = document.getElementById('auctionGroup');
+                groups.forEach(function(g) {
+                    [select, qrSelect, auctionGroup].forEach(function(s) {
+                        if (!s) return;
+                        var opt = document.createElement('option');
+                        opt.value = g.group_code;
+                        opt.textContent = g.group_code;
+                        s.appendChild(opt);
+                    });
+                });
+            }
+            
+            console.log('[ADMIN INIT] Refreshing students list...');
+            window.refreshStudents();
+            
+            console.log('[ADMIN INIT] Loading auction list...');
+            window.loadAuctionList();
+            
+            console.log('[ADMIN INIT] Admin panel initialization complete!');
+            
+            // Populate announcement group dropdown
+            var announcementGroupSelect = document.getElementById('announcementGroup');
+            var challengeTargetSelect = document.getElementById('challengeTargetGroup');
+            if (groups && groups.length) {
+                groups.forEach(function(g) {
+                    [announcementGroupSelect, challengeTargetSelect].forEach(function(s) {
+                        if (!s) return;
+                        var opt = document.createElement('option');
+                        opt.value = g.group_code;
+                        opt.textContent = g.group_code;
+                        s.appendChild(opt);
+                    });
+                });
+            }
+
+            if (!isSuperAdmin) {
+                var navAdmins = document.getElementById('navAdmins');
+                var viewAdmins = document.getElementById('viewAdmins');
+                if (navAdmins) navAdmins.style.display = 'none';
+                if (viewAdmins) viewAdmins.innerHTML = '<p class="text-muted">Only super_admin can manage admin users.</p>';
+            } else {
+                window.loadAdminUsers();
+            }
+
+            challengeBuilderState = [defaultChallengeQuestion('multiple_choice')];
+            renderChallengeBuilder();
+        } catch (e) {
+            console.error('[ADMIN INIT] Failed:', e);
+            showToast('Failed to initialize admin panel: ' + (e.message || 'Unknown error'), 'danger');
+        }
+    })();
+    
+    // ========== GROUPS MANAGEMENT ==========
+    window.loadGroupsList = function() {
+        console.log('[ADMIN] Loading groups list...');
+        getGroups().then(function(groups) {
+            var el = document.getElementById('groupsList');
+            if (!groups || !groups.length) {
+                el.innerHTML = '<p class="text-muted small">No groups yet. Create one above.</p>';
+                return;
+            }
+            el.innerHTML = '<table class="table table-sm"><thead><tr><th>Group</th><th>Limit</th><th>Lat</th><th>Lng</th><th>Actions</th></tr></thead><tbody>' + groups.map(function(g) {
+                var gc = String(g.group_code || '').replace(/'/g, "\\'");
+                var capValue = g.max_capacity != null ? g.max_capacity : g.capacity;
+                var cap = capValue == null ? 'null' : String(capValue);
+                var lat = g.last_admin_lat == null ? 'null' : String(g.last_admin_lat);
+                var lng = g.last_admin_lng == null ? 'null' : String(g.last_admin_lng);
+                return '<tr>' +
+                    '<td><strong>' + escapeHtml(g.group_code) + '</strong></td>' +
+                    '<td>' + (capValue != null ? capValue : '-') + '</td>' +
+                    '<td>' + (g.last_admin_lat != null ? g.last_admin_lat : '-') + '</td>' +
+                    '<td>' + (g.last_admin_lng != null ? g.last_admin_lng : '-') + '</td>' +
+                    '<td>' +
+                    '<button class="btn btn-sm btn-outline-primary me-1" onclick="openGroupEdit(\'' + gc + '\',' + cap + ',' + lat + ',' + lng + ')">Edit</button>' +
+                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteGroupConfirm(\'' + gc + '\')">Delete</button>' +
+                    '</td>' +
+                    '</tr>';
+            }).join('') + '</tbody></table>';
+        }).catch(function(e) {
+            console.error('[ADMIN] Failed to load groups:', e);
+        });
+    };
+    
+    document.getElementById('btnCreateGroupView').addEventListener('click', function() {
+        var code = document.getElementById('newGroupCodeInput').value.trim();
+        var capacity = parseInt(document.getElementById('newGroupCapacity').value) || null;
+        if (!code) { showToast('Enter a group code', 'danger'); return; }
+        insertGroup(code, capacity).then(function() {
+            document.getElementById('newGroupCodeInput').value = '';
+            document.getElementById('newGroupCapacity').value = '';
+            window.loadGroupsList();
+            showToast('Group created', 'success');
+        }).catch(function(e) {
+            logUiError('GROUP_CREATE_VIEW_ERROR', e);
+            showToast('Error creating group: ' + (e.message || 'Unknown'), 'danger');
+        });
+    });
+    
+    window.deleteGroupConfirm = function(groupCode) {
+        if (!confirm('Delete group "' + groupCode + '"? This cannot be undone.')) return;
+        deleteGroupSafe(groupCode).then(function(result) {
+            if (!result.ok) {
+                showToast('Error: ' + (result.error || 'Could not delete group'), 'danger');
+                return;
+            }
+            window.loadGroupsList();
+            showToast('Group deleted', 'success');
+        });
+    };
+
+    window.openGroupEdit = function(groupCode, maxCapacity, lat, lng) {
+        document.getElementById('editGroupOldCode').value = groupCode || '';
+        document.getElementById('editGroupCode').value = groupCode || '';
+        document.getElementById('editGroupCapacity').value = maxCapacity == null ? '' : maxCapacity;
+        document.getElementById('editGroupLat').value = lat == null ? '' : lat;
+        document.getElementById('editGroupLng').value = lng == null ? '' : lng;
+        if (!groupEditModalEl) groupEditModalEl = new bootstrap.Modal(document.getElementById('groupEditModal'));
+        groupEditModalEl.show();
+    };
+
+    document.getElementById('btnSaveGroupEdit').addEventListener('click', function() {
+        var oldCode = document.getElementById('editGroupOldCode').value;
+        var groupCode = document.getElementById('editGroupCode').value.trim();
+        var capacity = document.getElementById('editGroupCapacity').value;
+        var lat = document.getElementById('editGroupLat').value;
+        var lng = document.getElementById('editGroupLng').value;
+        if (!groupCode) { showToast('Group code is required', 'danger'); return; }
+
+        updateGroupSafe(oldCode, {
+            group_code: groupCode,
+            max_capacity: capacity,
+            last_admin_lat: lat,
+            last_admin_lng: lng
+        }).then(function(result) {
+            if (!result.ok) {
+                showToast('Error saving group: ' + (result.error || 'Unknown'), 'danger');
+                return;
+            }
+            if (groupEditModalEl) groupEditModalEl.hide();
+            window.loadGroupsList();
+            window.location.reload();
+        }).catch(function(e) {
+            logUiError('GROUP_EDIT_ERROR', e);
+            showToast('Error saving group: ' + (e.message || 'Unknown'), 'danger');
+        });
+    });
+
+    // ========== ADMIN USERS (super_admin) ==========
+    window.loadAdminUsers = function() {
+        var el = document.getElementById('adminUsersList');
+        if (!el) return;
+        supabaseClient.from(CONFIG.tables.profiles)
+            .select('id,nombre_completo,documento_id,rol,grupo')
+            .in('rol', ['teacher', 'admin', 'super_admin'])
+            .order('rol')
+            .order('nombre_completo')
+            .then(function(result) {
+                var list = result.data || [];
+                if (!list.length) {
+                    el.innerHTML = '<p class="text-muted small">No admin users found.</p>';
+                    return;
+                }
+                el.innerHTML = '<table class="table table-sm"><thead><tr><th>Name</th><th>Document</th><th>Role</th><th>Group</th></tr></thead><tbody>' +
+                    list.map(function(u) {
+                        return '<tr><td>' + escapeHtml(u.nombre_completo || '') + '</td><td>' + escapeHtml(u.documento_id || '') + '</td><td>' + escapeHtml(u.rol || '') + '</td><td>' + escapeHtml(u.grupo || '-') + '</td></tr>';
+                    }).join('') +
+                    '</tbody></table>';
+            })
+            .catch(function(e) {
+                el.innerHTML = '<div class="alert alert-danger">Error loading admin users: ' + (e.message || 'Unknown') + '</div>';
+            });
+    };
+
+    var createAdminBusy = false;
+    document.getElementById('btnCreateAdminUser').addEventListener('click', function() {
+        if (createAdminBusy) return;
+        if (!isSuperAdmin) { showToast('Only super_admin can create admin users', 'danger'); return; }
+        var name = document.getElementById('newAdminName').value.trim();
+        var doc = document.getElementById('newAdminDoc').value.trim();
+        var pin = document.getElementById('newAdminPin').value.trim();
+        var role = document.getElementById('newAdminRole').value;
+        if (!name || !doc || !pin) { showToast('Complete all fields', 'danger'); return; }
+        if (name.length < 3 || name.length > 100) { showToast('Name must be 3-100 chars', 'danger'); return; }
+        if (!/^[A-Za-z0-9_-]{3,32}$/.test(doc)) { showToast('Document must be 3-32 chars (letters, numbers, _ or -)', 'danger'); return; }
+        if (!/^\d{4,12}$/.test(pin)) { showToast('PIN must be 4-12 digits', 'danger'); return; }
+        if (!['teacher', 'admin'].includes(role)) { showToast('Invalid role', 'danger'); return; }
+
+        var btn = document.getElementById('btnCreateAdminUser');
+        createAdminBusy = true;
+        if (btn) { btn.disabled = true; btn.textContent = 'Creating...'; }
+
+        supabaseClient.from(CONFIG.tables.profiles).insert([{
+            nombre_completo: name,
+            documento_id: doc,
+            pin: pin,
+            grupo: null,
+            monedas: 0,
+            rol: role,
+            current_streak: 0
+        }]).then(function(result) {
+            if (result.error) throw result.error;
+            document.getElementById('newAdminName').value = '';
+            document.getElementById('newAdminDoc').value = '';
+            document.getElementById('newAdminPin').value = '';
+            window.loadAdminUsers();
+            showToast('Admin user created', 'success');
+        }).catch(function(e) {
+            logUiError('ADMIN_CREATE_ERROR', e);
+            showToast('Error creating admin user: ' + (e.message || 'Unknown'), 'danger');
+        }).finally(function() {
+            createAdminBusy = false;
+            if (btn) { btn.disabled = false; btn.textContent = 'Create Admin User'; }
+        });
+    });
+    
+    // ========== CHALLENGES MANAGEMENT ==========
+    window.loadChallengesList = function() {
+        console.log('[ADMIN] Loading challenges...');
+        supabaseClient.from(CONFIG.tables.challenges).select('*').order('created_at', {ascending: false}).then(function(result) {
+            var el = document.getElementById('challengesList');
+            if (!result.data || !result.data.length) {
+                el.innerHTML = '<p class="text-muted small">No challenges yet.</p>';
+                return;
+            }
+            el.innerHTML = '<div class="list-group">' + result.data.map(function(c) {
+                var target = extractChallengeTarget(c);
+                var scopeTxt = target ? ('Group: ' + escapeHtml(target)) : 'All groups';
+                var payload = null;
+                try { payload = typeof c.question_payload === 'string' ? JSON.parse(c.question_payload) : c.question_payload; } catch (_) {}
+                var totalQuestions = payload && Array.isArray(payload.questions) ? payload.questions.length : 1;
+                return '<div class="list-group-item"><strong>' + escapeHtml(c.title || '') + '</strong><br>' +
+                    '<small class="text-muted">' + (c.challenge_type || 'open') + ' · ' + scopeTxt + ' · Questions: ' + totalQuestions + ' · Status: ' + (c.status || 'active') + '</small></div>';
+            }).join('') + '</div>';
+        });
+    };
+
+    document.getElementById('challengeScope').addEventListener('change', function() {
+        var scope = this.value;
+        var targetSel = document.getElementById('challengeTargetGroup');
+        if (!targetSel) return;
+        targetSel.style.display = scope === 'group' ? '' : 'none';
+    });
+    document.getElementById('btnAddChallengeQuestion').addEventListener('click', function() {
+        addChallengeQuestion('multiple_choice');
+    });
+    
+    var createChallengeBusy = false;
+    document.getElementById('btnCreateChallenge').addEventListener('click', function() {
+        if (createChallengeBusy) return;
+        var title = document.getElementById('challengeTitle').value.trim();
+        var desc = document.getElementById('challengeDescription').value.trim();
+        var scope = document.getElementById('challengeScope').value;
+        var targetGroup = document.getElementById('challengeTargetGroup').value;
+        if (!title) { showToast('Enter challenge title', 'danger'); return; }
+        if (title.length > 120) { showToast('Challenge title is too long (max 120)', 'danger'); return; }
+        if (desc.length > 500) { showToast('Description is too long (max 500)', 'danger'); return; }
+        if (scope === 'group' && !targetGroup) { showToast('Select a target group', 'danger'); return; }
+
+        var questions;
+        try {
+            questions = collectChallengeQuestionsForSave();
+        } catch (e) {
+            showToast(e.message || 'Invalid question builder data', 'danger');
+            return;
+        }
+
+        var firstQuestion = questions[0] || null;
+        var payload = {
+            title: title,
+            description: desc,
+            question_text: firstQuestion ? firstQuestion.question_text : (desc || title),
+            question_payload: {
+                questions: questions.map(function(q, idx) {
+                    return {
+                        id: 'q-' + (idx + 1),
+                        order_index: idx + 1,
+                        question_type: q.question_type,
+                        question_text: q.question_text,
+                        payload: q.payload,
+                        correct_answer: q.correct_answer
+                    };
+                })
+            },
+            challenge_type: firstQuestion ? firstQuestion.question_type : 'open',
+            correct_answer: firstQuestion ? firstQuestion.correct_answer : '',
+            options: firstQuestion && firstQuestion.payload && firstQuestion.payload.options ? firstQuestion.payload.options : null,
+            status: 'active',
+            max_winners: 10,
+            current_winners: 0
+        };
+        if (scope === 'group') {
+            payload.scope = 'group';
+            payload.target_group = targetGroup;
+            payload.group_code = targetGroup;
+            payload.target_groups = [targetGroup];
+        } else {
+            payload.scope = 'all';
+            payload.target_group = null;
+            payload.group_code = null;
+            payload.target_groups = null;
+        }
+
+        var btn = document.getElementById('btnCreateChallenge');
+        createChallengeBusy = true;
+        if (btn) { btn.disabled = true; btn.textContent = 'Creating...'; }
+        createChallengeWithQuestions(payload, questions).then(function() {
+            document.getElementById('challengeTitle').value = '';
+            document.getElementById('challengeDescription').value = '';
+            document.getElementById('challengeScope').value = 'all';
+            document.getElementById('challengeTargetGroup').value = '';
+            document.getElementById('challengeTargetGroup').style.display = 'none';
+            challengeBuilderState = [defaultChallengeQuestion('multiple_choice')];
+            renderChallengeBuilder();
+            window.loadChallengesList();
+            showToast('Challenge created', 'success');
+        }).catch(function(e) {
+            logUiError('CHALLENGE_CREATE_ERROR', e);
+            showToast('Error creating challenge: ' + (e.message || 'Unknown'), 'danger');
+        }).finally(function() {
+            createChallengeBusy = false;
+            if (btn) { btn.disabled = false; btn.textContent = 'Create Challenge'; }
+        });
+    });
+    
+    // ========== BILLING CLAIMS ==========
+    window.loadBillingClaims = function() {
+        console.log('[ADMIN] Loading billing claims...');
+        getPendingBillingClaims().then(function(claims) {
+            var el = document.getElementById('billingClaimsList');
+            if (!claims || !claims.length) {
+                el.innerHTML = '<p class="text-muted small">No pending claims.</p>';
+                return;
+            }
+            el.innerHTML = '<div class="list-group">' + claims.map(function(c) {
+                return '<div class="list-group-item d-flex justify-content-between align-items-center">' +
+                    '<div><strong>' + escapeHtml(c.student_name || c.student_id) + '</strong><br>' +
+                    '<small class="text-muted">Item: ' + escapeHtml(c.item_name) + ' · Group: ' + escapeHtml(c.group_code || '-') + '</small></div>' +
+                    '<button class="btn btn-sm btn-success" onclick="confirmDeliveryClick(\'' + c.id + '\', null)">Confirm Delivery</button>' +
+                    '</div>';
+            }).join('') + '</div>';
+        });
+    };
+    
+    window.confirmDeliveryClick = function(claimId, inventoryId) {
+        confirmDelivery(claimId, inventoryId).then(function(result) {
+            if (result.ok) {
+                showToast('Delivery confirmed', 'success');
+                window.loadBillingClaims();
+            } else {
+                showToast('Error: ' + (result.error || 'Unknown'), 'danger');
+            }
+        });
+    };
+    
+    // ========== ANNOUNCEMENTS ==========
+    window.loadAnnouncementsList = function() {
+        console.log('[ADMIN] Loading announcements...');
+        getAnnouncementsForAdmin().then(function(announcements) {
+            var el = document.getElementById('announcementsList');
+            if (!announcements || !announcements.length) {
+                el.innerHTML = '<p class="text-muted small">No announcements yet.</p>';
+                return;
+            }
+            function toneClass(t) {
+                if (t === 'warning') return 'alert-warning';
+                if (t === 'danger') return 'alert-danger';
+                if (t === 'success') return 'alert-success';
+                return 'alert-info';
+            }
+            el.innerHTML = '<div class="list-group">' + announcements.map(function(a) {
+                var linksHtml = Array.isArray(a.links) && a.links.length
+                    ? '<div class="small mt-1">' + a.links.map(function(l) {
+                        var label = escapeHtml(l.label || l.url || 'link');
+                        var url = escapeHtml(l.url || '#');
+                        return '<a href="' + url + '" target="_blank" rel="noopener" class="me-2">' + label + '</a>';
+                    }).join('') + '</div>'
+                    : '';
+                return '<div class="list-group-item alert ' + toneClass(String(a.alert_type || 'info')) + ' d-flex justify-content-between align-items-start gap-2"><div><strong>' + escapeHtml(a.title || 'Announcement') + '</strong><br><span>' + escapeHtml(a.message || '') + '</span><br>' +
+                    '<small class="text-muted">Group: ' + escapeHtml(a.target_group || 'All') + ' · Expires: ' + escapeHtml(a.expiry_date || '-') + '</small>' + linksHtml + '</div>' +
+                    '<div class="d-flex gap-1"><button class="btn btn-sm btn-outline-primary" onclick="editAnnouncementForm(\'' + String(a.id || '').replace(/'/g, "\\'") + '\')">Edit</button>' +
+                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteAnnouncementClick(\'' + String(a.id || '').replace(/'/g, "\\'") + '\')">Delete</button></div></div>';
+            }).join('') + '</div>';
+        }).catch(function(e) {
+            logUiError('ANNOUNCEMENTS_LOAD_ERROR', e);
+            document.getElementById('announcementsList').innerHTML = '<div class="alert alert-danger">Error loading announcements</div>';
+        });
+    };
+
+    window.editAnnouncementForm = function(announcementId) {
+        getAnnouncementsForAdmin().then(function(all) {
+            var row = (all || []).find(function(a) { return String(a.id) === String(announcementId); });
+            if (!row) {
+                showToast('Announcement not found', 'danger');
+                return;
+            }
+            document.getElementById('announcementEditId').value = row.id;
+            document.getElementById('announcementTitle').value = row.title || '';
+            document.getElementById('announcementMessage').value = row.message || '';
+            document.getElementById('announcementType').value = row.alert_type || 'info';
+            document.getElementById('announcementGroup').value = row.target_group || '';
+            document.getElementById('announcementExpiry').value = row.expiry_date || '';
+            document.getElementById('announcementLinks').value = Array.isArray(row.links)
+                ? row.links.map(function(l) { return (l.label || '') + '|' + (l.url || ''); }).join('\n')
+                : '';
+            document.getElementById('btnCreateAnnouncement').textContent = 'Update Announcement';
+            document.getElementById('btnCancelAnnouncementEdit').style.display = '';
+        }).catch(function(e) {
+            logUiError('ANNOUNCEMENT_EDIT_LOAD_ERROR', e);
+            showToast('Could not load announcement for editing', 'danger');
+        });
+    };
+
+    function resetAnnouncementForm() {
+        document.getElementById('announcementEditId').value = '';
+        document.getElementById('announcementTitle').value = '';
+        document.getElementById('announcementMessage').value = '';
+        document.getElementById('announcementType').value = 'info';
+        document.getElementById('announcementLinks').value = '';
+        document.getElementById('announcementExpiry').value = '';
+        document.getElementById('announcementGroup').value = '';
+        document.getElementById('btnCreateAnnouncement').textContent = 'Create Announcement';
+        document.getElementById('btnCancelAnnouncementEdit').style.display = 'none';
+    }
+
+    window.deleteAnnouncementClick = function(announcementId) {
+        if (!confirm('Delete this announcement?')) return;
+        deleteAnnouncement(announcementId).then(function() {
+            showToast('Announcement deleted', 'success');
+            window.loadAnnouncementsList();
+        }).catch(function(e) {
+            logUiError('ANNOUNCEMENT_DELETE_ERROR', e);
+            showToast('Error deleting announcement: ' + (e.message || 'Unknown'), 'danger');
+        });
+    };
+    
+    var saveAnnouncementBusy = false;
+    document.getElementById('btnCreateAnnouncement').addEventListener('click', function() {
+        if (saveAnnouncementBusy) return;
+        var editId = document.getElementById('announcementEditId').value;
+        var title = document.getElementById('announcementTitle').value.trim();
+        var message = document.getElementById('announcementMessage').value.trim();
+        var group = document.getElementById('announcementGroup').value;
+        var expiry = document.getElementById('announcementExpiry').value;
+        var alertType = document.getElementById('announcementType').value || 'info';
+        var linksRaw = document.getElementById('announcementLinks').value || '';
+        if (!message || !expiry) { showToast('Enter message and expiry date', 'danger'); return; }
+        if (title.length > 120) { showToast('Title too long (max 120)', 'danger'); return; }
+        if (message.length > 1000) { showToast('Message too long (max 1000)', 'danger'); return; }
+        var btn = document.getElementById('btnCreateAnnouncement');
+        saveAnnouncementBusy = true;
+        if (btn) { btn.disabled = true; btn.textContent = editId ? 'Updating...' : 'Creating...'; }
+        var op = editId
+            ? updateAnnouncement(editId, message, group || null, expiry, {
+                title: title || null,
+                alertType: alertType,
+                links: parseAnnouncementLinks(linksRaw)
+            })
+            : createAnnouncement(message, group || null, expiry, {
+                title: title || null,
+                alertType: alertType,
+                links: parseAnnouncementLinks(linksRaw)
+            });
+        op.then(function() {
+            resetAnnouncementForm();
+            window.loadAnnouncementsList();
+            showToast(editId ? 'Announcement updated' : 'Announcement created', 'success');
+        }).catch(function(e) {
+            logUiError(editId ? 'ANNOUNCEMENT_UPDATE_ERROR' : 'ANNOUNCEMENT_CREATE_ERROR', e);
+            showToast('Error saving announcement: ' + (e.message || 'Unknown'), 'danger');
+        }).finally(function() {
+            saveAnnouncementBusy = false;
+            if (btn) btn.disabled = false;
+            if (btn) btn.textContent = editId ? 'Update Announcement' : 'Create Announcement';
+        });
+    });
+
+    document.getElementById('btnCancelAnnouncementEdit').addEventListener('click', function() {
+        resetAnnouncementForm();
+    });
+
+    subscribeToAuctionChanges(function() {
+        var storeView = document.getElementById('viewStore');
+        if (storeView && storeView.classList.contains('active')) {
+            window.loadAuctionList();
+        }
+    });
+}); // End DOMContentLoaded
+    </script>
+</body>
+</html>

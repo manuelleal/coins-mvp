@@ -613,34 +613,151 @@ function showTab(tab) {
         registerForm.classList.remove('hidden');
         tabLogin.classList.remove('active');
         tabRegister.classList.add('active');
-        loadGroups();
+        // Multi-tenant registration: first choose institution, then load its groups.
+        if (typeof loadRegisterInstitutions === 'function') loadRegisterInstitutions();
+        else loadGroups();
     }
 }
 
 // ========== LOAD GROUPS ==========
-async function loadGroups() {
+async function loadGroups(institutionId) {
     const select = document.getElementById('regGroup');
     if (!select) return;
+
+    var instSel = document.getElementById('regInstitution');
+    var instId = String(institutionId || (instSel ? instSel.value : '') || '').trim();
+    // Legacy mode: if no institutions selector exists, or it can't be loaded.
+    var legacyInstitutionMode = !instSel || instId === '__legacy__' || instId === '__default__';
+    if (!legacyInstitutionMode && !instId) {
+        select.disabled = true;
+        select.innerHTML = '<option value="">Select a school first...</option>';
+        return;
+    }
+    select.disabled = true;
+    select.innerHTML = '<option value="">Loading groups...</option>';
     
     try {
-        const { data, error } = await supabaseClient
+        // Only need group_code for registration dropdown.
+        // Prefer filtering by institution_id to avoid loading huge group lists.
+        var query = supabaseClient
             .from(CONFIG.tables.groups)
-            .select('*')
+            .select('group_code')
             .order('group_code');
-        
-        if (error) throw error;
-        
-        if (!data || data.length === 0) {
+        if (!legacyInstitutionMode && instId) {
+            query = query.eq('institution_id', instId);
+        }
+
+        var r = await query;
+        if (r.error && !legacyInstitutionMode && typeof isMissingColumnError === 'function' && isMissingColumnError(r.error, 'institution_id', CONFIG.tables.groups)) {
+            // Older schema: no institution_id on groups -> fall back to global list.
+            r = await supabaseClient
+                .from(CONFIG.tables.groups)
+                .select('group_code')
+                .order('group_code');
+        }
+        if (r.error) throw r.error;
+
+        var data = r.data || [];
+        if (!data.length) {
             select.innerHTML = '<option value="">No groups available</option>';
+            select.disabled = true;
             return;
         }
-        
+
         select.innerHTML = '<option value="">Select your group...</option>' +
-            data.map(g => `<option value="${g.group_code}">${g.group_code}</option>`).join('');
+            data.map(function(g) {
+                var code = String(g.group_code || '').trim();
+                return code ? ('<option value="' + code.replace(/"/g, '&quot;') + '">' + code + '</option>') : '';
+            }).join('');
+        select.disabled = false;
             
     } catch (error) {
         console.error('Error loading groups:', error);
         select.innerHTML = '<option value="">Error loading groups</option>';
+        select.disabled = true;
+    }
+}
+
+// ========== LOAD INSTITUTIONS (Registration) ==========
+async function loadRegisterInstitutions() {
+    var instSel = document.getElementById('regInstitution');
+    var groupSel = document.getElementById('regGroup');
+    if (!instSel) {
+        // Older index.html without institution selector.
+        return loadGroups();
+    }
+    if (instSel.dataset.loaded === '1') {
+        // If already loaded and user picked a school, ensure groups are loaded.
+        if (instSel.value) return loadGroups(instSel.value);
+        return;
+    }
+
+    instSel.dataset.loaded = '1';
+    instSel.disabled = true;
+    instSel.innerHTML = '<option value="">Loading schools...</option>';
+    if (groupSel) {
+        groupSel.disabled = true;
+        groupSel.innerHTML = '<option value="">Select a school first...</option>';
+    }
+
+    // Attach change handler once.
+    instSel.addEventListener('change', function() {
+        try {
+            var v = String(instSel.value || '').trim();
+            loadGroups(v);
+            try { localStorage.setItem('last_reg_institution_id', v); } catch (_) {}
+        } catch (_) {}
+    });
+
+    try {
+        var res = await supabaseClient
+            .from(CONFIG.tables.institutions)
+            .select('id,name')
+            .order('name', { ascending: true });
+        if (res.error && typeof isMissingColumnError === 'function' && isMissingColumnError(res.error, 'name', CONFIG.tables.institutions)) {
+            res = await supabaseClient
+                .from(CONFIG.tables.institutions)
+                .select('id')
+                .order('id', { ascending: true });
+        }
+        if (res.error) {
+            // Legacy environments: allow registration to continue without institution scoping.
+            instSel.innerHTML = '<option value="__legacy__">Default</option>';
+            instSel.value = '__legacy__';
+            instSel.disabled = true;
+            return loadGroups('__legacy__');
+        }
+
+        var rows = res.data || [];
+        if (!rows.length) {
+            instSel.innerHTML = '<option value="__legacy__">Default</option>';
+            instSel.value = '__legacy__';
+            instSel.disabled = true;
+            return loadGroups('__legacy__');
+        }
+
+        instSel.innerHTML = '<option value="">Select your school...</option>' + rows.map(function(r) {
+            var id = String(r.id || '').trim();
+            var nm = String(r.name || r.id || '').trim();
+            if (!id) return '';
+            return '<option value="' + id.replace(/"/g, '&quot;') + '">' + nm.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</option>';
+        }).join('');
+        instSel.disabled = false;
+
+        var last = '';
+        try { last = String(localStorage.getItem('last_reg_institution_id') || '').trim(); } catch (_) {}
+        if (last && rows.some(function(r) { return String(r.id) === last; })) {
+            instSel.value = last;
+            await loadGroups(last);
+        } else if (rows.length === 1) {
+            instSel.value = String(rows[0].id || '');
+            await loadGroups(instSel.value);
+        }
+    } catch (e) {
+        instSel.innerHTML = '<option value="__legacy__">Default</option>';
+        instSel.value = '__legacy__';
+        instSel.disabled = true;
+        return loadGroups('__legacy__');
     }
 }
 
@@ -740,12 +857,18 @@ async function handleLogin(e) {
 // ========== REGISTER ==========
 async function handleRegister(e) {
     e.preventDefault();
-    
+
+    var instSel = document.getElementById('regInstitution');
+    var instId = String((instSel ? instSel.value : '') || '').trim();
+    var legacyInstitutionMode = !instSel || instId === '__legacy__' || instId === '__default__';
+
     const userData = {
         nombre_completo: document.getElementById('regName').value.trim(),
         documento_id: normalizeDocumentoId(document.getElementById('regDoc').value),
         pin: normalizePin(document.getElementById('regPin').value),
-        grupo: document.getElementById('regGroup').value
+        grupo: document.getElementById('regGroup').value,
+        // Optional in older schemas
+        institution_id: (!legacyInstitutionMode && instId) ? instId : undefined
     };
     
     const btn = document.getElementById('btnRegister');
@@ -770,6 +893,9 @@ async function handleRegister(e) {
         if (!userData.grupo) {
             throw new Error('Please select a group');
         }
+        if (instSel && !legacyInstitutionMode && !userData.institution_id) {
+            throw new Error('Please select a school');
+        }
 
         const { data: existing } = await supabaseClient
             .from(CONFIG.tables.profiles)
@@ -779,15 +905,29 @@ async function handleRegister(e) {
         
         if (existing) throw new Error('This document ID is already registered');
         
-        const { error } = await supabaseClient
-            .from(CONFIG.tables.profiles)
-            .insert([{
-                ...userData,
-                monedas: 0,
-                rol: 'student'
-            }]);
-        
-        if (error) throw error;
+        var payload = {
+            nombre_completo: userData.nombre_completo,
+            documento_id: userData.documento_id,
+            pin: userData.pin,
+            grupo: userData.grupo,
+            monedas: 0,
+            rol: 'student'
+        };
+        if (userData.institution_id !== undefined) payload.institution_id = userData.institution_id;
+        // Optional approval system (if column exists). Default allow-login behavior remains unchanged until enforced elsewhere.
+        payload.is_approved = false;
+
+        var optionalCols = ['institution_id', 'is_approved'];
+        while (true) {
+            var ins = await supabaseClient.from(CONFIG.tables.profiles).insert([payload]);
+            if (!ins.error) break;
+            var missing = extractMissingColumnName(ins.error);
+            if (missing && optionalCols.includes(missing) && Object.prototype.hasOwnProperty.call(payload, missing)) {
+                delete payload[missing];
+                continue;
+            }
+            throw ins.error;
+        }
         
         statusDiv.className = 'text-success text-center mt-3 small';
         statusDiv.textContent = '✅ Account created successfully!';
@@ -823,7 +963,7 @@ async function getGroups() {
     }
 }
 
-async function insertGroup(groupCode, maxCapacity) {
+async function insertGroup(groupCode, maxCapacity, metadata) {
     const code = String(groupCode).trim();
     if (!code) throw new Error('Group code is required');
     
@@ -835,6 +975,10 @@ async function insertGroup(groupCode, maxCapacity) {
     if (existing) throw new Error('Group "' + code + '" already exists');
     
     const payload = { group_code: code };
+    if (metadata && metadata.institution_id) payload.institution_id = metadata.institution_id;
+    if (metadata && metadata.last_admin_lat != null) payload.last_admin_lat = metadata.last_admin_lat;
+    if (metadata && metadata.last_admin_lng != null) payload.last_admin_lng = metadata.last_admin_lng;
+
     const normalizedCapacity = maxCapacity != null && maxCapacity !== ''
         ? Math.max(1, Math.floor(Number(maxCapacity)) || 1)
         : null;
@@ -2999,10 +3143,34 @@ async function getTeacherAllowedGroups(teacherId) {
 }
 
 async function getGroupsFiltered(userObj) {
-    var allGroups = await getGroups();
+    var instId = String((userObj && userObj.institution_id) || '').trim();
+
+    var allGroups;
+    if (instId) {
+        try {
+            var r = await supabaseClient
+                .from(CONFIG.tables.groups)
+                .select('*')
+                .eq('institution_id', instId)
+                .order('group_code');
+            if (!r.error) {
+                allGroups = r.data || [];
+            } else {
+                allGroups = await getGroups();
+            }
+        } catch (_) {
+            allGroups = await getGroups();
+        }
+    } else {
+        allGroups = await getGroups();
+    }
+
     if (!userObj || userObj.rol !== 'teacher') return allGroups;
+
     var allowed = await getTeacherAllowedGroups(userObj.id);
-    if (!allowed || !allowed.length) return [];
+    if (!allowed || !allowed.length) {
+        return allGroups;
+    }
     return allGroups.filter(function(g) { return allowed.indexOf(g.group_code) !== -1; });
 }
 
@@ -4402,5 +4570,7 @@ async function teacherAwardCoinsToStudent(teacherProfileId, studentProfileId, am
 
 // ========== INIT (NO AUTO-REDIRECT) ==========
 if (typeof document !== 'undefined' && document.getElementById('regGroup')) {
-    loadGroups();
+    // If index.html supports institution-first registration, load institutions first.
+    if (document.getElementById('regInstitution')) loadRegisterInstitutions();
+    else loadGroups();
 }

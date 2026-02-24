@@ -130,7 +130,8 @@
                     <button type="button" class="btn btn-outline-secondary btn-sm ms-2" onclick="document.getElementById('bulkImportPanel').style.display='none'">Cancel</button>
                     <div id="bulkImportStatus" class="mt-2 small"></div>
                 </div>
-                <div class="mb-2">
+                <div class="mb-2 d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-success btn-sm" id="btnShowAddStudent"><i class="bi bi-person-plus"></i> Add Student</button>
                     <button type="button" class="btn btn-outline-info btn-sm" id="btnShowBulkImport"><i class="bi bi-file-earmark-spreadsheet"></i> Bulk Import CSV</button>
                 </div>
                 <div id="contentUsers">
@@ -476,10 +477,26 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalAddStudent" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Add Student</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Full Name <span class="text-danger">*</span></label><input type="text" id="addStudentName" class="form-control" placeholder="e.g. Maria Lopez"></div>
+                    <div class="mb-3"><label class="form-label">Document ID <span class="text-danger">*</span></label><input type="text" id="addStudentDoc" class="form-control" placeholder="e.g. 123456"></div>
+                    <div class="mb-3"><label class="form-label">PIN <span class="text-danger">*</span></label><input type="text" id="addStudentPin" class="form-control" placeholder="4–8 digit PIN"></div>
+                    <div class="mb-3"><label class="form-label">Group</label><input type="text" id="addStudentGroup" class="form-control" placeholder="Leave blank to assign later"></div>
+                    <div id="addStudentStatus" class="small mt-1"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-success" id="btnSaveAddStudent">Save Student</button></div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="modalImprovementPlan" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">🎯 Asignar Plan de Mejora</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header"><h5 class="modal-title">🎯 Assign Improvement Plan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <input type="hidden" id="improvementStudentId">
                     <div class="mb-3"><label class="form-label">Student</label><input type="text" id="improvementStudentName" class="form-control" readonly></div>
@@ -487,7 +504,7 @@
                     <div class="mb-3"><label class="form-label">Entry Cost (coins)</label><input type="number" id="improvementEntryCost" class="form-control" value="5" min="0"></div>
                     <div class="mb-3"><label class="form-label">Reward on Completion (coins)</label><input type="number" id="improvementReward" class="form-control" value="50" min="0"></div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-warning" id="btnSubmitImprovementPlan">Emitir Plan</button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-warning" id="btnSubmitImprovementPlan">Submit Plan</button></div>
             </div>
         </div>
     </div>
@@ -1289,11 +1306,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             var totalStudents = 0;
             var totalCoins = 0;
-            if (groupCodes.length) {
+            var teacherInstitutionId = String((user && user.institution_id) || '').trim();
+            if (groupCodes.length && teacherInstitutionId) {
                 var stuRes = await supabaseClient
                     .from(CONFIG.tables.profiles)
                     .select('grupo,monedas')
-                    .eq('institution_id', user.institution_id)
+                    .eq('institution_id', teacherInstitutionId)
                     .eq('rol', 'student')
                     .eq('is_active', true)
                     .in('grupo', groupCodes);
@@ -1382,11 +1400,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            var teacherInstitutionId = String((user && user.institution_id) || '').trim();
+            if (isTeacherRole && !teacherInstitutionId) {
+                content.innerHTML = '<div class="alert alert-warning">Your account has no institution assigned. Ask your admin to assign your school before managing students.</div>';
+                return;
+            }
+
             var query = supabaseClient
                 .from(CONFIG.tables.profiles)
                 .select('id,nombre_completo,documento_id,pin,grupo,monedas,rol,institution_id')
                 .eq('rol', 'student')
-                .eq('institution_id', user.institution_id)
+                .eq('institution_id', teacherInstitutionId)
                 .order('nombre_completo');
             if (group) query = query.eq('grupo', group);
             var rs = await query;
@@ -1450,7 +1474,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             console.log('[ADMIN] Students loaded:', list ? list.length : 0);
             if (!list || !list.length) {
-                content.innerHTML = '<div class="empty-state">No students match your filter.</div>';
+                var emptyMsg = group
+                    ? '<div class="empty-state">No students in group <strong>' + escapeHtml(group) + '</strong> yet. Edit a student and assign them to this group.</div>'
+                    : '<div class="empty-state">No students match your filter.</div>';
+                content.innerHTML = emptyMsg;
                 return;
             }
             var bulkHead = isTeacherRole ? '' : '<th><input type="checkbox" id="selectAllStudents" onclick="toggleSelectAllStudents(this)"></th>';
@@ -1473,7 +1500,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     actionButtons = '<button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="window.openEdit(\'' + sid + '\',\'' + sname + '\',\'' + sdoc + '\',\'' + spin + '\',\'' + sgroup + '\',\'' + srol + '\')">Edit</button>';
                 }
                 if (s.rol === 'student') {
-                    actionButtons += '<button type="button" class="btn btn-sm btn-outline-warning me-1" onclick="window.openImprovementModal(\'' + sid + '\',\'' + sname + '\')" title="Asignar Plan de Mejora">🎯 Plan</button>';
+                    actionButtons += '<button type="button" class="btn btn-sm btn-outline-warning me-1" onclick="window.openImprovementModal(\'' + sid + '\',\'' + sname + '\')" title="Assign Improvement Plan">🎯 Plan</button>';
                     if (isTeacherRole) {
                         actionButtons += '<button type="button" class="btn btn-sm btn-outline-success me-1" onclick="window.openGiveCoins(\'' + sid + '\',\'' + sname + '\')">Give 🪙</button>';
                     }
@@ -1835,30 +1862,89 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    document.getElementById('btnCreateGroup').addEventListener('click', function() {
+    function ensureGroupOption(selectEl, code) {
+        if (!selectEl || !code) return;
+        var exists = Array.from(selectEl.options || []).some(function(o) {
+            return String(o.value || '') === code;
+        });
+        if (exists) return;
+        var opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = code;
+        selectEl.appendChild(opt);
+    }
+
+    function syncCreatedGroupInUi(code) {
+        if (!code) return;
+        if (!Array.isArray(window._editGroups)) window._editGroups = [];
+        var hasGroup = window._editGroups.some(function(g) {
+            return String((g && g.group_code) || '') === code;
+        });
+        if (!hasGroup) window._editGroups.push({ group_code: code });
+
+        var sel = document.getElementById('adminGroupFilter');
+        var qrSel = document.getElementById('qrGroup');
+        var aucSel = document.getElementById('auctionGroup');
+        var annSel = document.getElementById('announcementGroup');
+        var chSel = document.getElementById('challengeTargetGroup');
+        [sel, qrSel, aucSel, annSel, chSel].forEach(function(s) { ensureGroupOption(s, code); });
+
+        if (isTeacherRole) {
+            selectedTeacherGroup = code;
+            if (sel) sel.value = code;
+            if (qrSel) qrSel.value = code;
+            var teacherCodes = (window._editGroups || []).map(function(g) {
+                return String((g && g.group_code) || '').trim();
+            }).filter(Boolean);
+            renderTeacherGroupTabs(teacherCodes);
+        }
+    }
+
+    async function createGroupScopedToInstitution(code, capacity) {
+        var institutionId = String((user && user.institution_id) || '').trim();
+        if (!institutionId) {
+            throw new Error('Your account has no institution assigned. Ask your admin to assign a school to your account.');
+        }
+
+        await insertGroup(code, capacity, { institution_id: institutionId });
+
+        if (isTeacherRole) {
+            var ins = await supabaseClient
+                .from(CONFIG.tables.teacher_groups)
+                .upsert([{ teacher_id: user.id, group_code: code }], { onConflict: 'teacher_id,group_code' });
+            if (ins && ins.error) {
+                console.warn('[GROUP_CREATE] teacher_groups upsert failed, trying insert:', ins.error);
+                var ins2 = await supabaseClient
+                    .from(CONFIG.tables.teacher_groups)
+                    .insert([{ teacher_id: user.id, group_code: code }]);
+                if (ins2 && ins2.error) {
+                    var msg = String(ins2.error.message || '');
+                    if (!msg.toLowerCase().includes('duplicate') && !msg.toLowerCase().includes('unique')) {
+                        throw ins2.error;
+                    }
+                }
+            }
+        }
+    }
+
+    document.getElementById('btnCreateGroup').addEventListener('click', async function() {
         var input = document.getElementById('newGroupCode');
         var code = input.value.trim();
         if (!code) { showToast('Enter a group code.', 'danger'); return; }
-        insertGroup(code).then(function() {
+
+        try {
+            await createGroupScopedToInstitution(code, null);
             input.value = '';
-            window._editGroups.push({ group_code: code });
-            var sel = document.getElementById('adminGroupFilter');
-            var qrSel = document.getElementById('qrGroup');
-            var aucSel = document.getElementById('auctionGroup');
-            var annSel = document.getElementById('announcementGroup');
-            [sel, qrSel, aucSel, annSel].forEach(function(s) {
-                if (!s) return;
-                var opt = document.createElement('option');
-                opt.value = code;
-                opt.textContent = code;
-                s.appendChild(opt);
-            });
+            syncCreatedGroupInUi(code);
             showToast('Group created', 'success');
             window.loadGroupsList();
-        }).catch(function(e) {
+            if (isTeacherRole && typeof window.refreshStudents === 'function') {
+                window.refreshStudents();
+            }
+        } catch (e) {
             logUiError('GROUP_CREATE_ERROR', e);
             showToast('Error creating group: ' + (e.message || 'Try again.'), 'danger');
-        });
+        }
     });
 
     // --- Attendance: group required for QR; today's list ---
@@ -2361,7 +2447,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             var teacherRes = await supabaseClient
                 .from(CONFIG.tables.profiles)
-                .select('institution_id, rol')
+                .select('institution_id,rol')
                 .eq('rol', 'teacher');
             if (!teacherRes.error) {
                 (teacherRes.data || []).forEach(function(t) {
@@ -2621,7 +2707,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             var res = await supabaseClient
                 .from(CONFIG.tables.profiles)
-                .select('id, rol')
+                .select('id,rol')
                 .eq('institution_id', fromId)
                 .in('rol', roles);
             if (res.error && isMissingColumnError(res.error, 'institution_id', CONFIG.tables.profiles)) {
@@ -2765,8 +2851,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (isTeacherRole) {
-                var groupCreateControls = document.getElementById('groupCreateControls');
-                if (groupCreateControls) groupCreateControls.style.display = 'none';
                 window.refreshStudents();
             }
 
@@ -2877,19 +2961,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
     
-    document.getElementById('btnCreateGroupView').addEventListener('click', function() {
+    document.getElementById('btnCreateGroupView').addEventListener('click', async function() {
         var code = document.getElementById('newGroupCodeInput').value.trim();
         var capacity = parseInt(document.getElementById('newGroupCapacity').value) || null;
         if (!code) { showToast('Enter a group code', 'danger'); return; }
-        insertGroup(code, capacity).then(function() {
+
+        try {
+            await createGroupScopedToInstitution(code, capacity);
             document.getElementById('newGroupCodeInput').value = '';
             document.getElementById('newGroupCapacity').value = '';
+            syncCreatedGroupInUi(code);
             window.loadGroupsList();
             showToast('Group created', 'success');
-        }).catch(function(e) {
+            if (isTeacherRole && typeof window.refreshStudents === 'function') {
+                window.refreshStudents();
+            }
+        } catch (e) {
             logUiError('GROUP_CREATE_VIEW_ERROR', e);
             showToast('Error creating group: ' + (e.message || 'Unknown'), 'danger');
-        });
+        }
     });
     
     window.deleteGroupConfirm = function(groupCode) {
@@ -3516,7 +3606,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var cfg = await supabaseClient
             .from(CONFIG.tables.institutions)
-            .select('active_ai_provider, active_ai_key')
+            .select('active_ai_provider,active_ai_key')
             .eq('id', institutionId)
             .maybeSingle();
         if (cfg.error && (isMissingColumnError(cfg.error, 'active_ai_provider', CONFIG.tables.institutions)
@@ -3879,11 +3969,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             var file = fileInput.files[0];
             var csvText = await file.text();
-            var instId = null;
-            try {
-                var inst = await getOrCreateInstitution();
-                instId = inst ? inst.id : null;
-            } catch (_) {}
+            var instId = String((user && user.institution_id) || '').trim() || null;
             var result = await processFlatFile(csvText, instId);
             var msg = 'Created: ' + result.created + ' | Skipped: ' + result.skipped;
             if (result.errors && result.errors.length) {
@@ -3900,6 +3986,63 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             bulkImportBusy = false;
             if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-upload"></i> Import Students'; }
+        }
+    });
+
+    document.getElementById('btnShowAddStudent').addEventListener('click', function() {
+        var grpInput = document.getElementById('addStudentGroup');
+        if (grpInput) grpInput.value = String(selectedTeacherGroup || '').trim();
+        var nameEl = document.getElementById('addStudentName');
+        var docEl = document.getElementById('addStudentDoc');
+        var pinEl = document.getElementById('addStudentPin');
+        if (nameEl) nameEl.value = '';
+        if (docEl) docEl.value = '';
+        if (pinEl) pinEl.value = '';
+        var statusEl = document.getElementById('addStudentStatus');
+        if (statusEl) statusEl.innerHTML = '';
+        var modal = new bootstrap.Modal(document.getElementById('modalAddStudent'));
+        modal.show();
+    });
+
+    document.getElementById('btnSaveAddStudent').addEventListener('click', async function() {
+        var btn = this;
+        var statusEl = document.getElementById('addStudentStatus');
+        var name = String((document.getElementById('addStudentName') || {}).value || '').trim();
+        var doc = String((document.getElementById('addStudentDoc') || {}).value || '').trim();
+        var pin = String((document.getElementById('addStudentPin') || {}).value || '').trim();
+        var grp = String((document.getElementById('addStudentGroup') || {}).value || '').trim();
+        if (!name || !doc || !pin) {
+            if (statusEl) statusEl.innerHTML = '<span class="text-danger">Name, Document ID and PIN are required.</span>';
+            return;
+        }
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        if (statusEl) statusEl.innerHTML = '';
+        try {
+            var instId = String((user && user.institution_id) || '').trim() || null;
+            var existCheck = await supabaseClient.from(CONFIG.tables.profiles).select('id').eq('documento_id', doc).maybeSingle();
+            if (existCheck.data) throw new Error('Document ID "' + doc + '" is already registered.');
+            var payload = { nombre_completo: name, documento_id: doc, pin: pin, rol: 'student', monedas: 0, current_streak: 0 };
+            if (grp) payload.grupo = grp;
+            if (instId) payload.institution_id = instId;
+            var ins = await supabaseClient.from(CONFIG.tables.profiles).insert([payload]);
+            if (ins.error && isMissingColumnError(ins.error, 'current_streak', CONFIG.tables.profiles)) {
+                delete payload.current_streak;
+                ins = await supabaseClient.from(CONFIG.tables.profiles).insert([payload]);
+            }
+            if (ins.error && isMissingColumnError(ins.error, 'institution_id', CONFIG.tables.profiles)) {
+                delete payload.institution_id;
+                ins = await supabaseClient.from(CONFIG.tables.profiles).insert([payload]);
+            }
+            if (ins.error) throw ins.error;
+            bootstrap.Modal.getInstance(document.getElementById('modalAddStudent')).hide();
+            showToast('Student "' + name + '" added successfully!', 'success');
+            window.refreshStudents();
+        } catch (e) {
+            if (statusEl) statusEl.innerHTML = '<span class="text-danger">' + escapeHtml(e.message || 'Failed to save student') + '</span>';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Save Student';
         }
     });
 

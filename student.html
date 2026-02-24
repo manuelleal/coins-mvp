@@ -1685,27 +1685,65 @@
             var banner = document.getElementById('studentActiveChallengeBanner');
             var text = document.getElementById('studentActiveChallengeBannerText');
             if (!banner || !text || !user || !user.grupo) return;
-            var count = 0;
+            var totalActive = 0;
+            var pending = 0;
             try {
+                // 1) Load active challenge IDs for this group (lightweight query)
                 var q1 = await supabaseClient
                     .from(CONFIG.tables.challenges)
-                    .select('id', { count: 'exact', head: true })
+                    .select('id')
                     .eq('status', 'active')
                     .or('group_code.eq.' + user.grupo + ',group_code.is.null');
-                if (!q1.error) {
-                    count = Number(q1.count) || 0;
-                } else if (typeof isMissingColumnError === 'function' && isMissingColumnError(q1.error, 'group_code', CONFIG.tables.challenges)) {
-                    var q2 = await supabaseClient
+                if (q1.error && typeof isMissingColumnError === 'function' && isMissingColumnError(q1.error, 'group_code', CONFIG.tables.challenges)) {
+                    q1 = await supabaseClient
                         .from(CONFIG.tables.challenges)
-                        .select('id', { count: 'exact', head: true })
+                        .select('id')
                         .eq('status', 'active')
                         .or('target_group.eq.' + user.grupo + ',target_group.eq.all,target_group.is.null');
-                    if (!q2.error) count = Number(q2.count) || 0;
+                }
+                if (q1.error && typeof isMissingColumnError === 'function' && isMissingColumnError(q1.error, 'status', CONFIG.tables.challenges)) {
+                    // Legacy challenges: no status column
+                    q1 = await supabaseClient
+                        .from(CONFIG.tables.challenges)
+                        .select('id')
+                        .or('group_code.eq.' + user.grupo + ',group_code.is.null');
+                }
+                if (q1.error) throw q1.error;
+
+                var ids = (q1.data || []).map(function(r) { return r && r.id ? String(r.id) : ''; }).filter(Boolean);
+                totalActive = ids.length;
+                if (!totalActive) {
+                    pending = 0;
+                } else {
+                    // 2) Subtract challenges that this student already finished.
+                    // Completion rule matches UI: done if any correct OR attempts >= 2.
+                    var doneIds = {};
+                    try {
+                        var subs = await supabaseClient
+                            .from(CONFIG.tables.challenge_submissions)
+                            .select('challenge_id,is_correct')
+                            .eq('student_id', user.documento_id)
+                            .in('challenge_id', ids);
+                        if (!subs.error) {
+                            var attempts = {};
+                            (subs.data || []).forEach(function(s) {
+                                var cid = String(s.challenge_id || '');
+                                if (!cid) return;
+                                attempts[cid] = (attempts[cid] || 0) + 1;
+                                if (s.is_correct === true) doneIds[cid] = true;
+                            });
+                            Object.keys(attempts).forEach(function(cid) {
+                                if (attempts[cid] >= 2) doneIds[cid] = true;
+                            });
+                        }
+                    } catch (_) {}
+                    var doneCount = Object.keys(doneIds).length;
+                    pending = Math.max(0, totalActive - doneCount);
                 }
             } catch (_) {}
 
-            if (count > 0) {
-                text.textContent = '🎯 You have ' + count + ' active challenge(s)! Complete them to earn coins!';
+            if (pending > 0) {
+                text.textContent = '🎯 You have ' + pending + ' active challenge(s)! Complete them to earn coins!';
                 banner.style.display = '';
             } else {
                 banner.style.display = 'none';

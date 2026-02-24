@@ -103,10 +103,19 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">
+                        <i class="bi bi-building"></i> School / Institution
+                    </label>
+                    <select id="regInstitution" class="form-select" required>
+                        <option value="">Select your school...</option>
+                    </select>
+                    <div class="small text-muted" style="margin-top:6px;">First choose your school, then you'll see its available groups.</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
                         <i class="bi bi-people"></i> Group
                     </label>
-                    <select id="regGroup" class="form-select" required>
-                        <option value="">Select your group...</option>
+                    <select id="regGroup" class="form-select" required disabled>
+                        <option value="">Select a school first...</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary" id="btnRegister">

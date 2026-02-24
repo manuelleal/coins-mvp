@@ -157,9 +157,11 @@
   }
 
   async function updateTeacherMapping(groupCode, teacherId) {
-    await supabaseClient.from(CONFIG.tables.teacher_groups).delete().eq('group_code', groupCode);
+    var del = await supabaseClient.from(CONFIG.tables.teacher_groups).delete().eq('group_code', groupCode);
+    if (del && del.error) throw del.error;
     if (!teacherId) return;
-    await supabaseClient.from(CONFIG.tables.teacher_groups).insert([{ teacher_id: teacherId, group_code: groupCode }]);
+    var ins = await supabaseClient.from(CONFIG.tables.teacher_groups).insert([{ teacher_id: teacherId, group_code: groupCode }]);
+    if (ins && ins.error) throw ins.error;
   }
 
   function ensureChangeTeacherModal() {
@@ -356,22 +358,18 @@
     var teacher = String((document.getElementById('createGroupTeacher') || {}).value || '').trim();
     if (!code) return UI.showToast('Group code is required', 'warning');
 
-    // Use insertGroup() from app.js which handles max_capacity->capacity->no-capacity fallback
-    // Then patch institution_id and GPS coords separately (insertGroup only sets group_code + capacity)
     if (typeof insertGroup === 'function') {
       try {
-        await insertGroup(code, cap);
-        // Patch institution_id and GPS (insertGroup doesn't set these)
-        var patch = { institution_id: schoolId };
-        if (latRaw) patch.last_admin_lat = Number(latRaw);
-        if (lngRaw) patch.last_admin_lng = Number(lngRaw);
-        await supabaseClient.from(CONFIG.tables.groups).update(patch).eq('group_code', code);
+        var meta = { institution_id: schoolId };
+        if (latRaw) meta.last_admin_lat = Number(latRaw);
+        if (lngRaw) meta.last_admin_lng = Number(lngRaw);
+        await insertGroup(code, cap, meta);
         await updateTeacherMapping(code, teacher || null);
         await logAudit('CREATE_GROUP', 'group', code, { group_code: code, institution_id: schoolId });
         UI.hideModal('groupCreateModal');
         loadList();
       } catch (e) {
-        UI.showToast(e.message || 'Create failed', 'danger');
+        UI.showToast((e && (e.message || e.details)) ? (e.message || e.details) : JSON.stringify(e) || 'Create failed', 'danger');
       }
       return;
     }

@@ -1,0 +1,126 @@
+﻿{
+  "meta": {
+    "executed_at": "2026-02-24T19:34:15.175Z",
+    "base": "http://127.0.0.1:5500"
+  },
+  "phase1_environment": {
+    "institutions_table": {
+      "status": "PASS",
+      "seen": "status=200"
+    },
+    "institutions_renamed_columns": {
+      "status": "PASS",
+      "seen": "Columns readable"
+    },
+    "profiles_columns": {
+      "status": "PASS",
+      "seen": "rol + teacher_credits readable"
+    },
+    "ensure_institution": {
+      "status": "PASS",
+      "seen": "UIS (fd138e39-9d18-4797-851e-1c038f512592)"
+    },
+    "ensure_group": {
+      "status": "PASS",
+      "seen": "FOREIGN LANGUAJE 40556"
+    },
+    "ensure_test_users": {
+      "status": "PASS",
+      "seen": "teacher=true; student=true; model=documento_id+pin (not email)"
+    },
+    "teacher_credits_set": {
+      "status": "PASS",
+      "seen": "teacher_credits target=9 applied (or fallback if column missing)"
+    }
+  },
+  "phase2_auth": {
+    "super_admin": {
+      "status": "PASS",
+      "seen": "{\"wrongMsg\":\"Invalid credentials\",\"loginUrl\":\"http://127.0.0.1:5500/admin.html\",\"passLogin\":true,\"rolePersist\":\"super_admin\",\"afterLogout\":\"http://127.0.0.1:5500/index.html\",\"expiredUrl\":\"http://127.0.0.1:5500/index.html\",\"consoleErrors\":[\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\"],\"networkErrors\":[\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/english_challenges?select=id&is_active=eq.true -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.bbe5655f-50bd-432b-ac61-e52f9af3d857 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&account_locked=eq.true -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.bbe5655f-50bd-432b-ac61-e52f9af3d857 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.bbe5655f-50bd-432b-ac61-e52f9af3d857 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.bbe5655f-50bd-432b-ac61-e52f9af3d857 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.bbe5655f-50bd-432b-ac61-e52f9af3d857 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/english_challenges?select=id&is_active=eq.true -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&account_locked=eq.true -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.bbe5655f-50bd-432b-ac61-e52f9af3d857 -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/english_challenges?select=id&is_active=eq.true -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/index.html -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET https://uggkivypfugdchvjurlo.supabase.co/rest/v1/institutions?select=id%2Cname&order=name.asc -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\"]}"
+    },
+    "teacher": {
+      "status": "FAIL",
+      "seen": "{\"wrongMsg\":\"Invalid credentials\",\"loginUrl\":\"http://127.0.0.1:5500/index.html\",\"passLogin\":false,\"rolePersist\":\"\",\"afterLogout\":\"http://127.0.0.1:5500/index.html\",\"expiredUrl\":\"http://127.0.0.1:5500/index.html\",\"consoleErrors\":[\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\"],\"networkErrors\":[\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET https://uggkivypfugdchvjurlo.supabase.co/rest/v1/institutions?select=id%2Cname&order=name.asc -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\"]}"
+    },
+    "student": {
+      "status": "PASS",
+      "seen": "{\"wrongMsg\":\"Invalid credentials\",\"loginUrl\":\"http://127.0.0.1:5500/student.html\",\"passLogin\":true,\"rolePersist\":\"student\",\"afterLogout\":\"http://127.0.0.1:5500/index.html\",\"expiredUrl\":\"http://127.0.0.1:5500/index.html\",\"consoleErrors\":[\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\",\"[error] Failed to load resource: the server responded with a status of 404 (File not found)\"],\"networkErrors\":[\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\",\"GET https://uggkivypfugdchvjurlo.supabase.co/rest/v1/institutions?select=id%2Cname&order=name.asc -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/config.js -> net::ERR_ABORTED\"]}"
+    }
+  },
+  "phase3_rbac": {
+    "super_admin_system_configs": {
+      "status": "PASS",
+      "seen": "navAiConfig=1; keyFields=3"
+    },
+    "teacher_blocked": {
+      "status": "PASS",
+      "seen": "adminAttempt=http://127.0.0.1:5500/index.html; schoolAttempt=http://127.0.0.1:5500/index.html; logic=RBAC: This action requires super_admin privileges"
+    },
+    "student_blocked": {
+      "status": "PASS",
+      "seen": "adminAttempt=http://127.0.0.1:5500/index.html; teacherAttempt=http://127.0.0.1:5500/index.html"
+    }
+  },
+  "phase4_teacher_groups": {
+    "teacher_login": {
+      "status": "FAIL",
+      "seen": "http://127.0.0.1:5500/index.html"
+    },
+    "group_filtering": {
+      "status": "FAIL",
+      "seen": "Teacher could not access teacher.html"
+    }
+  },
+  "phase5_teacher_credits": {},
+  "phase6_institution_pool": {},
+  "phase7_multi_ai": {},
+  "phase8_cefr": {},
+  "phase9_responsive": {
+    "desktop": {
+      "status": "FAIL",
+      "seen": "{\"aiPanel\":false,\"drako\":false,\"runBtn\":false,\"overflowAi\":null,\"overflowNav\":null}"
+    },
+    "laptop": {
+      "status": "FAIL",
+      "seen": "{\"aiPanel\":false,\"drako\":false,\"runBtn\":false,\"overflowAi\":null,\"overflowNav\":null}"
+    },
+    "tablet": {
+      "status": "FAIL",
+      "seen": "{\"aiPanel\":false,\"drako\":false,\"runBtn\":false,\"overflowAi\":null,\"overflowNav\":null}"
+    },
+    "mobile": {
+      "status": "FAIL",
+      "seen": "{\"aiPanel\":false,\"drako\":false,\"runBtn\":false,\"overflowAi\":null,\"overflowNav\":null}"
+    }
+  },
+  "phase10_student": {
+    "student_login": {
+      "status": "PASS",
+      "seen": "http://127.0.0.1:5500/student.html"
+    },
+    "student_visibility": {
+      "status": "PASS",
+      "seen": "{\"hasCoins\":true,\"hasChallengesNav\":true,\"hasTeacherCreditsText\":false,\"hasProviderUi\":false}"
+    }
+  },
+  "phase11_security": {
+    "direct_system_configs_call": {
+      "status": "FAIL",
+      "seen": "status=200 (RLS/open access risk)"
+    },
+    "role_spoof_attempt": {
+      "status": "PASS",
+      "seen": "localStorageSpoof=set; url=http://127.0.0.1:5500/index.html"
+    }
+  },
+  "phase12_resilience": {
+    "teacher_groups_missing": {
+      "status": "FAIL",
+      "seen": "{\"teacherGroupsMissing\":\"crash:window.refreshStudents is not a function\",\"networkOffline\":\"error:Error: Network offline\"}"
+    },
+    "network_offline": {
+      "status": "PASS",
+      "seen": "{\"teacherGroupsMissing\":\"crash:window.refreshStudents is not a function\",\"networkOffline\":\"error:Error: Network offline\"}"
+    }
+  }
+}

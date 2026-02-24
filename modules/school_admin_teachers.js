@@ -296,7 +296,8 @@
 
     try {
       // One teacher per group: clear existing mapping for that group.
-      await supabaseClient.from(CONFIG.tables.teacher_groups).delete().eq('group_code', groupCode);
+      var del = await supabaseClient.from(CONFIG.tables.teacher_groups).delete().eq('group_code', groupCode);
+      if (del && del.error) throw del.error;
       var ins = await supabaseClient.from(CONFIG.tables.teacher_groups).insert([{ teacher_id: teacherId, group_code: groupCode }]);
       if (ins.error) throw ins.error;
 

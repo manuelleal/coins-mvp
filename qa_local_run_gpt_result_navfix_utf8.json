@@ -1,0 +1,25 @@
+{
+  "step7": {
+    "admin_uis": {
+      "status": "FAIL",
+      "seen": {
+        "url": "",
+        "error": "page.goto: net::ERR_EMPTY_RESPONSE at http://127.0.0.1:5500/index.html\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5500/index.html\", waiting until \"domcontentloaded\"\u001b[22m\n"
+      }
+    },
+    "teacher_uis": {
+      "status": "FAIL",
+      "seen": {
+        "url": "",
+        "error": "page.goto: net::ERR_EMPTY_RESPONSE at http://127.0.0.1:5500/index.html\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5500/index.html\", waiting until \"domcontentloaded\"\u001b[22m\n"
+      }
+    },
+    "student_banner": {
+      "status": "FAIL",
+      "seen": {
+        "url": "",
+        "error": "page.goto: net::ERR_EMPTY_RESPONSE at http://127.0.0.1:5500/index.html\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:5500/index.html\", waiting until \"domcontentloaded\"\u001b[22m\n"
+      }
+    }
+  }
+}

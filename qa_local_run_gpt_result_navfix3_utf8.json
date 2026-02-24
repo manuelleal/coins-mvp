@@ -1,0 +1,34 @@
+{
+  "step7": {
+    "admin_uis": {
+      "status": "PASS",
+      "seen": {
+        "url": "http://127.0.0.1:5500/admin.html",
+        "teachers": [
+          "Teacher QA",
+          "Teacher UIS"
+        ]
+      }
+    },
+    "teacher_uis": {
+      "status": "PASS",
+      "seen": {
+        "url": "http://127.0.0.1:5500/teacher.html",
+        "groups": [
+          "UIS-A1"
+        ],
+        "selectedGroup": "UIS-A1",
+        "emptyState": ""
+      }
+    },
+    "student_banner": {
+      "status": "PASS",
+      "seen": {
+        "url": "http://127.0.0.1:5500/student.html",
+        "display": "block",
+        "text": "\u00ad\u0192\u00c4\u00bb You have 1 active challenge(s)! Complete them to earn coins!",
+        "student": "1113"
+      }
+    }
+  }
+}

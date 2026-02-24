@@ -1,0 +1,183 @@
+{
+  "report": {
+    "super_admin": {
+      "login_redirect": {
+        "status": "PASS",
+        "seen": "http://127.0.0.1:5500/admin.html"
+      },
+      "dashboard_numbers": {
+        "status": "PASS",
+        "seen": "🏫 Escuelas activas\n5\n🪙 Monedas en circulacion\n2148\n👨‍🏫 Teachers\n2\n👨‍🎓 Estudiantes\n87\n📚 Grupos activos\n7\n🏆 Challenges activos\n1\n🤖 AI credits usados hoy\n0\n⚠️ Cuentas bloqueadas\n0\nEscuela mas activa: UIS (87 students)"
+      },
+      "schools_count": {
+        "status": "PASS",
+        "seen": "rows/cards=5; Colegio Test\nPlan: BASIC | AI: chatgpt\nManage\nPlan & Features\nEdit School\nAI Credits\nView Stats\nSuspend\nDelete\nTest Institution\nPlan: BASIC | AI: chatgpt\nManage\nPlan & Features\nEdit School\nAI Credits\nView Stats\nSuspend\nDelete\nUIS\nPlan: PREMIUM | AI: chatgpt\nManage\nPlan & Features\nEdit School\nAI Credits\nView Stats\nSuspend\nDelete\nUIS-OLD-1\nPlan: PREMIUM | AI: chatgpt\nManage\nPlan & Features\nEdit School\nAI Credits\nView Stats\nSuspend\nDelete\nUIS-OLD-2\nPlan: PREMIUM | AI: chatgpt\nManage\nPlan & Features\nEdit School\nAI Credits\nView Stats\nSuspend\nDelete"
+      },
+      "users_step2_groups": {
+        "status": "PASS",
+        "seen": "options=5; All groups | ENGLISH 1 PB1 | ENGLISH 1pb2 | ENGLISH 2 C1 | FOREIGN LANGUAJE 40556"
+      },
+      "groups_uis_count": {
+        "status": "PASS",
+        "seen": "groups_visible=32"
+      },
+      "economy_uis_once": {
+        "status": "FAIL",
+        "seen": "UIS_occurrences=3; snippet=Economy\nCoin Economy\nSchool\tPlan\tCoin Pool\tIn Circulation\tAvailable\tAction\nColegio Test\tBASIC\t1\t0\n0% used\n\t1\t\nAdd\nRemove\n\nTest Institution\tBASIC\t0\t0\n0% used\n\t0\t\nAdd\nRemove\n\nUIS\tPREMIUM\t2800\t2148\n77% used\n\t652\t\nAdd\nRemove\n\nUIS-OLD-1\tPREMIUM\t0\t0\n0% used\n\t0\t\nAdd\nRemove\n\nUIS-OLD-2\tPREMIUM\t0\t0\n0% used\n\t0\t\nAdd\nRemove\nAI Credits\n\nLoading...\n\nExport Credit Report CSV"
+      },
+      "ai_config_pin": {
+        "status": "FAIL",
+        "seen": "dialogs=0; viewText=AI Config\n                \n                    API Keys Globales\n                    \n                        OpenAI\n                        Anthropic\n                        Google\n                    \n                    Save Keys\n                \n                \n                    Modelos por Slot\n                    \n                    Save Models\n                \n                \n                    Límites Diarios por Estudiante\n                    \n                        Daily\n                        Exam\n                        ESP\n                        Coins/day Challenges\n                        Coins/day Attendance\n                    \n                    Save Limits"
+      },
+      "__fatal": "page.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#navAdmins')\u001b[22m\n\u001b[2m    - locator resolved to <a href=\"#\" id=\"navAdmins\" onclick=\"return window.showAdminView('admins')\">Admins</a>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"modal-body\">…</div> from <div tabindex=\"-1\" role=\"dialog\" aria-modal=\"true\" id=\"aiConfigPinModal\" class=\"modal fade show\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"modal-body\">…</div> from <div tabindex=\"-1\" role=\"dialog\" aria-modal=\"true\" id=\"aiConfigPinModal\" class=\"modal fade show\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is not stable\u001b[22m\n\u001b[2m  14 × retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m       - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div tabindex=\"-1\" role=\"dialog\" aria-modal=\"true\" id=\"aiConfigPinModal\" class=\"modal fade show\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m       - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"modal-body\">…</div> from <div tabindex=\"-1\" role=\"dialog\" aria-modal=\"true\" id=\"aiConfigPinModal\" class=\"modal fade show\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m       - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"modal-body\">…</div> from <div tabindex=\"-1\" role=\"dialog\" aria-modal=\"true\" id=\"aiConfigPinModal\" class=\"modal fade show\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m       - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div tabindex=\"-1\" role=\"dialog\" aria-modal=\"true\" id=\"aiConfigPinModal\" class=\"modal fade show\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 500ms\u001b[22m\n",
+      "console_errors": [],
+      "network_errors": [
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/english_challenges?select=id&is_active=eq.true -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&account_locked=eq.true -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/english_challenges?select=id&is_active=eq.true -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&account_locked=eq.true -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.6d01fb42-7076-42af-9c4f-694b26e1d637 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.012c9ed8-8204-40fd-b151-d97073772164 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=id&institution_id=eq.cdfd3817-6d1a-4cc2-9a4d-1f9f5219a345 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592&is_active=eq.true&rol=eq.admin -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592&is_active=eq.true&rol=eq.teacher -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592&is_active=eq.true&rol=eq.student -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592&is_active=eq.true&rol=eq.admin -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592&is_active=eq.true&rol=eq.teacher -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592&is_active=eq.true&rol=eq.student -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED"
+      ]
+    },
+    "admin_escuela": {
+      "login_redirect": {
+        "status": "PASS",
+        "seen": "http://127.0.0.1:5500/school.html"
+      },
+      "overview_stats": {
+        "status": "PASS",
+        "seen": {
+          "students": "87",
+          "teachers": "1",
+          "groups": "4",
+          "challenges": "0",
+          "coins": "2148",
+          "cobros": "0"
+        }
+      },
+      "teachers_with_groups": {
+        "status": "FAIL",
+        "seen": "No teachers yet."
+      },
+      "students_87": {
+        "status": "PASS",
+        "seen": "rows=87"
+      },
+      "adjust_coins_with_reason": {
+        "status": "PASS",
+        "seen": "Coins adjusted: 12"
+      },
+      "console_errors": [
+        "[error] Failed to load resource: the server responded with a status of 400 ()",
+        "[error] Failed to load resource: the server responded with a status of 400 ()",
+        "[error] Failed to load resource: the server responded with a status of 400 ()",
+        "[error] Failed to load resource: the server responded with a status of 400 ()"
+      ],
+      "network_errors": [
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592&rol=eq.teacher -> net::ERR_ABORTED",
+        "HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=group_code&institution_id=eq.fd138e39-9d18-4797-851e-1c038f512592 -> net::ERR_ABORTED"
+      ]
+    },
+    "teacher": {
+      "login_redirect": {
+        "status": "PASS",
+        "seen": "http://127.0.0.1:5500/index.html"
+      },
+      "__fatal": "page.waitForSelector: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#teacherGroupTabs') to be visible\u001b[22m\n",
+      "console_errors": [],
+      "network_errors": []
+    },
+    "student": {
+      "login_redirect": {
+        "status": "FAIL",
+        "seen": "No student credentials discovered in browser flow."
+      },
+      "coins_visible": {
+        "status": "FAIL",
+        "seen": "Skipped"
+      },
+      "challenge_active": {
+        "status": "FAIL",
+        "seen": "Skipped"
+      },
+      "animations_visible": {
+        "status": "FAIL",
+        "seen": "Skipped"
+      },
+      "coming_soon": {
+        "status": "FAIL",
+        "seen": "Skipped"
+      },
+      "mute_button": {
+        "status": "FAIL",
+        "seen": "Skipped"
+      },
+      "console_errors": [],
+      "network_errors": []
+    }
+  },
+  "stash": {}
+}

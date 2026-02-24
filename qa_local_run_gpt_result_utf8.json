@@ -1,0 +1,30 @@
+{
+  "step7": {
+    "admin_uis": {
+      "status": "PASS",
+      "seen": {
+        "url": "http://127.0.0.1:5500/admin.html",
+        "teachers": [
+          "Teacher QA",
+          "Teacher UIS"
+        ]
+      }
+    },
+    "teacher_uis": {
+      "status": "FAIL",
+      "seen": {
+        "url": "http://127.0.0.1:5500/teacher.html",
+        "error": "page.waitForSelector: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#contentUsers table tbody tr') to be visible\u001b[22m\n"
+      }
+    },
+    "student_banner": {
+      "status": "FAIL",
+      "seen": {
+        "url": "http://127.0.0.1:5500/student.html",
+        "display": "none",
+        "text": "\u00ad\u0192\u00c4\u00bb You have active challenges!",
+        "student": "qa_student"
+      }
+    }
+  }
+}

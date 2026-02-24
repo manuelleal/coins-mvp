@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Admin | Lingo-Coins</title>
+    <link rel="icon" type="image/webp" href="assets/images/icono-moneda.webp">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .teacher-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem; }
+        .stat-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1rem; text-align: center; flex: 1; min-width: 120px; }
+        .stat-card .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--gold-500, #FFD700); }
+        .stat-card .stat-label { font-size: 0.78rem; color: rgba(255,255,255,0.55); margin-top: 0.2rem; }
+        .alert-card { border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; font-size: 0.88rem; }
+        .school-section-title { font-size: 1.05rem; font-weight: 700; color: var(--gold-500, #FFD700); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+    </style>
+</head>
+<body class="bg-dashboard">
+    <div class="decor-overlay" aria-hidden="true"></div>
+    <div class="container-custom page-container" style="max-width: 960px;">
+        <div class="card card-premium" style="padding: 0; overflow: hidden;">
+            <nav class="admin-nav">
+                <span class="greeting">Hello <strong id="adminName"></strong>!</span>
+                <a href="#" id="navOverview" class="active" onclick="return window.showSchoolView('overview')">Overview</a>
+                <a href="#" id="navTeachers" onclick="return window.showSchoolView('teachers')">Teachers</a>
+                <a href="#" id="navGroups" onclick="return window.showSchoolView('groups')">Groups</a>
+                <a href="#" id="navStudents" onclick="return window.showSchoolView('students')">Students</a>
+                <a href="#" id="navChallenges" onclick="return window.showSchoolView('challenges')">Challenges</a>
+                <a href="#" id="navStore" onclick="return window.showSchoolView('store')">Store</a>
+                <a href="#" id="navCobros" onclick="return window.showSchoolView('cobros')">Cobros</a>
+                <a href="#" id="navAnnouncements" onclick="return window.showSchoolView('announcements')">Announcements</a>
+                <a href="#" id="navFeedback" onclick="return window.showSchoolView('feedback')">Feedback</a>
+                <button type="button" class="nav-btn" id="btnLogout">Logout</button>
+            </nav>
+
+            <!-- VIEW: Overview -->
+            <div id="viewOverview" class="admin-view active" style="padding:1.5rem;">
+                <div class="school-section-title"><i class="bi bi-speedometer2"></i> School Overview</div>
+                <div class="d-flex flex-wrap gap-3 mb-4" id="overviewStats">
+                    <div class="stat-card"><div class="stat-value" id="ovStatStudents">—</div><div class="stat-label">Students</div></div>
+                    <div class="stat-card"><div class="stat-value" id="ovStatTeachers">—</div><div class="stat-label">Teachers</div></div>
+                    <div class="stat-card"><div class="stat-value" id="ovStatGroups">—</div><div class="stat-label">Groups</div></div>
+                    <div class="stat-card"><div class="stat-value" id="ovStatChallenges">—</div><div class="stat-label">Active Challenges</div></div>
+                    <div class="stat-card"><div class="stat-value" id="ovStatCoins">—</div><div class="stat-label">Coins in Circulation</div></div>
+                    <div class="stat-card"><div class="stat-value" id="ovStatCobros">—</div><div class="stat-label">Pending Cobros</div></div>
+                </div>
+                <div class="school-section-title"><i class="bi bi-bell"></i> Alerts</div>
+                <div id="overviewAlerts"><p class="text-muted small">Loading alerts...</p></div>
+            </div>
+
+            <!-- VIEW: Teachers -->
+            <div id="viewTeachers" class="admin-view" style="padding:1.5rem;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="school-section-title mb-0"><i class="bi bi-person-badge"></i> Teachers</div>
+                    <button type="button" class="btn btn-success btn-sm" id="btnCreateTeacher"><i class="bi bi-plus-circle"></i> New Teacher</button>
+                </div>
+                <div id="teachersList"><p class="text-muted small">Loading teachers...</p></div>
+            </div>
+
+            <!-- VIEW: Groups -->
+            <div id="viewGroups" class="admin-view" style="padding:1.5rem;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="school-section-title mb-0"><i class="bi bi-collection"></i> Groups</div>
+                    <button type="button" class="btn btn-success btn-sm" id="btnCreateGroupSchool"><i class="bi bi-plus-circle"></i> New Group</button>
+                </div>
+                <div id="groupsList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Students -->
+            <div id="viewStudents" class="admin-view" style="padding:1.5rem;">
+                <div class="school-section-title"><i class="bi bi-people"></i> Students</div>
+                <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                    <select id="studentGroupFilter" class="form-select" style="max-width:180px;">
+                        <option value="">All groups</option>
+                    </select>
+                    <input type="text" id="studentSearchInput" class="form-control" style="max-width:220px;" placeholder="Search name or document">
+                    <button type="button" class="btn btn-primary btn-sm" id="btnRefreshStudents"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                    <button type="button" class="btn btn-outline-info btn-sm" id="btnShowBulkImport"><i class="bi bi-file-earmark-spreadsheet"></i> Bulk CSV</button>
+                </div>
+                <div id="bulkImportPanel" class="glass-panel mb-3" style="padding:1rem;display:none;">
+                    <p class="small text-muted mb-2">CSV format: <code>nombre_completo,documento_id,pin,grupo</code> (header required).</p>
+                    <input type="file" id="csvFileInput" class="form-control mb-2" accept=".csv,.txt">
+                    <button type="button" class="btn btn-warning btn-sm" id="btnRunBulkImport"><i class="bi bi-upload"></i> Import</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm ms-2" onclick="document.getElementById('bulkImportPanel').style.display='none'">Cancel</button>
+                    <div id="bulkImportStatus" class="mt-2 small"></div>
+                </div>
+                <div id="contentStudents"><p class="text-muted small">Loading students...</p></div>
+            </div>
+
+            <!-- VIEW: Challenges -->
+            <div id="viewChallenges" class="admin-view" style="padding:1.5rem;">
+                <div class="school-section-title"><i class="bi bi-lightning-charge"></i> Challenges</div>
+                <div class="d-flex gap-2 mb-3 align-items-center flex-wrap">
+                    <select id="challengeGroupFilter" class="form-select" style="max-width:180px;">
+                        <option value="">All groups</option>
+                    </select>
+                    <select id="challengeStatusFilter" class="form-select" style="max-width:140px;">
+                        <option value="">All statuses</option>
+                        <option value="active">Active</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnRefreshChallenges"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                </div>
+                <div id="challengesList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Store -->
+            <div id="viewStore" class="admin-view" style="padding:1.5rem;">
+                <div class="school-section-title"><i class="bi bi-shop"></i> Store / Auctions</div>
+                <div class="d-flex gap-2 mb-3 align-items-center flex-wrap">
+                    <select id="storeGroupFilter" class="form-select" style="max-width:180px;">
+                        <option value="">All groups</option>
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnRefreshStore"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                </div>
+                <div id="storeList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Cobros -->
+            <div id="viewCobros" class="admin-view" style="padding:1.5rem;">
+                <div class="school-section-title"><i class="bi bi-receipt"></i> Cobros (Billing Claims)</div>
+                <div class="d-flex gap-2 mb-3 align-items-center flex-wrap">
+                    <select id="cobrosGroupFilter" class="form-select" style="max-width:180px;">
+                        <option value="">All groups</option>
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnRefreshCobros"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                </div>
+                <div id="cobrosList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Announcements -->
+            <div id="viewAnnouncements" class="admin-view" style="padding:1.5rem;">
+                <div class="school-section-title"><i class="bi bi-megaphone"></i> Announcements</div>
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <input type="hidden" id="announcementEditId">
+                    <div class="row g-2">
+                        <div class="col-md-6"><label class="form-label small">Title</label><input type="text" id="announcementTitle" class="form-control" placeholder="Announcement title"></div>
+                        <div class="col-md-3"><label class="form-label small">Type</label>
+                            <select id="announcementType" class="form-select">
+                                <option value="info">Info</option><option value="success">Success</option>
+                                <option value="warning">Warning</option><option value="danger">Danger</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3"><label class="form-label small">Target Group</label>
+                            <select id="announcementGroup" class="form-select"><option value="">All groups</option></select>
+                        </div>
+                        <div class="col-12"><label class="form-label small">Message</label><textarea id="announcementMessage" class="form-control" rows="2" placeholder="Message"></textarea></div>
+                        <div class="col-md-8"><label class="form-label small">Links (Label|https://url, one per line)</label><textarea id="announcementLinks" class="form-control" rows="2" placeholder="Docs|https://..."></textarea></div>
+                        <div class="col-md-4"><label class="form-label small">Expiry Date</label><input type="date" id="announcementExpiry" class="form-control"></div>
+                        <div class="col-12 d-flex gap-2">
+                            <button type="button" class="btn btn-primary btn-sm" id="btnCreateAnnouncement">Create</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnCancelAnnouncementEdit" style="display:none;">Cancel Edit</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="announcementsList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <!-- VIEW: Feedback -->
+            <div id="viewFeedback" class="admin-view" style="padding:1.5rem;">
+                <div class="school-section-title"><i class="bi bi-chat-dots"></i> Student Feedback</div>
+                <div class="d-flex gap-2 mb-3 align-items-center flex-wrap">
+                    <select id="feedbackGroupFilter" class="form-select" style="max-width:180px;">
+                        <option value="">All groups</option>
+                    </select>
+                    <select id="feedbackStatusFilter" class="form-select" style="max-width:140px;">
+                        <option value="">All statuses</option>
+                        <option value="new">New</option>
+                        <option value="read">Read</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnRefreshFeedback"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                </div>
+                <div id="feedbackList"><p class="text-muted small">Loading...</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index:1080;"></div>
+
+    <!-- Modal: Edit Student -->
+    <div class="modal fade" id="editStudentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Student</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="editStudentId">
+                    <div class="mb-2"><label class="form-label small">Full name</label><input type="text" id="editStudentName" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label small">Document ID</label><input type="text" id="editStudentDoc" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label small">PIN (leave blank to keep)</label><input type="password" id="editStudentPin" class="form-control" placeholder="Leave blank"></div>
+                    <div class="mb-2"><label class="form-label small">Group</label><select id="editStudentGroup" class="form-select"></select></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="btnSaveStudentEdit">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Adjust Coins -->
+    <div class="modal fade" id="adjustCoinsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Adjust Coins</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="adjustCoinsStudentId">
+                    <div class="mb-2"><label class="form-label small">Student</label><input type="text" id="adjustCoinsStudentName" class="form-control" readonly></div>
+                    <div class="mb-2"><label class="form-label small">Current Coins</label><input type="text" id="adjustCoinsCurrentVal" class="form-control" readonly></div>
+                    <div class="mb-2"><label class="form-label small">Delta (positive = add, negative = deduct)</label><input type="number" id="adjustCoinsDelta" class="form-control" placeholder="e.g. 10 or -5"></div>
+                    <div class="mb-2"><label class="form-label small">Reason (required)</label><input type="text" id="adjustCoinsReason" class="form-control" placeholder="e.g. Bonus for participation"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-warning" id="btnSaveAdjustCoins">Apply</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Group -->
+    <div class="modal fade" id="groupEditModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Group</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="editGroupOldCode">
+                    <div class="mb-2"><label class="form-label small">Group code</label><input type="text" id="editGroupCode" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label small">Student limit</label><input type="number" id="editGroupCapacity" class="form-control" min="1"></div>
+                    <div class="mb-2"><label class="form-label small">Latitude (optional)</label><input type="number" id="editGroupLat" class="form-control" step="any"></div>
+                    <div class="mb-2"><label class="form-label small">Longitude (optional)</label><input type="number" id="editGroupLng" class="form-control" step="any"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="btnSaveGroupEdit">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Create Teacher -->
+    <div class="modal fade" id="createTeacherModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">New Teacher</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-2"><label class="form-label small">Full name</label><input type="text" id="newTeacherName" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label small">Document ID</label><input type="text" id="newTeacherDoc" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label small">PIN (4-12 digits)</label><input type="password" id="newTeacherPin" class="form-control"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-success" id="btnSaveCreateTeacher">Create</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Assign Teacher to Group -->
+    <div class="modal fade" id="assignTeacherModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Assign Teacher to Group</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="assignTeacherId">
+                    <div class="mb-2"><label class="form-label small">Teacher</label><input type="text" id="assignTeacherNameDisplay" class="form-control" readonly></div>
+                    <div class="mb-2"><label class="form-label small">Groups</label>
+                        <select id="assignTeacherGroupSelect" class="form-select" multiple size="6"><option value="">Unassigned</option></select>
+                        <div class="form-text">Ctrl/Cmd + click to select multiple groups.</div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="btnSaveAssignTeacher">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Create Group -->
+    <div class="modal fade" id="createGroupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">New Group</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-2"><label class="form-label small">Group code</label><input type="text" id="newGroupCode" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label small">Student limit</label><input type="number" id="newGroupCapacity" class="form-control" min="1" value="30"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-success" id="btnSaveCreateGroup">Create</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+    <script src="./modules/auth.js"></script>
+    <script src="./modules/ui.js"></script>
+    <script src="./modules/store.js"></script>
+    <script src="./modules/announcements.js"></script>
+    <script src="./modules/feedback.js"></script>
+    <script>
+// ========== SCHOOL ADMIN — institution-scoped dashboard ==========
+var user = null;
+try {
+    user = JSON.parse(localStorage.getItem('lingoCoins_user') || 'null');
+} catch(e) { user = null; }
+if (!user || !user.id || user.rol !== 'admin') {
+    window.location.href = 'index.html';
+}
+var INST_ID = user ? (user.institution_id || '') : '';
+
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('adminName').textContent = user.nombre_completo || 'Admin';
+    document.getElementById('btnLogout').addEventListener('click', function() {
+        localStorage.removeItem('lingoCoins_user');
+        window.location.href = 'index.html';
+    });
+
+    function esc(v) { var d=document.createElement('div'); d.textContent=String(v==null?'':v); return d.innerHTML; }
+    function escAttr(v) { return esc(v).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function showToast(msg, type) {
+        var c=document.getElementById('toastContainer');
+        if(!c){alert(msg);return;}
+        var klass=type==='danger'?'text-bg-danger':type==='success'?'text-bg-success':'text-bg-primary';
+        var el=document.createElement('div');
+        el.className='toast align-items-center '+klass+' border-0';
+        el.setAttribute('role','alert');el.setAttribute('aria-live','assertive');el.setAttribute('aria-atomic','true');
+        el.innerHTML='<div class="d-flex"><div class="toast-body">'+esc(msg)+'</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>';
+        c.appendChild(el);
+        new bootstrap.Toast(el,{delay:type==='danger'?4500:2800}).show();
+        el.addEventListener('hidden.bs.toast',function(){el.remove();});
+    }
+    function parseLinks(raw) {
+        return String(raw||'').split(/\r?\n/).map(function(l){var p=l.split('|');return p.length>=2&&/^https?:\/\//i.test((p[1]||'').trim())?{label:p[0].trim(),url:p[1].trim(),type:'resource'}:null;}).filter(Boolean);
+    }
+
+    var VIEWS=['overview','teachers','groups','students','challenges','store','cobros','announcements','feedback'];
+    window.showSchoolView = function(viewId) {
+        if(VIEWS.indexOf(viewId)===-1) return false;
+        document.querySelectorAll('.admin-view').forEach(function(el){el.classList.remove('active');});
+        document.querySelectorAll('.admin-nav a').forEach(function(el){el.classList.remove('active');});
+        var view=document.getElementById('view'+viewId.charAt(0).toUpperCase()+viewId.slice(1));
+        var nav=document.getElementById('nav'+viewId.charAt(0).toUpperCase()+viewId.slice(1));
+        if(view) view.classList.add('active');
+        if(nav) nav.classList.add('active');
+        document.body.className='bg-dashboard';
+        if(viewId==='challenges') document.body.className='bg-challenges';
+        else if(viewId==='store') document.body.className='bg-auctions';
+        if(viewId==='overview') loadOverview();
+        if(viewId==='teachers') loadTeachers();
+        if(viewId==='groups') loadGroups();
+        if(viewId==='students') loadStudents();
+        if(viewId==='challenges') loadChallenges();
+        if(viewId==='store') loadStore();
+        if(viewId==='cobros') loadCobros();
+        if(viewId==='announcements') loadAnnouncements();
+        if(viewId==='feedback') loadFeedback();
+        return false;
+    };
+
+    var _schoolGroups=[];
+    async function fetchSchoolGroups() {
+        if(!INST_ID) return [];
+        var res=await supabaseClient.from(CONFIG.tables.groups).select('group_code,max_capacity,last_admin_lat,last_admin_lng').eq('institution_id',INST_ID).order('group_code');
+        _schoolGroups=res.error?[]:(res.data||[]);
+        return _schoolGroups;
+    }
+    function populateGroupSelects(groups) {
+        var ids=['studentGroupFilter','challengeGroupFilter','storeGroupFilter','cobrosGroupFilter','feedbackGroupFilter','announcementGroup','editStudentGroup','assignTeacherGroupSelect'];
+        ids.forEach(function(id){
+            var sel=document.getElementById(id); if(!sel) return;
+            var cur=sel.value;
+            var hasAll=(id!=='editStudentGroup'&&id!=='assignTeacherGroupSelect');
+            sel.innerHTML=hasAll?'<option value="">All groups</option>':'<option value="">Unassigned</option>';
+            groups.forEach(function(g){var opt=document.createElement('option');opt.value=g.group_code;opt.textContent=g.group_code;if(g.group_code===cur)opt.selected=true;sel.appendChild(opt);});
+        });
+    }
+
+    async function loadOverview() {
+        if(!INST_ID){document.getElementById('overviewAlerts').innerHTML='<div class="alert alert-warning">No institution linked to your account.</div>';return;}
+        try {
+            var stuRes=await supabaseClient.from(CONFIG.tables.profiles).select('monedas').eq('institution_id',INST_ID).eq('rol','student');
+            var tchRes=await supabaseClient.from(CONFIG.tables.profiles).select('id',{count:'exact',head:true}).eq('institution_id',INST_ID).eq('rol','teacher');
+            var grpRes=await supabaseClient.from(CONFIG.tables.groups).select('group_code',{count:'exact',head:true}).eq('institution_id',INST_ID);
+            var chalRes=await supabaseClient.from(CONFIG.tables.challenges).select('id',{count:'exact',head:true}).eq('institution_id',INST_ID).eq('status','active');
+            var cobRes=await supabaseClient.from('billing_claims').select('id',{count:'exact',head:true}).eq('institution_id',INST_ID).eq('status','pending');
+            var totalCoins=(stuRes.data||[]).reduce(function(s,r){return s+(r.monedas||0);},0);
+            document.getElementById('ovStatStudents').textContent=(stuRes.data||[]).length;
+            document.getElementById('ovStatTeachers').textContent=tchRes.count||0;
+            document.getElementById('ovStatGroups').textContent=grpRes.count||0;
+            document.getElementById('ovStatChallenges').textContent=chalRes.count||0;
+            document.getElementById('ovStatCoins').textContent=totalCoins;
+            document.getElementById('ovStatCobros').textContent=cobRes.count||0;
+            var alerts=[];
+            if((cobRes.count||0)>0) alerts.push('<div class="alert alert-warning alert-card"><i class="bi bi-exclamation-triangle me-2"></i><strong>'+(cobRes.count||0)+' pending cobros</strong> waiting for delivery confirmation.</div>');
+            if((chalRes.count||0)===0) alerts.push('<div class="alert alert-info alert-card"><i class="bi bi-info-circle me-2"></i>No active challenges. Go to Challenges to create one.</div>');
+            document.getElementById('overviewAlerts').innerHTML=alerts.length?alerts.join(''):'<div class="alert alert-success alert-card"><i class="bi bi-check-circle me-2"></i>All good! No pending alerts.</div>';
+        } catch(e) {
+            document.getElementById('overviewAlerts').innerHTML='<div class="alert alert-danger">Error loading overview: '+esc(e.message||'')+'</div>';
+        }
+    }
+
+    async function loadTeachers() {
+        var el=document.getElementById('teachersList');
+        el.innerHTML='<p class="text-muted small">Loading...</p>';
+        if(!INST_ID){el.innerHTML='<div class="alert alert-warning">No institution linked.</div>';return;}
+        try {
+            var res=await supabaseClient.from(CONFIG.tables.profiles).select('id,nombre_completo,documento_id,is_active,account_locked,coin_pocket').eq('institution_id',INST_ID).eq('rol','teacher').order('nombre_completo');
+            var teachers=res.data||[];
+            var tids=teachers.map(function(t){return t.id;});
+            var tgMap={};
+            if(tids.length){
+                var tgRes=await supabaseClient.from(CONFIG.tables.teacher_groups).select('teacher_id,group_code').in('teacher_id',tids);
+                (tgRes.data||[]).forEach(function(r){
+                    if(!tgMap[r.teacher_id]) tgMap[r.teacher_id]=[];
+                    tgMap[r.teacher_id].push(r.group_code);
+                });
+            }
+            if(!teachers.length){el.innerHTML='<p class="text-muted small">No teachers yet.</p>';return;}
+            el.innerHTML=teachers.map(function(t){
+                var locked=t.account_locked?'<span class="badge bg-danger ms-1">Locked</span>':'';
+                var groups=tgMap[t.id]||[];
+                var grp=groups.length?groups.map(function(g){return '<span class="badge bg-info ms-1">'+esc(g)+'</span>';}).join(' '):'<span class="text-muted small">No group</span>';
+                var pocket=Math.max(0, Number(t.coin_pocket)||0);
+                return '<div class="teacher-card d-flex justify-content-between align-items-center flex-wrap gap-2">'+
+                    '<div><strong>'+esc(t.nombre_completo||'')+'</strong>'+locked+'<br><small class="text-muted">'+esc(t.documento_id||'')+'</small><br>'+grp+'<br><small>🪙 Pocket: <strong id="teacher-pocket-'+escAttr(t.id)+'">'+pocket+'</strong> coins</small></div>'+
+                    '<div class="d-flex gap-1 flex-wrap">'+
+                    '<button class="btn btn-sm btn-outline-info" onclick="openAssignTeacher(\''+escAttr(t.id)+'\',\''+escAttr(t.nombre_completo||'')+'\')">Assign Group</button>'+
+                    '<input type="number" min="1" step="1" id="teacherPocketDelta-'+escAttr(t.id)+'" class="form-control form-control-sm" style="width:100px;" placeholder="Amount">'+
+                    '<button class="btn btn-sm btn-outline-success" onclick="adjustTeacherPocket(\''+escAttr(t.id)+'\', 1)">Add</button>'+
+                    '<button class="btn btn-sm btn-outline-warning" onclick="adjustTeacherPocket(\''+escAttr(t.id)+'\', -1)">Remove</button>'+
+                    '<button class="btn btn-sm btn-outline-'+(t.account_locked?'success':'warning')+'" onclick="toggleTeacherLock(\''+escAttr(t.id)+'\','+!!t.account_locked+')">'+(t.account_locked?'Unlock':'Lock')+'</button>'+
+                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteTeacher(\''+escAttr(t.id)+'\',\''+escAttr(t.nombre_completo||'')+'\')">Delete</button>'+
+                    '</div></div>';
+            }).join('');
+        } catch(e){el.innerHTML='<div class="alert alert-danger">Error: '+esc(e.message||'')+'</div>';}
+    }
+
+    window.adjustTeacherPocket=async function(teacherId, direction){
+        var input=document.getElementById('teacherPocketDelta-'+teacherId);
+        var amount=Math.floor(Number(input&&input.value)||0);
+        if(amount<=0){showToast('Enter a valid amount','danger');return;}
+        var delta=(direction<0?-1:1)*amount;
+        var row=await supabaseClient.from(CONFIG.tables.profiles).select('coin_pocket').eq('id',teacherId).maybeSingle();
+        if(row.error||!row.data){showToast('Teacher not found','danger');return;}
+        var current=Math.max(0, Number(row.data.coin_pocket)||0);
+        var next=Math.max(0,current+delta);
+        var upd=await supabaseClient.from(CONFIG.tables.profiles).update({coin_pocket:next}).eq('id',teacherId);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        if(input) input.value='';
+        showToast('Teacher pocket updated','success');
+        loadTeachers();
+    };
+
+    window.openAssignTeacher=async function(teacherId,teacherName){
+        document.getElementById('assignTeacherId').value=teacherId;
+        document.getElementById('assignTeacherNameDisplay').value=teacherName;
+        var groups=_schoolGroups.length?_schoolGroups:await fetchSchoolGroups();
+        populateGroupSelects(groups);
+        var cur=await supabaseClient.from(CONFIG.tables.teacher_groups).select('group_code').eq('teacher_id',teacherId);
+        var sel=document.getElementById('assignTeacherGroupSelect');
+        if(sel){
+            var set={};
+            (cur.data||[]).forEach(function(r){set[String(r.group_code||'')]=true;});
+            Array.from(sel.options).forEach(function(opt){opt.selected=!!set[String(opt.value||'')];});
+        }
+        new bootstrap.Modal(document.getElementById('assignTeacherModal')).show();
+    };
+    document.getElementById('btnSaveAssignTeacher').addEventListener('click',async function(){
+        var tid=document.getElementById('assignTeacherId').value;
+        var grpSel=document.getElementById('assignTeacherGroupSelect');
+        var groups=Array.from(grpSel&&grpSel.selectedOptions?grpSel.selectedOptions:[]).map(function(o){return String(o.value||'').trim();}).filter(Boolean);
+        await supabaseClient.from(CONFIG.tables.teacher_groups).delete().eq('teacher_id',tid);
+        if(groups.length) await supabaseClient.from(CONFIG.tables.teacher_groups).insert(groups.map(function(g){return {teacher_id:tid,group_code:g};}));
+        bootstrap.Modal.getInstance(document.getElementById('assignTeacherModal')).hide();
+        showToast('Teacher group updated','success'); loadTeachers();
+    });
+    window.toggleTeacherLock=async function(teacherId,currentlyLocked){
+        var upd=await supabaseClient.from(CONFIG.tables.profiles).update({account_locked:!currentlyLocked}).eq('id',teacherId);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        showToast(currentlyLocked?'Teacher unlocked':'Teacher locked','success'); loadTeachers();
+    };
+    window.deleteTeacher=async function(teacherId,name){
+        if(!confirm('Delete teacher "'+name+'"?')) return;
+        await supabaseClient.from(CONFIG.tables.teacher_groups).delete().eq('teacher_id',teacherId);
+        var del=await supabaseClient.from(CONFIG.tables.profiles).delete().eq('id',teacherId);
+        if(del.error){showToast('Error: '+del.error.message,'danger');return;}
+        showToast('Teacher deleted','success'); loadTeachers();
+    };
+    document.getElementById('btnCreateTeacher').addEventListener('click',function(){
+        ['newTeacherName','newTeacherDoc','newTeacherPin'].forEach(function(id){document.getElementById(id).value='';});
+        new bootstrap.Modal(document.getElementById('createTeacherModal')).show();
+    });
+    document.getElementById('btnSaveCreateTeacher').addEventListener('click',async function(){
+        var name=document.getElementById('newTeacherName').value.trim();
+        var doc=document.getElementById('newTeacherDoc').value.trim();
+        var pin=document.getElementById('newTeacherPin').value.trim();
+        if(!name||!doc||!pin){showToast('All fields required','danger');return;}
+        if(!/^\d{4,12}$/.test(pin)){showToast('PIN must be 4-12 digits','danger');return;}
+        var ins=await supabaseClient.from(CONFIG.tables.profiles).insert([{nombre_completo:name,documento_id:doc,pin:pin,rol:'teacher',institution_id:INST_ID,monedas:0,current_streak:0}]);
+        if(ins.error){showToast('Error: '+ins.error.message,'danger');return;}
+        bootstrap.Modal.getInstance(document.getElementById('createTeacherModal')).hide();
+        showToast('Teacher created','success'); loadTeachers();
+    });
+
+    // ===== GROUPS =====
+    async function loadGroups() {
+        var el=document.getElementById('groupsList');
+        el.innerHTML='<p class="text-muted small">Loading...</p>';
+        if(!INST_ID){el.innerHTML='<div class="alert alert-warning">No institution linked.</div>';return;}
+        try {
+            var groups=await fetchSchoolGroups();
+            populateGroupSelects(groups);
+            if(!groups.length){el.innerHTML='<p class="text-muted small">No groups yet.</p>';return;}
+            var codes=groups.map(function(g){return g.group_code;});
+            var stuRes=await supabaseClient.from(CONFIG.tables.profiles).select('grupo').eq('rol','student').eq('institution_id',INST_ID).in('grupo',codes);
+            var sCount={};
+            (stuRes.data||[]).forEach(function(r){sCount[r.grupo]=(sCount[r.grupo]||0)+1;});
+            var tgRes=await supabaseClient.from(CONFIG.tables.teacher_groups).select('teacher_id,group_code').in('group_code',codes);
+            var tids=(tgRes.data||[]).map(function(r){return r.teacher_id;});
+            var tNames={};
+            if(tids.length){var tpRes=await supabaseClient.from(CONFIG.tables.profiles).select('id,nombre_completo').in('id',tids);(tpRes.data||[]).forEach(function(t){tNames[t.id]=t.nombre_completo;});}
+            var tMap={};
+            (tgRes.data||[]).forEach(function(r){tMap[r.group_code]=tNames[r.teacher_id]||'—';});
+            el.innerHTML='<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Group</th><th>Teacher</th><th>Students</th><th>Capacity</th><th>Actions</th></tr></thead><tbody>'+
+                groups.map(function(g){
+                    var gc=g.group_code; var canDel=!(sCount[gc]||0);
+                    return '<tr><td><strong>'+esc(gc)+'</strong></td><td>'+esc(tMap[gc]||'—')+'</td><td>'+(sCount[gc]||0)+'</td><td>'+esc(g.max_capacity||'—')+'</td><td class="d-flex gap-1">'+
+                        '<button class="btn btn-sm btn-outline-primary" onclick="openEditGroup(\''+escAttr(gc)+'\')">Edit</button>'+
+                        (canDel?'<button class="btn btn-sm btn-outline-danger" onclick="deleteGroup(\''+escAttr(gc)+'\')">Delete</button>':'<span class="small text-muted">Not empty</span>')+
+                        '</td></tr>';
+                }).join('')+'</tbody></table></div>';
+        } catch(e){el.innerHTML='<div class="alert alert-danger">Error: '+esc(e.message||'')+'</div>';}
+    }
+    window.openEditGroup=async function(groupCode){
+        var res=await supabaseClient.from(CONFIG.tables.groups).select('group_code,max_capacity,last_admin_lat,last_admin_lng').eq('institution_id',INST_ID).eq('group_code',groupCode).maybeSingle();
+        var g=res.data||{};
+        document.getElementById('editGroupOldCode').value=g.group_code||groupCode;
+        document.getElementById('editGroupCode').value=g.group_code||groupCode;
+        document.getElementById('editGroupCapacity').value=g.max_capacity||'';
+        document.getElementById('editGroupLat').value=g.last_admin_lat||'';
+        document.getElementById('editGroupLng').value=g.last_admin_lng||'';
+        new bootstrap.Modal(document.getElementById('groupEditModal')).show();
+    };
+    document.getElementById('btnSaveGroupEdit').addEventListener('click',async function(){
+        var oldCode=document.getElementById('editGroupOldCode').value;
+        var newCode=document.getElementById('editGroupCode').value.trim();
+        var cap=document.getElementById('editGroupCapacity').value;
+        var lat=document.getElementById('editGroupLat').value;
+        var lng=document.getElementById('editGroupLng').value;
+        if(!newCode){showToast('Group code required','danger');return;}
+        var payload={group_code:newCode,max_capacity:cap?Number(cap):null,last_admin_lat:lat?Number(lat):null,last_admin_lng:lng?Number(lng):null};
+        var upd=await supabaseClient.from(CONFIG.tables.groups).update(payload).eq('institution_id',INST_ID).eq('group_code',oldCode);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        if(newCode!==oldCode){
+            await supabaseClient.from(CONFIG.tables.profiles).update({grupo:newCode}).eq('institution_id',INST_ID).eq('grupo',oldCode);
+            await supabaseClient.from(CONFIG.tables.teacher_groups).update({group_code:newCode}).eq('group_code',oldCode);
+        }
+        bootstrap.Modal.getInstance(document.getElementById('groupEditModal')).hide();
+        showToast('Group updated','success'); loadGroups();
+    });
+    window.deleteGroup=async function(groupCode){
+        if(!confirm('Delete group "'+groupCode+'"?')) return;
+        var del=await supabaseClient.from(CONFIG.tables.groups).delete().eq('institution_id',INST_ID).eq('group_code',groupCode);
+        if(del.error){showToast('Error: '+del.error.message,'danger');return;}
+        await supabaseClient.from(CONFIG.tables.teacher_groups).delete().eq('group_code',groupCode);
+        showToast('Group deleted','success'); loadGroups();
+    };
+    document.getElementById('btnCreateGroupSchool').addEventListener('click',function(){
+        document.getElementById('newGroupCode').value='';
+        document.getElementById('newGroupCapacity').value='30';
+        new bootstrap.Modal(document.getElementById('createGroupModal')).show();
+    });
+    document.getElementById('btnSaveCreateGroup').addEventListener('click',async function(){
+        var code=document.getElementById('newGroupCode').value.trim();
+        var cap=document.getElementById('newGroupCapacity').value;
+        if(!code){showToast('Group code required','danger');return;}
+        var ins=await supabaseClient.from(CONFIG.tables.groups).insert([{group_code:code,institution_id:INST_ID,max_capacity:cap?Number(cap):30}]);
+        if(ins.error){showToast('Error: '+ins.error.message,'danger');return;}
+        bootstrap.Modal.getInstance(document.getElementById('createGroupModal')).hide();
+        showToast('Group created','success'); loadGroups();
+    });
+
+    // ===== STUDENTS =====
+    async function loadStudents() {
+        var el=document.getElementById('contentStudents');
+        el.innerHTML='<p class="text-muted small">Loading...</p>';
+        if(!INST_ID){el.innerHTML='<div class="alert alert-warning">No institution linked.</div>';return;}
+        try {
+            var grpFilter=document.getElementById('studentGroupFilter').value;
+            var q=(document.getElementById('studentSearchInput').value||'').trim().toLowerCase();
+            var query=supabaseClient.from(CONFIG.tables.profiles).select('id,nombre_completo,documento_id,grupo,monedas,is_active,account_locked').eq('institution_id',INST_ID).eq('rol','student').order('nombre_completo');
+            if(grpFilter) query=query.eq('grupo',grpFilter);
+            var res=await query;
+            var list=(res.data||[]).filter(function(s){return !q||(s.nombre_completo||'').toLowerCase().includes(q)||(s.documento_id||'').toLowerCase().includes(q);});
+            if(!list.length){el.innerHTML='<p class="text-muted small">No students found.</p>';return;}
+            el.innerHTML='<div class="admin-table-wrap"><table class="student-table"><thead><tr><th>Name</th><th>Document</th><th>Group</th><th>Coins</th><th>Actions</th></tr></thead><tbody>'+
+                list.map(function(s){
+                    var locked=s.account_locked?' <span class="badge bg-danger">Locked</span>':'';
+                    return '<tr>'+
+                        '<td><strong>'+esc(s.nombre_completo||'')+'</strong>'+locked+'</td>'+
+                        '<td>'+esc(s.documento_id||'')+'</td>'+
+                        '<td><span class="badge-group">'+esc(s.grupo||'—')+'</span></td>'+
+                        '<td><span id="sc-'+s.id+'">'+(s.monedas||0)+'</span></td>'+
+                        '<td class="d-flex gap-1 flex-wrap">'+
+                        '<button class="btn btn-sm btn-outline-primary" onclick="openEditStudent(\''+escAttr(s.id)+'\',\''+escAttr(s.nombre_completo||'')+'\',\''+escAttr(s.documento_id||'')+'\',\''+escAttr(s.grupo||'')+'\')">Edit</button>'+
+                        '<button class="btn btn-sm btn-outline-warning" onclick="openAdjustCoins(\''+escAttr(s.id)+'\',\''+escAttr(s.nombre_completo||'\'')+'\','+(s.monedas||0)+')">Coins</button>'+
+                        '<button class="btn btn-sm btn-outline-'+(s.account_locked?'success':'secondary')+'" onclick="toggleStudentLock(\''+escAttr(s.id)+'\','+!!s.account_locked+')">'+(s.account_locked?'Unlock':'Lock')+'</button>'+
+                        '<button class="btn btn-sm btn-outline-danger" onclick="softDeleteStudent(\''+escAttr(s.id)+'\',\''+escAttr(s.nombre_completo||'')+'\')">Delete</button>'+
+                        '</td></tr>';
+                }).join('')+'</tbody></table></div>';
+        } catch(e){el.innerHTML='<div class="alert alert-danger">Error: '+esc(e.message||'')+'</div>';}
+    }
+    document.getElementById('btnRefreshStudents').addEventListener('click',loadStudents);
+    document.getElementById('studentGroupFilter').addEventListener('change',loadStudents);
+    document.getElementById('studentSearchInput').addEventListener('input',loadStudents);
+
+    window.openEditStudent=async function(id,name,doc,grp){
+        document.getElementById('editStudentId').value=id;
+        document.getElementById('editStudentName').value=name;
+        document.getElementById('editStudentDoc').value=doc;
+        document.getElementById('editStudentPin').value='';
+        var groups=_schoolGroups.length?_schoolGroups:await fetchSchoolGroups();
+        populateGroupSelects(groups);
+        var sel=document.getElementById('editStudentGroup');
+        if(sel) sel.value=grp||'';
+        new bootstrap.Modal(document.getElementById('editStudentModal')).show();
+    };
+    document.getElementById('btnSaveStudentEdit').addEventListener('click',async function(){
+        var id=document.getElementById('editStudentId').value;
+        var name=document.getElementById('editStudentName').value.trim();
+        var doc=document.getElementById('editStudentDoc').value.trim();
+        var pin=document.getElementById('editStudentPin').value;
+        var grp=document.getElementById('editStudentGroup').value;
+        if(!name||!doc){showToast('Name and document required','danger');return;}
+        var payload={nombre_completo:name,documento_id:doc,grupo:grp||null};
+        if(pin) payload.pin=pin;
+        var upd=await supabaseClient.from(CONFIG.tables.profiles).update(payload).eq('id',id);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        bootstrap.Modal.getInstance(document.getElementById('editStudentModal')).hide();
+        showToast('Student updated','success'); loadStudents();
+    });
+    window.openAdjustCoins=function(id,name,currentCoins){
+        document.getElementById('adjustCoinsStudentId').value=id;
+        document.getElementById('adjustCoinsStudentName').value=name;
+        document.getElementById('adjustCoinsCurrentVal').value=currentCoins;
+        document.getElementById('adjustCoinsDelta').value='';
+        document.getElementById('adjustCoinsReason').value='';
+        new bootstrap.Modal(document.getElementById('adjustCoinsModal')).show();
+    };
+    document.getElementById('btnSaveAdjustCoins').addEventListener('click',async function(){
+        var id=document.getElementById('adjustCoinsStudentId').value;
+        var delta=parseInt(document.getElementById('adjustCoinsDelta').value);
+        var reason=document.getElementById('adjustCoinsReason').value.trim();
+        var cur=parseInt(document.getElementById('adjustCoinsCurrentVal').value)||0;
+        if(isNaN(delta)||delta===0){showToast('Enter a non-zero delta','danger');return;}
+        if(!reason){showToast('Reason is required','danger');return;}
+        var newVal=Math.max(0,cur+delta);
+        var upd=await supabaseClient.from(CONFIG.tables.profiles).update({monedas:newVal}).eq('id',id);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        try { await supabaseClient.from('audit_logs').insert([{user_id:user.id,user_name:user.nombre_completo,action:'ADJUST_COINS',target_id:id,details:'delta='+delta+' reason='+reason,institution_id:INST_ID}]); } catch(_){}
+        var span=document.getElementById('sc-'+id); if(span) span.textContent=newVal;
+        bootstrap.Modal.getInstance(document.getElementById('adjustCoinsModal')).hide();
+        showToast('Coins adjusted: '+newVal,'success');
+    });
+    window.toggleStudentLock=async function(id,locked){
+        var upd=await supabaseClient.from(CONFIG.tables.profiles).update({account_locked:!locked}).eq('id',id);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        showToast(locked?'Student unlocked':'Student locked','success'); loadStudents();
+    };
+    window.softDeleteStudent=async function(id,name){
+        if(!confirm('Delete student "'+name+'"? This cannot be undone.')) return;
+        var del=await supabaseClient.from(CONFIG.tables.profiles).delete().eq('id',id);
+        if(del.error){showToast('Error: '+del.error.message,'danger');return;}
+        showToast('Student deleted','success'); loadStudents();
+    };
+
+    // Bulk CSV Import
+    document.getElementById('btnShowBulkImport').addEventListener('click',function(){
+        var p=document.getElementById('bulkImportPanel');
+        if(p) p.style.display=p.style.display==='none'?'':'none';
+    });
+    var _bulkBusy=false;
+    document.getElementById('btnRunBulkImport').addEventListener('click',async function(){
+        if(_bulkBusy) return;
+        var fi=document.getElementById('csvFileInput');
+        var st=document.getElementById('bulkImportStatus');
+        if(!fi||!fi.files||!fi.files.length){showToast('Select a CSV file first','danger');return;}
+        _bulkBusy=true; var btn=this; btn.disabled=true; btn.textContent='Importing...';
+        if(st) st.innerHTML='<div class="spinner-border spinner-border-sm text-warning"></div> Processing...';
+        try {
+            var csvText=await fi.files[0].text();
+            var result=await processFlatFile(csvText,INST_ID);
+            var msg='Created: '+result.created+' | Skipped: '+result.skipped;
+            if(result.errors&&result.errors.length) msg+='<br><span class="text-danger">'+result.errors.slice(0,5).map(function(e){return esc(e);}).join('<br>')+'</span>';
+            if(st) st.innerHTML='<span class="text-success">'+msg+'</span>';
+            showToast('Import: '+result.created+' created, '+result.skipped+' skipped',result.created>0?'success':'warning');
+            loadStudents();
+        } catch(e){
+            if(st) st.innerHTML='<span class="text-danger">Error: '+esc(e.message||'')+'</span>';
+            showToast('Import failed','danger');
+        } finally { _bulkBusy=false; btn.disabled=false; btn.innerHTML='<i class="bi bi-upload"></i> Import'; }
+    });
+
+    // ===== CHALLENGES =====
+    async function loadChallenges() {
+        var el=document.getElementById('challengesList');
+        el.innerHTML='<p class="text-muted small">Loading...</p>';
+        if(!INST_ID){el.innerHTML='<div class="alert alert-warning">No institution linked.</div>';return;}
+        try {
+            var grpFilter=document.getElementById('challengeGroupFilter').value;
+            var statusFilter=document.getElementById('challengeStatusFilter').value;
+            var query=supabaseClient.from(CONFIG.tables.challenges).select('id,title,description,status,is_active,target_group,group_code,created_at').eq('institution_id',INST_ID).order('created_at',{ascending:false});
+            if(grpFilter) query=query.or('target_group.eq.'+grpFilter+',group_code.eq.'+grpFilter);
+            if(statusFilter==='active') query=query.eq('status','active');
+            else if(statusFilter==='closed') query=query.eq('status','closed');
+            var res=await query;
+            var list=res.data||[];
+            if(!list.length){el.innerHTML='<p class="text-muted small">No challenges found.</p>';return;}
+            el.innerHTML='<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Title</th><th>Group</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>'+
+                list.map(function(c){
+                    var isActive=(c.status==='active')||(c.is_active===true&&c.status!=='closed');
+                    var statusBadge=isActive?'<span class="badge bg-success">Active</span>':'<span class="badge bg-secondary">Closed</span>';
+                    var toggleLabel=isActive?'Close':'Reopen';
+                    var toggleClass=isActive?'btn-outline-warning':'btn-outline-success';
+                    var grpDisplay=c.target_group||c.group_code||'All';
+                    return '<tr>'+
+                        '<td><strong>'+esc(c.title||'')+'</strong><br><small class="text-muted">'+esc((c.description||'').substring(0,60))+'</small></td>'+
+                        '<td>'+esc(grpDisplay)+'</td>'+
+                        '<td>'+statusBadge+'</td>'+
+                        '<td><small>'+esc((c.created_at||'').substring(0,10))+'</small></td>'+
+                        '<td class="d-flex gap-1">'+
+                        '<button class="btn btn-sm '+toggleClass+'" onclick="toggleChallengeStatus(\''+escAttr(c.id)+'\',' +isActive+')">'+toggleLabel+'</button>'+
+                        '<button class="btn btn-sm btn-outline-danger" onclick="deleteChallenge(\''+escAttr(c.id)+'\',\''+escAttr(c.title||'')+'\')">Delete</button>'+
+                        '</td></tr>';
+                }).join('')+'</tbody></table></div>';
+        } catch(e){el.innerHTML='<div class="alert alert-danger">Error: '+esc(e.message||'')+'</div>';}
+    }
+    document.getElementById('btnRefreshChallenges').addEventListener('click',loadChallenges);
+    document.getElementById('challengeGroupFilter').addEventListener('change',loadChallenges);
+    document.getElementById('challengeStatusFilter').addEventListener('change',loadChallenges);
+    window.toggleChallengeStatus=async function(id,isCurrentlyActive){
+        var newStatus=isCurrentlyActive?'closed':'active';
+        var newIsActive=!isCurrentlyActive;
+        var upd=await supabaseClient.from(CONFIG.tables.challenges).update({status:newStatus,is_active:newIsActive}).eq('id',id);
+        if(upd.error){
+            var upd2=await supabaseClient.from(CONFIG.tables.challenges).update({status:newStatus}).eq('id',id);
+            if(upd2.error){showToast('Error: '+upd2.error.message,'danger');return;}
+        }
+        showToast('Challenge '+(newIsActive?'reopened':'closed'),'success'); loadChallenges();
+    };
+    window.deleteChallenge=async function(id,title){
+        if(!confirm('Delete challenge "'+title+'"?')) return;
+        var del=await supabaseClient.from(CONFIG.tables.challenges).delete().eq('id',id);
+        if(del.error){showToast('Error: '+del.error.message,'danger');return;}
+        showToast('Challenge deleted','success'); loadChallenges();
+    };
+
+    // ===== STORE =====
+    async function loadStore() {
+        var el=document.getElementById('storeList');
+        el.innerHTML='<p class="text-muted small">Loading...</p>';
+        if(!INST_ID){el.innerHTML='<div class="alert alert-warning">No institution linked.</div>';return;}
+        try {
+            var grpFilter=document.getElementById('storeGroupFilter').value;
+            var groups=_schoolGroups.length?_schoolGroups:await fetchSchoolGroups();
+            var codes=groups.map(function(g){return g.group_code;});
+            var query=supabaseClient.from(CONFIG.tables.auctions).select('id,item_name,item_type,base_price,current_bid,status,group_code,created_at,description').eq('institution_id',INST_ID).order('created_at',{ascending:false});
+            if(grpFilter) query=query.eq('group_code',grpFilter);
+            else if(codes.length) query=query.or('group_code.is.null,group_code.in.('+codes.map(function(c){return '"'+c+'"';}).join(',')+')');
+            var res=await query;
+            var list=res.data||[];
+            if(!list.length){el.innerHTML='<p class="text-muted small">No store items found.</p>';return;}
+            el.innerHTML='<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Item</th><th>Type</th><th>Price/Bid</th><th>Group</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+                list.map(function(a){
+                    var statusBadge=a.status==='active'?'<span class="badge bg-success">Active</span>':'<span class="badge bg-secondary">'+esc(a.status||'')+'</span>';
+                    return '<tr>'+
+                        '<td><strong>'+esc(a.item_name||'')+'</strong><br><small class="text-muted">'+esc((a.description||'').substring(0,40))+'</small></td>'+
+                        '<td>'+esc(a.item_type||'auction')+'</td>'+
+                        '<td>'+(a.item_type==='shop'?esc(a.base_price||0):esc(a.current_bid||a.base_price||0))+'</td>'+
+                        '<td>'+esc(a.target_group||'All')+'</td>'+
+                        '<td>'+statusBadge+'</td>'+
+                        '<td class="d-flex gap-1">'+
+                        (a.status==='active'?'<button class="btn btn-sm btn-outline-warning" onclick="closeStoreItem(\''+escAttr(a.id)+'\')">Close</button>':'')+
+                        '<button class="btn btn-sm btn-outline-danger" onclick="deleteStoreItem(\''+escAttr(a.id)+'\',\''+escAttr(a.item_name||'')+'\')">Delete</button>'+
+                        '</td></tr>';
+                }).join('')+'</tbody></table></div>';
+        } catch(e){el.innerHTML='<div class="alert alert-danger">Error: '+esc(e.message||'')+'</div>';}
+    }
+    document.getElementById('btnRefreshStore').addEventListener('click',loadStore);
+    document.getElementById('storeGroupFilter').addEventListener('change',loadStore);
+    window.closeStoreItem=async function(id){
+        var upd=await supabaseClient.from(CONFIG.tables.auctions).update({status:'closed'}).eq('id',id);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        showToast('Item closed','success'); loadStore();
+    };
+    window.deleteStoreItem=async function(id,name){
+        if(!confirm('Delete item "'+name+'"?')) return;
+        var del=await supabaseClient.from(CONFIG.tables.auctions).delete().eq('id',id);
+        if(del.error){showToast('Error: '+del.error.message,'danger');return;}
+        showToast('Item deleted','success'); loadStore();
+    };
+
+    // ===== COBROS =====
+    async function loadCobros() {
+        var el=document.getElementById('cobrosList');
+        el.innerHTML='<p class="text-muted small">Loading...</p>';
+        if(!INST_ID){el.innerHTML='<div class="alert alert-warning">No institution linked.</div>';return;}
+        try {
+            var grpFilter=document.getElementById('cobrosGroupFilter').value;
+            var query=supabaseClient.from('billing_claims').select('id,student_id,student_name,item_name,coins_spent,status,created_at,group_code,grupo').eq('institution_id',INST_ID).order('created_at',{ascending:false});
+            if(grpFilter) query=query.or('group_code.eq.'+grpFilter+',grupo.eq.'+grpFilter);
+            var res=await query;
+            var list=res.data||[];
+            if(!list.length){el.innerHTML='<p class="text-muted small">No billing claims found.</p>';return;}
+            el.innerHTML='<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Student</th><th>Item</th><th>Coins</th><th>Group</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+                list.map(function(c){
+                    var statusBadge=c.status==='pending'?'<span class="badge bg-warning text-dark">Pending</span>':'<span class="badge bg-success">'+esc(c.status||'')+'</span>';
+                    return '<tr>'+
+                        '<td>'+esc(c.student_name||c.student_id||'')+'</td>'+
+                        '<td>'+esc(c.item_name||'')+'</td>'+
+                        '<td>'+esc(c.coins_spent||0)+'</td>'+
+                        '<td>'+esc(c.group_code||c.grupo||'—')+'</td>'+
+                        '<td>'+statusBadge+'</td>'+
+                        '<td>'+(c.status==='pending'?'<button class="btn btn-sm btn-outline-success" onclick="confirmDelivery(\''+escAttr(c.id)+'\')">Confirm Delivery</button>':'')+'</td></tr>';
+                }).join('')+'</tbody></table></div>';
+        } catch(e){el.innerHTML='<div class="alert alert-danger">Error: '+esc(e.message||'')+'</div>';}
+    }
+    document.getElementById('btnRefreshCobros').addEventListener('click',loadCobros);
+    document.getElementById('cobrosGroupFilter').addEventListener('change',loadCobros);
+    window.confirmDelivery=async function(id){
+        var upd=await supabaseClient.from('billing_claims').update({status:'delivered'}).eq('id',id);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        showToast('Delivery confirmed','success'); loadCobros();
+    };
+
+    // ===== ANNOUNCEMENTS =====
+    async function loadAnnouncements() {
+        var el=document.getElementById('announcementsList');
+        el.innerHTML='<p class="text-muted small">Loading...</p>';
+        if(!INST_ID){el.innerHTML='<div class="alert alert-warning">No institution linked.</div>';return;}
+        try {
+            var res=await supabaseClient.from(CONFIG.tables.announcements).select('id,title,message,type,target_group,expiry_date,created_at').eq('institution_id',INST_ID).order('created_at',{ascending:false});
+            var list=res.data||[];
+            if(!list.length){el.innerHTML='<p class="text-muted small">No announcements yet.</p>';return;}
+            el.innerHTML='<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Title</th><th>Type</th><th>Group</th><th>Expires</th><th>Actions</th></tr></thead><tbody>'+
+                list.map(function(a){
+                    return '<tr>'+
+                        '<td><strong>'+esc(a.title||'')+'</strong><br><small class="text-muted">'+esc((a.message||'').substring(0,60))+'</small></td>'+
+                        '<td><span class="badge bg-'+esc(a.type||'info')+'">'+esc(a.type||'info')+'</span></td>'+
+                        '<td>'+esc(a.target_group||'All')+'</td>'+
+                        '<td><small>'+esc(a.expiry_date||'—')+'</small></td>'+
+                        '<td class="d-flex gap-1">'+
+                        '<button class="btn btn-sm btn-outline-primary" onclick="editAnnouncement(\''+escAttr(a.id)+'\')">Edit</button>'+
+                        '<button class="btn btn-sm btn-outline-danger" onclick="deleteAnnouncement(\''+escAttr(a.id)+'\',\''+escAttr(a.title||'')+'\')">Delete</button>'+
+                        '</td></tr>';
+                }).join('')+'</tbody></table></div>';
+        } catch(e){el.innerHTML='<div class="alert alert-danger">Error: '+esc(e.message||'')+'</div>';}
+    }
+    var _announcementsCache=[];
+    document.getElementById('btnCreateAnnouncement').addEventListener('click',async function(){
+        var editId=document.getElementById('announcementEditId').value;
+        var title=document.getElementById('announcementTitle').value.trim();
+        var message=document.getElementById('announcementMessage').value.trim();
+        var type=document.getElementById('announcementType').value;
+        var grp=document.getElementById('announcementGroup').value;
+        var expiry=document.getElementById('announcementExpiry').value;
+        var linksRaw=document.getElementById('announcementLinks').value;
+        if(!title||!message){showToast('Title and message required','danger');return;}
+        var links=parseLinks(linksRaw);
+        var payload={title:title,message:message,type:type,target_group:grp||null,expiry_date:expiry||null,links:links,institution_id:INST_ID};
+        var res;
+        if(editId){
+            res=await supabaseClient.from(CONFIG.tables.announcements).update(payload).eq('id',editId);
+        } else {
+            res=await supabaseClient.from(CONFIG.tables.announcements).insert([payload]);
+        }
+        if(res.error){showToast('Error: '+res.error.message,'danger');return;}
+        resetAnnouncementForm();
+        showToast(editId?'Announcement updated':'Announcement created','success');
+        loadAnnouncements();
+    });
+    function resetAnnouncementForm(){
+        ['announcementEditId','announcementTitle','announcementMessage','announcementLinks','announcementExpiry'].forEach(function(id){document.getElementById(id).value='';});
+        document.getElementById('announcementType').value='info';
+        document.getElementById('announcementGroup').value='';
+        document.getElementById('btnCreateAnnouncement').textContent='Create';
+        var cancelBtn=document.getElementById('btnCancelAnnouncementEdit');
+        if(cancelBtn) cancelBtn.style.display='none';
+    }
+    document.getElementById('btnCancelAnnouncementEdit').addEventListener('click',resetAnnouncementForm);
+    window.editAnnouncement=async function(id){
+        var res=await supabaseClient.from(CONFIG.tables.announcements).select('*').eq('id',id).maybeSingle();
+        var a=res.data||{};
+        document.getElementById('announcementEditId').value=a.id||'';
+        document.getElementById('announcementTitle').value=a.title||'';
+        document.getElementById('announcementMessage').value=a.message||'';
+        document.getElementById('announcementType').value=a.type||'info';
+        document.getElementById('announcementGroup').value=a.target_group||'';
+        document.getElementById('announcementExpiry').value=a.expiry_date||'';
+        var links=a.links||[];
+        document.getElementById('announcementLinks').value=Array.isArray(links)?links.map(function(l){return l.label+'|'+l.url;}).join('\n'):'';
+        document.getElementById('btnCreateAnnouncement').textContent='Update';
+        var cancelBtn=document.getElementById('btnCancelAnnouncementEdit');
+        if(cancelBtn) cancelBtn.style.display='';
+        document.getElementById('announcementTitle').scrollIntoView({behavior:'smooth'});
+    };
+    window.deleteAnnouncement=async function(id,title){
+        if(!confirm('Delete announcement "'+title+'"?')) return;
+        var del=await supabaseClient.from(CONFIG.tables.announcements).delete().eq('id',id);
+        if(del.error){showToast('Error: '+del.error.message,'danger');return;}
+        showToast('Announcement deleted','success'); loadAnnouncements();
+    };
+
+    // ===== FEEDBACK =====
+    async function loadFeedback() {
+        var el=document.getElementById('feedbackList');
+        el.innerHTML='<p class="text-muted small">Loading...</p>';
+        if(!INST_ID){el.innerHTML='<div class="alert alert-warning">No institution linked.</div>';return;}
+        try {
+            var grpFilter=document.getElementById('feedbackGroupFilter').value;
+            var statusFilter=document.getElementById('feedbackStatusFilter').value;
+            var query=supabaseClient.from('feedback_messages').select('id,student_name,grupo,message,status,created_at').eq('institution_id',INST_ID).order('created_at',{ascending:false});
+            if(grpFilter) query=query.eq('grupo',grpFilter);
+            if(statusFilter) query=query.eq('status',statusFilter);
+            var res=await query;
+            var list=res.data||[];
+            if(!list.length){el.innerHTML='<p class="text-muted small">No feedback messages found.</p>';return;}
+            el.innerHTML='<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Student</th><th>Group</th><th>Message</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>'+
+                list.map(function(f){
+                    var statusBadge=f.status==='new'?'<span class="badge bg-warning text-dark">New</span>':f.status==='read'?'<span class="badge bg-info">Read</span>':'<span class="badge bg-secondary">'+esc(f.status||'')+'</span>';
+                    return '<tr>'+
+                        '<td>'+esc(f.student_name||'')+'</td>'+
+                        '<td>'+esc(f.grupo||'—')+'</td>'+
+                        '<td><small>'+esc((f.message||'').substring(0,80))+'</small></td>'+
+                        '<td>'+statusBadge+'</td>'+
+                        '<td><small>'+esc((f.created_at||'').substring(0,10))+'</small></td>'+
+                        '<td class="d-flex gap-1">'+
+                        (f.status==='new'?'<button class="btn btn-sm btn-outline-info" onclick="markFeedbackRead(\''+escAttr(f.id)+'\')">Mark Read</button>':'')+
+                        '<button class="btn btn-sm btn-outline-secondary" onclick="archiveFeedback(\''+escAttr(f.id)+'\')">Archive</button>'+
+                        '</td></tr>';
+                }).join('')+'</tbody></table></div>';
+        } catch(e){el.innerHTML='<div class="alert alert-danger">Error: '+esc(e.message||'')+'</div>';}
+    }
+    document.getElementById('btnRefreshFeedback').addEventListener('click',loadFeedback);
+    document.getElementById('feedbackGroupFilter').addEventListener('change',loadFeedback);
+    document.getElementById('feedbackStatusFilter').addEventListener('change',loadFeedback);
+    window.markFeedbackRead=async function(id){
+        var upd=await supabaseClient.from('feedback_messages').update({status:'read'}).eq('id',id);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        loadFeedback();
+    };
+    window.archiveFeedback=async function(id){
+        var upd=await supabaseClient.from('feedback_messages').update({status:'archived'}).eq('id',id);
+        if(upd.error){showToast('Error: '+upd.error.message,'danger');return;}
+        showToast('Archived','success'); loadFeedback();
+    };
+
+    // ===== INIT =====
+    (async function init() {
+        var groups=await fetchSchoolGroups();
+        populateGroupSelects(groups);
+        loadOverview();
+    })();
+
+}); // End DOMContentLoaded
+    </script>
+</body>
+</html>

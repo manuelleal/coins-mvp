@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "executed_at": "2026-02-23T22:14:17.815Z",
+    "base": "http://127.0.0.1:5500"
+  },
+  "phase1_environment": {
+    "institutions_table": {
+      "status": "PASS",
+      "seen": "status=200"
+    },
+    "institutions_renamed_columns": {
+      "status": "PASS",
+      "seen": "Columns readable"
+    },
+    "profiles_columns": {
+      "status": "PASS",
+      "seen": "rol + teacher_credits readable"
+    },
+    "ensure_institution": {
+      "status": "PASS",
+      "seen": "UIS (fd138e39-9d18-4797-851e-1c038f512592)"
+    },
+    "ensure_group": {
+      "status": "PASS",
+      "seen": "FOREIGN LANGUAJE 40556"
+    },
+    "ensure_test_users": {
+      "status": "PASS",
+      "seen": "teacher=true; student=true; model=documento_id+pin (not email)"
+    },
+    "teacher_credits_set": {
+      "status": "PASS",
+      "seen": "teacher_credits target=9 applied (or fallback if column missing)"
+    }
+  },
+  "phase2_auth": {
+    "super_admin": {
+      "status": "PASS",
+      "seen": "{\"wrongMsg\":\"Invalid credentials\",\"loginUrl\":\"http://127.0.0.1:5500/admin.html\",\"passLogin\":true,\"rolePersist\":\"super_admin\",\"afterLogout\":\"http://127.0.0.1:5500/index.html\",\"expiredUrl\":\"http://127.0.0.1:5500/index.html\",\"consoleErrors\":[\"[error] Error loading groups: {message: TypeError: Failed to fetch, details: TypeError: Failed to fetch\\n    at https://cdn.jsde\u00d4\u00c7\u00aa loadGroups (http://127.0.0.1:5500/app.js:569:33), hint: , code: }\"],\"networkErrors\":[\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.teacher -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.student -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=id&is_active=eq.true&rol=eq.admin&institution_id=eq.5e5ea042-ab9d-4693-a1c0-b45ee1fb112f -> net::ERR_ABORTED\",\"HEAD https://uggkivypfugdchvjurlo.supabase.co/rest/v1/english_challenges?select=id&is_active=eq.true -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/index.html -> net::ERR_ABORTED\",\"GET https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=*&order=group_code.asc -> net::ERR_ABORTED\"]}"
+    },
+    "teacher": {
+      "status": "PASS",
+      "seen": "{\"wrongMsg\":\"Invalid credentials\",\"loginUrl\":\"http://127.0.0.1:5500/teacher.html\",\"passLogin\":true,\"rolePersist\":\"teacher\",\"afterLogout\":\"http://127.0.0.1:5500/index.html\",\"expiredUrl\":\"http://127.0.0.1:5500/index.html\",\"consoleErrors\":[\"[error] Failed to load resource: the server responded with a status of 400 ()\",\"[error] Failed to load resource: the server responded with a status of 400 ()\",\"[error] Error loading groups: {message: TypeError: Failed to fetch, details: TypeError: Failed to fetch\\n    at https://cdn.jsde\u00d4\u00c7\u00aa loadGroups (http://127.0.0.1:5500/app.js:569:33), hint: , code: }\"],\"networkErrors\":[\"GET https://uggkivypfugdchvjurlo.supabase.co/rest/v1/profiles?select=grupo&rol=eq.student&grupo=in.%28FOREIGN+LANGUAJE+40556%29 -> net::ERR_ABORTED\",\"GET http://127.0.0.1:5500/index.html -> net::ERR_ABORTED\",\"GET https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=*&order=group_code.asc -> net::ERR_ABORTED\"]}"
+    },
+    "student": {
+      "status": "PASS",
+      "seen": "{\"wrongMsg\":\"Invalid credentials\",\"loginUrl\":\"http://127.0.0.1:5500/student.html\",\"passLogin\":true,\"rolePersist\":\"student\",\"afterLogout\":\"http://127.0.0.1:5500/index.html\",\"expiredUrl\":\"http://127.0.0.1:5500/index.html\",\"consoleErrors\":[\"[error] Error loading groups: {message: TypeError: Failed to fetch, details: TypeError: Failed to fetch\\n    at https://cdn.jsde\u00d4\u00c7\u00aa loadGroups (http://127.0.0.1:5500/app.js:569:33), hint: , code: }\"],\"networkErrors\":[\"GET https://uggkivypfugdchvjurlo.supabase.co/rest/v1/groups?select=*&order=group_code.asc -> net::ERR_ABORTED\"]}"
+    }
+  },
+  "phase3_rbac": {
+    "super_admin_system_configs": {
+      "status": "PASS",
+      "seen": "navAiConfig=1; keyFields=3"
+    },
+    "teacher_blocked": {
+      "status": "PASS",
+      "seen": "adminAttempt=http://127.0.0.1:5500/index.html; schoolAttempt=http://127.0.0.1:5500/index.html; logic=RBAC: This action requires super_admin privileges"
+    },
+    "student_blocked": {
+      "status": "PASS",
+      "seen": "adminAttempt=http://127.0.0.1:5500/index.html; teacherAttempt=http://127.0.0.1:5500/index.html"
+    }
+  },
+  "phase4_teacher_groups": {
+    "teacher_login": {
+      "status": "PASS",
+      "seen": "http://127.0.0.1:5500/teacher.html"
+    },
+    "group_filtering": {
+      "status": "PASS",
+      "seen": "{\"adminGroupFilter\":{\"exists\":true,\"options\":[\"FOREIGN LANGUAJE 40556\"]},\"qrGroup\":{\"exists\":true,\"options\":[\"FOREIGN LANGUAJE 40556\"]},\"auctionGroup\":{\"exists\":true,\"options\":[\"FOREIGN LANGUAJE 40556\"]},\"announcementGroup\":{\"exists\":true,\"options\":[\"FOREIGN LANGUAJE 40556\"]},\"challengeTargetGroup\":{\"exists\":true,\"options\":[\"FOREIGN LANGUAJE 40556\"]}}"
+    }
+  },
+  "phase5_teacher_credits": {
+    "block_at_zero": {
+      "status": "PASS",
+      "seen": "Creditos insuficientes (0 < 3)"
+    },
+    "console_errors": [
+      "[error] Failed to load resource: the server responded with a status of 400 ()",
+      "[error] Failed to load resource: the server responded with a status of 400 ()",
+      "[error] [AI_STRUCTURED_GENERATE_ERROR] Error: Simulated provider network error\n    at window.routeAIRequest (eval at evaluate (:290:30), <anonymous>:3:54)\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/teacher.html:3095:36)",
+      "[debug] [AI_STRUCTURED_GENERATE_ERROR_DETAIL] Simulated provider network error",
+      "[error] Failed to load resource: the server responded with a status of 400 ()",
+      "[error] [AI_STRUCTURED_GENERATE_ERROR] SyntaxError: Unexpected token 'o', \"not-json\" is not valid JSON\n    at JSON.parse (<anonymous>)\n    at HTMLButtonElement.<anonymous> (http://127.0.0.1:5500/teacher.html:3105:34)",
+      "[debug] [AI_STRUCTURED_GENERATE_ERROR_DETAIL] Unexpected token 'o', \"not-json\" is not valid JSON"
+    ],
+    "network_errors": []
+  },
+  "phase6_institution_pool": {
+    "pool_columns": {
+      "status": "PASS",
+      "seen": "{\"mode\":\"renamed_columns\",\"row\":{\"ai_credit_pool\":500,\"ai_credits_used\":0}}"
+    }
+  },
+  "phase7_multi_ai": {
+    "provider_network_error": {
+      "status": "PASS",
+      "seen": "status=Error: Simulated provider network error; credits 9->9"
+    },
+    "provider_malformed_json": {
+      "status": "PASS",
+      "seen": "status=Error: Unexpected token 'o', \"not-json\" is not valid JSON; credits 9->9"
+    },
+    "provider_selector_visibility": {
+      "status": "PASS",
+      "seen": "{\"plan\":\"BASIC\",\"visible\":false}"
+    }
+  },
+  "phase8_cefr": {
+    "empty_fields_handling": {
+      "status": "PASS",
+      "seen": "Error en generacion IA: Unexpected token 'o', \"not-json\" is not valid JSON\nCreditos insuficientes. Necesitas al menos 3.\nIngresa un tema (Topic)"
+    }
+  },
+  "phase9_responsive": {
+    "desktop": {
+      "status": "PASS",
+      "seen": "{\"aiPanel\":true,\"drako\":true,\"runBtn\":true,\"overflowAi\":false,\"overflowNav\":false}"
+    },
+    "laptop": {
+      "status": "PASS",
+      "seen": "{\"aiPanel\":true,\"drako\":true,\"runBtn\":true,\"overflowAi\":false,\"overflowNav\":false}"
+    },
+    "tablet": {
+      "status": "PASS",
+      "seen": "{\"aiPanel\":true,\"drako\":true,\"runBtn\":true,\"overflowAi\":false,\"overflowNav\":false}"
+    },
+    "mobile": {
+      "status": "PASS",
+      "seen": "{\"aiPanel\":true,\"drako\":true,\"runBtn\":true,\"overflowAi\":false,\"overflowNav\":false}"
+    }
+  },
+  "phase10_student": {
+    "student_login": {
+      "status": "PASS",
+      "seen": "http://127.0.0.1:5500/student.html"
+    },
+    "student_visibility": {
+      "status": "PASS",
+      "seen": "{\"hasCoins\":true,\"hasChallengesNav\":true,\"hasTeacherCreditsText\":false,\"hasProviderUi\":false}"
+    }
+  },
+  "phase11_security": {
+    "direct_system_configs_call": {
+      "status": "FAIL",
+      "seen": "status=200 (RLS/open access risk)"
+    },
+    "role_spoof_attempt": {
+      "status": "PASS",
+      "seen": "localStorageSpoof=set; url=http://127.0.0.1:5500/index.html"
+    }
+  },
+  "phase12_resilience": {
+    "teacher_groups_missing": {
+      "status": "PASS",
+      "seen": "{\"teacherGroupsMissing\":\"no crash\",\"networkOffline\":\"error:Error: Network offline\"}"
+    },
+    "network_offline": {
+      "status": "PASS",
+      "seen": "{\"teacherGroupsMissing\":\"no crash\",\"networkOffline\":\"error:Error: Network offline\"}"
+    }
+  }
+}

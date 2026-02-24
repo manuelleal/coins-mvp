@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lingo-Coins | Gamified Rewards</title>
+    <link rel="icon" type="image/webp" href="assets/images/icono-moneda.webp">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-dashboard">
+    <div class="decor-overlay" aria-hidden="true"></div>
+    <div class="container-custom page-container">
+        <div class="text-center mb-4">
+            <h1 class="mb-2 section-title" style="justify-content:center;"><img src="assets/images/icono-moneda.webp" class="ui-icon coin-pulse" loading="lazy" alt="Coins">Lingo-Coins</h1>
+            <h2 class="fw-bold mb-1">English Coins Arena</h2>
+            <p class="text-muted">Level up your English, earn rewards!</p>
+        </div>
+        
+        <div class="card card-premium">
+            <div class="section-title with-banner mb-3" style="justify-content:center;">Welcome Back</div>
+            <img src="assets/images/escudo-decorativo.webp" class="decor-emblem" alt="Decor emblem" loading="lazy">
+            <div class="nav-tabs">
+                <button id="tabLogin" class="nav-tab active" onclick="showTab('login')">
+                    <i class="bi bi-box-arrow-in-right"></i> Log in
+                </button>
+                <button id="tabRegister" class="nav-tab" onclick="showTab('register')">
+                    <i class="bi bi-person-plus"></i> Register
+                </button>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-person-badge"></i> Document ID
+                    </label>
+                    <input 
+                        type="text" 
+                        id="loginDoc" 
+                        class="form-control" 
+                        placeholder="e.g. 1111"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-lock"></i> PIN
+                    </label>
+                    <input 
+                        type="password" 
+                        id="loginPin" 
+                        class="form-control" 
+                        placeholder="••••"
+                        required
+                    >
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="btnLogin">
+                    <i class="bi bi-unlock-fill"></i> Log in
+                </button>
+                
+                <div id="loginError" class="text-danger text-center mt-3 small" style="display:none"></div>
+            </form>
+            
+            <form id="registerForm" onsubmit="handleRegister(event)" class="hidden">
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-person"></i> Full name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="regName" 
+                        class="form-control" 
+                        placeholder="e.g. John Doe"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-person-badge"></i> Document ID
+                    </label>
+                    <input 
+                        type="text" 
+                        id="regDoc" 
+                        class="form-control" 
+                        placeholder="e.g. 1111"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-lock"></i> PIN
+                    </label>
+                    <input 
+                        type="password" 
+                        id="regPin" 
+                        class="form-control" 
+                        placeholder="••••"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-people"></i> Group
+                    </label>
+                    <select id="regGroup" class="form-select" required>
+                        <option value="">Select your group...</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" id="btnRegister">
+                    <i class="bi bi-check-circle-fill"></i> Create account
+                </button>
+                <div id="registerStatus" class="text-center mt-3 small" style="display:none"></div>
+            </form>
+        </div>
+        <div class="text-center small text-muted mt-3">v1.0-MVP-STABLE</div>
+    </div>
+    <img src="assets/images/rey-lanzando-monedas.webp" class="mascot-fixed mascot-float" loading="lazy" alt="King mascot">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Store attendance code from URL if present
+        (function() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var attendanceCode = urlParams.get('attendance_code');
+            if (attendanceCode) {
+                try { sessionStorage.setItem('pending_attendance_code', attendanceCode); } catch (_) {}
+                try { localStorage.setItem('pending_attendance_code', attendanceCode); } catch (_) {}
+            }
+        })();
+    </script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

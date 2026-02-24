@@ -1,0 +1,31 @@
+﻿{
+  "step7": {
+    "admin_uis": {
+      "status": "FAIL",
+      "seen": {
+        "url": "http://127.0.0.1:5500/admin.html",
+        "error": "page.waitForSelector: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#contentUsers') to be visible\u001b[22m\n\u001b[2m    28 ├ù locator resolved to hidden <div id=\"contentUsers\">ÔÇª</div>\u001b[22m\n"
+      }
+    },
+    "teacher_uis": {
+      "status": "PASS",
+      "seen": {
+        "url": "http://127.0.0.1:5500/teacher.html",
+        "groups": [
+          "UIS-A1"
+        ],
+        "selectedGroup": "UIS-A1",
+        "emptyState": ""
+      }
+    },
+    "student_banner": {
+      "status": "PASS",
+      "seen": {
+        "url": "http://127.0.0.1:5500/student.html",
+        "display": "block",
+        "text": "­ƒÄ» You have 1 active challenge(s)! Complete them to earn coins!",
+        "student": "1113"
+      }
+    }
+  }
+}

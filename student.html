@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard | Lingo-Coins</title>
+    <link rel="icon" type="image/webp" href="assets/images/icono-moneda.webp">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        @keyframes pulse { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.2) } }
+        @keyframes badgeUnlock { 0% { transform: scale(0) rotate(-10deg) } 60% { transform: scale(1.2) rotate(5deg) } 100% { transform: scale(1) rotate(0deg) } }
+        @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 5px rgba(255,215,0,0.65) } 50% { box-shadow: 0 0 20px rgba(255,215,0,0.85) } }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) } 100% { opacity: 0; transform: translateY(-60px) } }
+        @keyframes slideInLeft { 0% { opacity: 0; transform: translateX(-18px) } 100% { opacity: 1; transform: translateX(0) } }
+
+        .streak-badge.active { animation: pulse 1.6s ease-in-out infinite; transform-origin: center; }
+        .streak-fire { animation: pulse 1s infinite; }
+        .level-badge.badge-unlock { animation: badgeUnlock 650ms cubic-bezier(.2,.8,.2,1) both; }
+        .badge-unlock { animation: badgeUnlock 0.5s ease; }
+        .challenge-card.active-glow { animation: glowPulse 1.8s ease-in-out infinite; }
+        .challenge-active-card { animation: glowPulse 2s infinite; }
+        .active-challenge-banner {
+            border: 2px solid #fbbf24;
+            box-shadow: 0 0 0 rgba(251, 191, 36, 0.45);
+            animation: glowPulse 1.7s ease-in-out infinite;
+            background: linear-gradient(135deg, rgba(251,191,36,0.18), rgba(251,191,36,0.06));
+        }
+        .coins-float { position: fixed; z-index: 1200; pointer-events: none; font-weight: 900; color: var(--gold-500, #FFD700); text-shadow: 0 2px 10px rgba(0,0,0,0.35); animation: floatUp 900ms ease-out forwards; }
+        .coin-float { animation: floatUp 1s ease forwards; position: absolute; color: gold; font-weight: bold; pointer-events: none; }
+        .leaderboard-list li.lb-row { opacity: 0; animation: slideInLeft 520ms ease-out forwards; }
+        .leaderboard-row { animation: slideInLeft 0.3s ease forwards; }
+        #xpBarFill { transition: width 1s ease; }
+        .progress-bar { transition: width 1s ease; }
+        .stat-number { animation: slideInLeft 0.5s ease; }
+        .coming-soon-card {
+            opacity: 0.75;
+            border: 1px solid gold;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.1) 50%, transparent 100%);
+            background-size: 400px 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            .streak-badge.active,
+            .streak-fire,
+            .level-badge.badge-unlock,
+            .badge-unlock,
+            .challenge-card.active-glow,
+            .challenge-active-card,
+            .coins-float,
+            .leaderboard-list li.lb-row,
+            .leaderboard-row,
+            .coming-soon-card,
+            .stat-number { animation: none !important; }
+            #xpBarFill { transition: width 200ms ease; }
+            .progress-bar { transition: width 200ms ease; }
+        }
+    </style>
+</head>
+<body class="bg-dashboard">
+    <div class="decor-overlay" aria-hidden="true"></div>
+    <!-- Geofence Gate: blocks entire page if student is too far -->
+    <div id="geofenceGate" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,0.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); align-items:center; justify-content:center;">
+        <div class="text-center" style="max-width:400px; padding:2rem;">
+            <div style="font-size:4rem; margin-bottom:1rem;">&#x1F6AB;</div>
+            <h2 style="color:#fca5a5; font-weight:800; margin-bottom:1rem;">Access Denied</h2>
+            <p style="color:rgba(255,255,255,0.8); font-size:1.1rem;" id="geofenceMsg">You must be within 50m of the classroom to access your dashboard.</p>
+            <button type="button" class="btn btn-primary mt-3" style="width:auto;" onclick="window.location.reload()"><i class="bi bi-arrow-clockwise"></i> Retry</button>
+            <button type="button" class="btn btn-danger mt-3 ms-2" style="width:auto;" onclick="window.logout()"><i class="bi bi-box-arrow-left"></i> Logout</button>
+        </div>
+    </div>
+
+    <div class="container-custom page-container" style="max-width: 700px;">
+        <div class="card card-premium" style="padding: 0; overflow: hidden;">
+            <nav class="student-nav">
+                <span class="greeting" id="navGreeting"></span>
+                <a href="#" id="navDashboard" class="active" onclick="return showStudentView('dashboard')"><i class="bi bi-house-fill"></i> Home</a>
+                <a href="#" id="navAttendance" onclick="return showStudentView('attendance')"><i class="bi bi-calendar-check"></i> Attendance</a>
+                <a href="#" id="navChallenges" onclick="return showStudentView('challenges')"><i class="bi bi-lightning-charge-fill"></i> Challenges</a>
+                <a href="#" id="navStore" onclick="return showStudentView('store')"><i class="bi bi-shop"></i> Store</a>
+                <a href="#" id="navBag" onclick="return showStudentView('bag')"><i class="bi bi-backpack-fill"></i> Bag</a>
+                <button type="button" class="nav-btn" id="btnMute" title="Mute sounds"><i class="bi bi-volume-up"></i></button>
+                <button type="button" class="nav-btn" id="btnLogoutStudent">Logout</button>
+            </nav>
+
+            <!-- VIEW: Dashboard -->
+            <div id="viewDashboard" class="student-view active">
+                <div id="studentActiveChallengeBanner" class="alert active-challenge-banner mb-3" style="display:none;">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div id="studentActiveChallengeBannerText" style="font-weight:700;">🎯 You have active challenges!</div>
+                        <button type="button" class="btn btn-sm btn-warning" id="btnGoToChallengesBanner">Go to Challenges →</button>
+                    </div>
+                </div>
+                <div class="glass-panel card-premium mb-3 leaderboard-wrap" style="background:linear-gradient(135deg, rgba(16,185,129,0.22), rgba(30,58,95,0.18));">
+                    <img src="assets/images/escudo-decorativo.webp" class="decor-emblem" alt="Decor emblem" loading="lazy">
+                    <h4 class="mb-1 section-title with-banner">Challenge Arena</h4>
+                    <p class="small mb-0 text-muted">Compete • Earn • Win</p>
+                </div>
+                <div class="gold-card text-center">
+                    <p class="text-muted mb-1 section-title" style="justify-content:center;">
+                        <img src="assets/images/icono-moneda.webp" class="ui-icon coin-pulse" loading="lazy" alt="Coins">
+                        Your Wallet
+                    </p>
+                    <div class="coins-num"><span id="studentCoins">0</span></div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
+                    <span class="level-badge" id="levelBadge"><i class="bi bi-star-fill"></i> Level 1 <i class="bi bi-crown-fill"></i></span>
+                    <span class="streak-badge" id="streakBadge">&#x1F525; 0 day streak</span>
+                    <span class="badge-group" id="studentGroup"></span>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span id="xpLabel">XP: 0 / 50</span>
+                        <span id="xpPercLabel">0%</span>
+                    </div>
+                    <div class="xp-bar-container">
+                        <div class="xp-bar-fill" id="xpBarFill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="glass-panel mb-3">
+                    <h6 class="mb-2">Progress to Top</h6>
+                    <div class="small" id="progressToTop10">⬆️ — coins to reach Top 10</div>
+                    <div class="small" id="progressToTop1">⬆️ — coins to reach #1</div>
+                    <div class="progress mt-2" style="height:8px;"><div class="progress-bar bg-warning" id="topProgressBar" style="width:0%"></div></div>
+                </div>
+                <div class="glass-panel mb-3">
+                    <h6 class="mb-2">This Week Attendance</h6>
+                    <div class="d-flex justify-content-between small text-muted mb-1"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span></div>
+                    <div class="d-flex justify-content-between fs-5" id="attendanceMiniWeek"><span>⏳</span><span>⏳</span><span>⏳</span><span>⏳</span><span>⏳</span></div>
+                    <div class="small mt-2" id="attendanceMiniSummary">You attended 0/0 days this week 🔥</div>
+                </div>
+                <div class="glass-panel mb-3">
+                    <h6 class="mb-2">Badges</h6>
+                    <div class="row g-2" id="studentBadgesGrid"></div>
+                </div>
+                <div class="glass-panel mb-3 challenge-active-card" id="activeChallengeSpotlight">
+                    <div class="small text-warning">🔥 ACTIVE — Waiting challenge...</div>
+                    <div class="small text-muted">⏱️ Closes in: --:--:--</div>
+                    <div class="small text-muted">🪙 Win up to 40 coins</div>
+                    <button type="button" class="btn btn-sm btn-warning mt-2" onclick="return showStudentView('challenges')">Start Now →</button>
+                </div>
+                <div class="mb-3">
+                    <h6 class="mb-2">Today's Status</h6>
+                    <div id="todayStatus" class="alert alert-secondary mb-0">
+                        <span class="spinner-border spinner-border-sm"></span> Checking...
+                    </div>
+                </div>
+                <div class="mb-3" id="bulletinSection" style="display:none;">
+                    <h6 class="mb-2"><i class="bi bi-megaphone-fill" style="color:var(--gold);"></i> Announcements</h6>
+                    <div id="bulletinList"></div>
+                </div>
+                <div class="mb-4 leaderboard-wrap">
+                    <h6 class="mb-2 section-title"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Leaderboard">Top 5 in your group</h6>
+                    <ul class="leaderboard-list" id="leaderboard"><li class="text-muted">Loading...</li></ul>
+                </div>
+                <div class="glass-panel">
+                    <h6 class="mb-2"><i class="bi bi-chat-dots"></i> Contact / Feedback</h6>
+                    <p class="small text-muted mb-2">Need help or want to report a bug? Send quick feedback.</p>
+                    <form id="feedbackForm" class="d-flex flex-column gap-2">
+                        <input type="email" id="feedbackEmail" class="form-control form-control-sm" placeholder="Your email (optional)">
+                        <textarea id="feedbackMessage" class="form-control form-control-sm" rows="2" placeholder="Write your feedback" required></textarea>
+                        <button type="submit" class="btn btn-outline-primary btn-sm" style="width:auto;">Send feedback</button>
+                    </form>
+                </div>
+                <div class="row g-2 mt-2">
+                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">🎯 Exam Prep</div></div>
+                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">💼 Business English</div></div>
+                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">🎤 Speaking AI</div></div>
+                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">🏅 School Tournaments</div></div>
+                </div>
+            </div>
+
+            <!-- VIEW: Attendance -->
+            <div id="viewAttendance" class="student-view">
+                <h5 class="mb-2 section-title"><img src="assets/images/icono-asistencia.webp" class="ui-icon" loading="lazy" alt="Attendance">Attendance</h5>
+                <p class="small text-muted mb-3">Scan the QR code shown by your teacher, or enter the daily code manually.</p>
+                <div class="glass-panel mb-3">
+                    <h6 class="mb-2">Manual Code Entry</h6>
+                    <p class="small text-muted">If your camera doesn't work, type the 6-character code shown on the board.</p>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="manualCode" class="form-control" placeholder="e.g. AB3X7K" maxlength="10" style="max-width:180px;text-transform:uppercase;letter-spacing:0.2em;font-weight:700;">
+                        <button type="button" class="btn btn-primary" id="btnManualCheckin" style="width:auto;">Check In</button>
+                    </div>
+                    <div id="manualCheckinStatus" class="mt-2 small" style="display:none;"></div>
+                </div>
+                <div class="mb-3">
+                    <h6 class="mb-2">Attendance History</h6>
+                    <div id="attendanceHistory"><p class="text-muted small">Loading...</p></div>
+                </div>
+            </div>
+
+            <!-- VIEW: Challenges -->
+            <div id="viewChallenges" class="student-view">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 challenge-header">
+                    <div>
+                        <h5 class="mb-2 section-title with-banner"><img src="assets/images/icono-challenge.webp" class="ui-icon" loading="lazy" alt="Challenges">Mission Center</h5>
+                        <p class="small text-muted mb-3">Complete English challenges to earn coins!</p>
+                    </div>
+                    <img src="assets/images/princesa-guardiana.webp" class="mascot-float" loading="lazy" alt="Guardian princess" style="width:clamp(160px,18vw,200px);object-fit:contain;">
+                </div>
+                <div id="drakoFeedbackPanel" style="display:none;"></div>
+                <div id="studentChallengeActiveList"><p class="text-muted small">Loading...</p></div>
+                <div class="accordion mt-3" id="finishedChallengesAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="finishedChallengesHeading">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#finishedChallengesBody" aria-expanded="false" aria-controls="finishedChallengesBody">
+                                Finished Challenges
+                            </button>
+                        </h2>
+                        <div id="finishedChallengesBody" class="accordion-collapse collapse" aria-labelledby="finishedChallengesHeading" data-bs-parent="#finishedChallengesAccordion">
+                            <div class="accordion-body" id="studentChallengeFinishedList">
+                                <p class="text-muted small mb-0">No finished challenges yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: Store -->
+            <div id="viewStore" class="student-view">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 store-header">
+                    <div>
+                        <h5 class="mb-2 section-title auction-banner"><img src="assets/images/icono-tienda.webp" class="ui-icon" loading="lazy" alt="Store">Marketplace <span class="live-dot"></span></h5>
+                        <div class="store-decor">
+                            <img src="assets/images/cofre-tesoro.webp" loading="lazy" alt="Treasure chest">
+                            <img src="assets/images/corona-flotante.webp" loading="lazy" alt="Floating crown">
+                            <img src="assets/images/icono-moneda.webp" loading="lazy" alt="Coins icon">
+                        </div>
+                    </div>
+                </div>
+                <p class="small text-muted mb-3">Buy items or outbid other students to win rewards!</p>
+                <div id="marketplace"></div>
+            </div>
+
+            <!-- VIEW: Bag (Inventory) -->
+            <div id="viewBag" class="student-view">
+                <h5 class="mb-2"><i class="bi bi-backpack-fill"></i> My Bag</h5>
+                <p class="small text-muted mb-3">Items you've purchased. Activate them when ready!</p>
+                <div id="inventoryList"><p class="text-muted small">Loading...</p></div>
+            </div>
+        </div>
+    </div>
+    <img src="assets/images/rey-principal.webp" class="mascot-fixed mascot-float" loading="lazy" alt="Main king mascot">
+    <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+    <script>
+    (function() {
+        // SAFE localStorage parsing with try/catch
+        var user;
+        try {
+            user = JSON.parse(localStorage.getItem('lingoCoins_user') || '{}');
+        } catch (e) {
+            console.error('Failed to parse user data:', e);
+            localStorage.removeItem('lingoCoins_user');
+            window.location.href = './index.html';
+            return;
+        }
+        if (!user.id || isAdminRole(user.rol)) { window.location.href = './index.html'; return; }
+
+        var reduceMotion = false;
+        try { reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) {}
+
+        var SOUND_KEY = 'lingoCoins_muted';
+        var isMuted = false;
+        try { isMuted = localStorage.getItem(SOUND_KEY) === '1'; } catch (_) {}
+        var audioCtx = null;
+        var soundReady = false;
+
+        function setMute(nextMuted) {
+            isMuted = !!nextMuted;
+            try { localStorage.setItem(SOUND_KEY, isMuted ? '1' : '0'); } catch (_) {}
+            var btn = document.getElementById('btnMute');
+            if (btn) btn.innerHTML = isMuted ? '<i class="bi bi-volume-mute"></i>' : '<i class="bi bi-volume-up"></i>';
+        }
+
+        function ensureAudioContext() {
+            if (audioCtx) return audioCtx;
+            var Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return null;
+            audioCtx = new Ctx();
+            return audioCtx;
+        }
+
+        function markSoundReady() {
+            soundReady = true;
+            var ctx = ensureAudioContext();
+            if (!ctx) return;
+            if (ctx.state === 'suspended') {
+                ctx.resume().catch(function(){});
+            }
+        }
+
+        function withOsc(freq, type, durSec, gainPeak, whenSec) {
+            if (isMuted || !soundReady || reduceMotion) return;
+            var ctx = ensureAudioContext();
+            if (!ctx) return;
+            var now = ctx.currentTime + (whenSec || 0);
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.type = type || 'sine';
+            osc.frequency.setValueAtTime(Math.max(40, freq || 440), now);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, gainPeak || 0.06), now + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + Math.max(0.05, durSec || 0.25));
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + Math.max(0.05, durSec || 0.25) + 0.02);
+        }
+
+        function playCoinSound() {
+            if (isMuted || !soundReady) return;
+            var ctx = ensureAudioContext();
+            if (!ctx) return;
+            var now = ctx.currentTime;
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(740, now);
+            osc.frequency.exponentialRampToValueAtTime(990, now + 0.12);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(0.06, now + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.30);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.32);
+        }
+        function playStreakSound() { withOsc(220, 'triangle', 0.22, 0.035, 0.0); withOsc(330, 'triangle', 0.22, 0.035, 0.06); }
+        function playBadgeUnlock() { withOsc(440, 'sine', 0.20, 0.05, 0.0); withOsc(554, 'sine', 0.20, 0.05, 0.08); withOsc(659, 'sine', 0.22, 0.055, 0.16); }
+        function playChallengeWhoosh() { withOsc(180, 'sawtooth', 0.18, 0.025, 0.0); withOsc(120, 'sawtooth', 0.18, 0.02, 0.05); }
+        function playWrong() { withOsc(320, 'sine', 0.18, 0.03, 0.0); withOsc(220, 'sine', 0.22, 0.03, 0.08); }
+        function playCorrect() { withOsc(660, 'sine', 0.14, 0.045, 0.0); withOsc(880, 'sine', 0.14, 0.04, 0.08); }
+
+        function setupSoundGate() {
+            var once = false;
+            function unlock() {
+                if (once) return;
+                once = true;
+                markSoundReady();
+                window.removeEventListener('pointerdown', unlock, true);
+                window.removeEventListener('keydown', unlock, true);
+                window.removeEventListener('touchstart', unlock, true);
+            }
+            window.addEventListener('pointerdown', unlock, true);
+            window.addEventListener('keydown', unlock, true);
+            window.addEventListener('touchstart', unlock, true);
+        }
+
+        setupSoundGate();
+
+        // --- Geofence Gate disabled for login/dashboard access ---
+        // Geolocation stays enforced in attendance.html only.
+        var ENABLE_DASHBOARD_GEOFENCE = false;
+        var mainContent = document.querySelector('.container-custom');
+        var gateEl = document.getElementById('geofenceGate');
+        // DO NOT hide content by default - let data load first
+
+        var _geoRetries = 0;
+        var _maxGeoRetries = 2;
+        var _storedGroupLoc = null;
+
+        window.retryGeofence = function() {
+            _geoRetries++;
+            gateEl.style.display = 'none';
+            doGeofenceCheck();
+        };
+
+        function doGeofenceCheck() {
+            if (!ENABLE_DASHBOARD_GEOFENCE) {
+                if (gateEl) gateEl.style.display = 'none';
+                if (mainContent) mainContent.style.display = '';
+                return;
+            }
+            if (!_storedGroupLoc) return;
+            if (!navigator.geolocation) {
+                document.getElementById('geofenceMsg').innerHTML = 'Geolocation is not supported by your browser.';
+                gateEl.style.display = 'flex';
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                var acc = pos.coords.accuracy;
+                if (acc > 60 && _geoRetries < _maxGeoRetries) {
+                    document.getElementById('geofenceMsg').innerHTML = 'GPS accuracy is low (' + Math.round(acc) + 'm). Move near a window and retry.' +
+                        '<br><button type="button" class="btn btn-warning btn-sm mt-2" style="width:auto;" onclick="retryGeofence()"><i class="bi bi-arrow-clockwise"></i> Retry (' + (_maxGeoRetries - _geoRetries) + ' left)</button>';
+                    gateEl.style.display = 'flex';
+                    return;
+                }
+                var dist = haversineDistance(_storedGroupLoc.lat, _storedGroupLoc.lng, pos.coords.latitude, pos.coords.longitude);
+                if (dist > (CONFIG.geofenceMeters || 50)) {
+                    var retriesLeft = _maxGeoRetries - _geoRetries;
+                    var retryBtn = retriesLeft > 0
+                        ? '<br><button type="button" class="btn btn-warning btn-sm mt-2" style="width:auto;" onclick="retryGeofence()"><i class="bi bi-arrow-clockwise"></i> Retry (' + retriesLeft + ' left)</button>'
+                        : '';
+                    document.getElementById('geofenceMsg').innerHTML = 'You must be within 50m of the classroom. Current distance: ' + Math.round(dist) + 'm.' + retryBtn;
+                    gateEl.style.display = 'flex';
+                } else {
+                    if (mainContent) mainContent.style.display = '';
+                }
+            }, function(err) {
+                var retriesLeft = _maxGeoRetries - _geoRetries;
+                var retryBtn = retriesLeft > 0
+                    ? '<br><button type="button" class="btn btn-warning btn-sm mt-2" style="width:auto;" onclick="retryGeofence()"><i class="bi bi-arrow-clockwise"></i> Retry (' + retriesLeft + ' left)</button>'
+                    : '';
+                document.getElementById('geofenceMsg').innerHTML = 'Location access denied. Enable GPS in your browser settings.' + retryBtn;
+                gateEl.style.display = 'flex';
+            }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+        }
+
+        (async function geofenceCheck() {
+            try {
+                if (!ENABLE_DASHBOARD_GEOFENCE) {
+                    if (gateEl) gateEl.style.display = 'none';
+                    if (mainContent) mainContent.style.display = '';
+                    return;
+                }
+                if (!user.grupo) {
+                    console.warn('Student has no group assigned - skipping geofence');
+                    return;
+                }
+                var groupLoc = await getGroupLocation(user.grupo);
+                if (groupLoc.lat == null || groupLoc.lng == null) {
+                    console.warn('Group location not set - geofence disabled for', user.grupo);
+                    return;
+                }
+                _storedGroupLoc = groupLoc;
+                doGeofenceCheck();
+            } catch (e) {
+                console.error('Geofence check error:', e);
+            }
+        })();
+
+        window.logout = function() {
+            if (supabaseClient) supabaseClient.removeAllChannels();
+            localStorage.removeItem('lingoCoins_user');
+            window.location.href = 'index.html';
+        };
+        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var email = document.getElementById('feedbackEmail').value.trim();
+            var message = document.getElementById('feedbackMessage').value.trim();
+            if (!message) {
+                showToast('Please write a message', 'warning');
+                return;
+            }
+            var btn = e.target.querySelector('button[type="submit"]');
+            var originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            try {
+                var result = await createFeedbackMessage(user.documento_id, user.nombre_completo, user.grupo, email, message);
+                if (!result.ok) throw new Error(result.error);
+                showToast('Feedback sent! Thank you.', 'success');
+                document.getElementById('feedbackForm').reset();
+            } catch (err) {
+                showToast('Failed to send feedback: ' + err.message, 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        });
+
+        document.getElementById('btnLogoutStudent').addEventListener('click', window.logout);
+
+        setMute(isMuted);
+        var muteBtn = document.getElementById('btnMute');
+        if (muteBtn) {
+            muteBtn.addEventListener('click', function() {
+                setMute(!isMuted);
+            });
+        }
+
+        var firstName = (user.nombre_completo || 'Student').split(' ')[0];
+        document.getElementById('navGreeting').innerHTML = 'Hello <strong>' + firstName + '</strong>';
+        document.getElementById('studentGroup').textContent = user.grupo || 'No group';
+
+        function setStudentBackgroundClass(viewId) {
+            document.body.classList.remove('bg-dashboard', 'bg-challenges', 'bg-store', 'bg-auctions');
+            if (viewId === 'challenges') {
+                document.body.classList.add('bg-challenges');
+                return;
+            }
+            if (viewId === 'store') {
+                document.body.classList.add('bg-store');
+                return;
+            }
+            document.body.classList.add('bg-dashboard');
+        }
+
+        // --- SPA view switching ---
+        function showStudentView(viewId) {
+            document.querySelectorAll('.student-view').forEach(function(el) { el.classList.remove('active'); });
+            document.querySelectorAll('.student-nav a').forEach(function(el) { el.classList.remove('active'); });
+            var view = document.getElementById('view' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
+            var nav = document.getElementById('nav' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
+            if (view) view.classList.add('active');
+            if (nav) nav.classList.add('active');
+            setStudentBackgroundClass(viewId);
+            if (viewId === 'attendance') loadAttendanceHistory();
+            if (viewId === 'challenges') {
+                playChallengeWhoosh();
+                loadStudentChallenges();
+            }
+            if (viewId === 'store') {
+                loadMarketplace();
+                startMarketplacePolling();
+            } else {
+                stopMarketplacePolling();
+            }
+            if (viewId === 'bag') loadInventory();
+            return false;
+        }
+        window.showStudentView = showStudentView;
+        setStudentBackgroundClass('dashboard');
+
+        var _coinsFirstLoad = true;
+        var _lastCoinsValue = Number(user.monedas) || 0;
+
+        function spawnCoinsFloat(amount) {
+            if (reduceMotion) return;
+            var coinEl = document.getElementById('studentCoins');
+            if (!coinEl) return;
+            var rect = coinEl.getBoundingClientRect();
+            var el = document.createElement('div');
+            el.className = 'coins-float';
+            el.textContent = '+' + Math.max(0, Math.floor(Number(amount) || 0)) + ' 🪙';
+            el.style.left = Math.round(rect.left + rect.width / 2) + 'px';
+            el.style.top = Math.round(rect.top - 6) + 'px';
+            el.style.transform = 'translateX(-50%)';
+            document.body.appendChild(el);
+            window.setTimeout(function() { try { el.remove(); } catch(_) {} }, 1100);
+        }
+
+        function animateCoins(targetValue, durationOverride) {
+            var el = document.getElementById('studentCoins');
+            if (!el) return;
+            var start = parseInt(el.textContent, 10) || 0;
+            var end = Math.max(0, Math.floor(Number(targetValue)) || 0);
+            if (start === end) return;
+            var duration = Math.max(150, Number(durationOverride) || 700);
+            var startTime = null;
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                var progress = Math.min((timestamp - startTime) / duration, 1);
+                var eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(start + (end - start) * eased);
+                if (progress < 1) requestAnimationFrame(step);
+                else el.textContent = end;
+            }
+            requestAnimationFrame(step);
+        }
+
+        function setCoins(val) {
+            var coins = val != null ? val : (user.monedas || 0);
+            var next = Math.max(0, Math.floor(Number(coins)) || 0);
+            var prev = Number.isFinite(_lastCoinsValue) ? _lastCoinsValue : 0;
+
+            if (_coinsFirstLoad) {
+                _coinsFirstLoad = false;
+                animateCoins(next, 1500);
+            } else {
+                animateCoins(next, 700);
+            }
+
+            var delta = next - prev;
+            if (delta > 0) {
+                spawnCoinsFloat(delta);
+                playCoinSound();
+            }
+            _lastCoinsValue = next;
+
+            var info = calculateLevelXP(coins);
+            document.getElementById('levelBadge').innerHTML = '<i class="bi bi-star-fill"></i> Level ' + info.level + ' <i class="bi bi-crown-fill"></i>';
+            document.getElementById('xpLabel').textContent = 'XP: ' + info.xp + ' / ' + info.xpForNext;
+            document.getElementById('xpPercLabel').textContent = info.xpPercent + '%';
+            document.getElementById('xpBarFill').style.width = info.xpPercent + '%';
+
+            if (typeof setCoins._lastLevel === 'number' && info.level > setCoins._lastLevel) {
+                var lb = document.getElementById('levelBadge');
+                if (lb && !reduceMotion) {
+                    lb.classList.remove('badge-unlock');
+                    void lb.offsetWidth;
+                    lb.classList.add('badge-unlock');
+                    window.setTimeout(function(){ lb.classList.remove('badge-unlock'); }, 800);
+                }
+                playBadgeUnlock();
+            }
+            setCoins._lastLevel = info.level;
+        }
+
+        function setStreak(streak) {
+            var s = Number(streak) || 0;
+            var badge = document.getElementById('streakBadge');
+            badge.textContent = '\uD83D\uDD25 ' + s + ' day streak';
+            if (s > 0) { badge.classList.add('active'); badge.classList.add('streak-fire'); }
+            else { badge.classList.remove('active'); badge.classList.remove('streak-fire'); }
+
+            if (setStreak._firstSet !== true) {
+                setStreak._firstSet = true;
+                if (s > 3) playStreakSound();
+            }
+        }
+
+        function escapeHtml(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        function escapeAttr(t) {
+            return escapeHtml(t).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function parseJSON(raw, fallback) {
+            if (raw == null) return fallback;
+            if (typeof raw === 'object') return raw;
+            try { return JSON.parse(String(raw)); } catch (_) { return fallback; }
+        }
+
+        function parseChallengeOptions(raw) {
+            if (Array.isArray(raw)) {
+                return raw.map(function(item, idx) {
+                    if (item && typeof item === 'object') {
+                        return {
+                            value: String(item.value != null ? item.value : ('opt_' + (idx + 1))),
+                            label: String(item.label != null ? item.label : item.value != null ? item.value : '')
+                        };
+                    }
+                    var txt = String(item == null ? '' : item).trim();
+                    return { value: txt, label: txt };
+                }).filter(function(opt) { return !!opt.label; });
+            }
+            var parsed = parseJSON(raw, null);
+            if (Array.isArray(parsed)) return parseChallengeOptions(parsed);
+            return String(raw || '').split(/\r?\n|,/).map(function(x) { return x.trim(); }).filter(Boolean).map(function(txt) {
+                return { value: txt, label: txt };
+            });
+        }
+
+        function normalizeQuestionType(type) {
+            var t = String(type || 'open').trim().toLowerCase();
+            if (t === 'true/false' || t === 'true-false' || t === 'boolean') return 'true_false';
+            if (t === 'multiple-choice' || t === 'multi_choice' || t === 'mcq') return 'multiple_choice';
+            return t || 'open';
+        }
+
+        function getChallengeQuestionsList(challenge) {
+            var payload = parseJSON(challenge && challenge.question_payload, {}) || {};
+            var qList = Array.isArray(challenge && challenge.questions) ? challenge.questions : [];
+            if (!qList.length && Array.isArray(payload.questions)) {
+                qList = payload.questions;
+            }
+            if (!qList.length) {
+                qList = [{
+                    id: 'q-1',
+                    question_type: normalizeQuestionType(challenge && challenge.challenge_type),
+                    question_text: challenge && (challenge.question_text || challenge.description || challenge.title) || '',
+                    payload: payload,
+                    correct_answer: challenge && challenge.correct_answer || ''
+                }];
+            }
+            return qList.map(function(q, idx) {
+                var qp = parseJSON(q && q.payload, {}) || {};
+                if (!qp.options && Array.isArray(q && q.options)) qp.options = q.options;
+                if (!qp.options && Array.isArray(challenge && challenge.options) && idx === 0) qp.options = challenge.options;
+                return {
+                    id: String(q && q.id || ('q-' + (idx + 1))),
+                    question_type: normalizeQuestionType(q && q.question_type || challenge && challenge.challenge_type),
+                    question_text: String(q && q.question_text || '').trim(),
+                    payload: qp,
+                    correct_answer: q && q.correct_answer != null ? q.correct_answer : ''
+                };
+            });
+        }
+
+        var challengeRuntimeMap = {};
+
+        function buildQuestionInputHtml(challengeId, questionIndex, q) {
+            var qType = normalizeQuestionType(q.question_type);
+            var qPayload = q.payload || {};
+            var optionList = parseChallengeOptions(qPayload.options || []);
+            if (qType === 'true_false') {
+                return '<select class="form-select form-select-sm" id="challenge-' + challengeId + '-q-' + questionIndex + '">' +
+                    '<option value="">Select...</option><option value="true">True</option><option value="false">False</option></select>';
+            }
+            if (qType === 'multiple_choice') {
+                return '<select class="form-select form-select-sm" id="challenge-' + challengeId + '-q-' + questionIndex + '"><option value="">Select one option</option>' +
+                    optionList.map(function(opt) {
+                        return '<option value="' + escapeAttr(opt.value || '') + '">' + escapeHtml(opt.label || '') + '</option>';
+                    }).join('') + '</select>';
+            }
+            if (qType === 'multiple_select') {
+                return '<div class="d-flex flex-column gap-1">' + optionList.map(function(opt) {
+                    return '<label class="small"><input type="checkbox" name="challenge-' + challengeId + '-q-' + questionIndex + '" value="' + escapeAttr(opt.value || '') + '"> ' + escapeHtml(opt.label || '') + '</label>';
+                }).join('') + '</div>';
+            }
+            if (qType === 'matching' && qPayload.pairs && typeof qPayload.pairs === 'object') {
+                var leftTerms = Object.keys(qPayload.pairs);
+                var rightValues = leftTerms.map(function(k) { return qPayload.pairs[k]; });
+                return '<div class="d-flex flex-column gap-1">' + leftTerms.map(function(term, pairIdx) {
+                    return '<div class="d-flex gap-2 align-items-center"><span class="small" style="min-width:110px;">' + escapeHtml(term) + '</span><select class="form-select form-select-sm" id="challenge-' + challengeId + '-q-' + questionIndex + '-pair-' + pairIdx + '"><option value="">Select...</option>' +
+                        rightValues.map(function(v) {
+                            var safeV = escapeHtml(v || '');
+                            return '<option value="' + escapeAttr(v || '') + '">' + safeV + '</option>';
+                        }).join('') + '</select></div>';
+                }).join('') + '</div>';
+            }
+            if (qType === 'fill_blank') {
+                return '<input type="text" class="form-control form-control-sm" id="challenge-' + challengeId + '-q-' + questionIndex + '" placeholder="Type your answer">';
+            }
+            return '<input type="text" class="form-control form-control-sm" id="challenge-' + challengeId + '-q-' + questionIndex + '" placeholder="Your answer">';
+        }
+
+        function collectCurrentQuestionAnswer(challengeId, q, questionIndex) {
+            var qType = normalizeQuestionType(q.question_type);
+            var qPayload = q.payload || {};
+            if (qType === 'multiple_select') {
+                var selected = Array.from(document.querySelectorAll('input[name="challenge-' + challengeId + '-q-' + questionIndex + '"]:checked')).map(function(el) { return el.value; });
+                return selected.length ? selected : null;
+            }
+            if (qType === 'matching' && qPayload.pairs && typeof qPayload.pairs === 'object') {
+                var out = {};
+                var keys = Object.keys(qPayload.pairs);
+                var missingPair = false;
+                keys.forEach(function(term, pairIdx) {
+                    var sel = document.getElementById('challenge-' + challengeId + '-q-' + questionIndex + '-pair-' + pairIdx);
+                    out[term] = sel ? sel.value : '';
+                    if (!out[term]) missingPair = true;
+                });
+                if (missingPair) return null;
+                return JSON.stringify(out);
+            }
+            var input = document.getElementById('challenge-' + challengeId + '-q-' + questionIndex);
+            var value = input ? input.value.trim() : '';
+            return value ? value : null;
+        }
+
+        async function chargeChallengeRetry(challengeId) {
+            var pay = await debitCoinsByDocumentoId(user.documento_id, 5);
+            if (!pay.ok) return { ok: false, error: pay.error || 'Could not process retry payment' };
+            console.debug('[CHALLENGE_FLOW] Retry clicked; charged 5 coins; challenge=' + challengeId);
+            var fresh = await getProfileById(user.id);
+            if (fresh) {
+                setCoins(fresh.monedas);
+                user.monedas = fresh.monedas;
+            }
+            return { ok: true, charged: 5 };
+        }
+
+        function isCurrentUserBidder(bidderId) {
+            var b = String(bidderId || '');
+            return b && (b === String(user.id || '') || b === String(user.documento_id || ''));
+        }
+
+        function isCurrentUserBidderName(bidderName) {
+            var name = String(bidderName || '').trim().toLowerCase();
+            if (!name) return false;
+            var myName = String(user.nombre_completo || '').trim().toLowerCase();
+            var myDoc = String(user.documento_id || '').trim().toLowerCase();
+            return (myName && name === myName) || (myDoc && name === myDoc);
+        }
+
+        function isCurrentUserLeadingAuction(auctionRow) {
+            if (!auctionRow) return false;
+            return isCurrentUserBidder(auctionRow.highest_bidder_id) ||
+                isCurrentUserBidder(auctionRow.winner_id) ||
+                isCurrentUserBidderName(auctionRow.highest_bidder_name);
+        }
+
+        var auctionLeadState = {};
+
+        // --- Manual Code Check-in ---
+        var manualCheckinBusy = false;
+        document.getElementById('btnManualCheckin').addEventListener('click', async function() {
+            if (manualCheckinBusy) return;
+            var code = document.getElementById('manualCode').value.trim().toUpperCase();
+            var statusEl = document.getElementById('manualCheckinStatus');
+            var btn = document.getElementById('btnManualCheckin');
+            manualCheckinBusy = true;
+            if (btn) { btn.disabled = true; btn.textContent = 'Checking...'; }
+            if (!code || code.length < 4) {
+                statusEl.className = 'mt-2 small text-danger';
+                statusEl.textContent = 'Enter a valid code.';
+                statusEl.style.display = 'block';
+                manualCheckinBusy = false;
+                if (btn) { btn.disabled = false; btn.textContent = 'Check In'; }
+                return;
+            }
+            statusEl.className = 'mt-2 small text-info'; statusEl.textContent = 'Checking...'; statusEl.style.display = 'block';
+
+            var hasToday = await hasAttendanceToday(user.documento_id);
+            if (hasToday) {
+                statusEl.className = 'mt-2 small text-danger';
+                statusEl.textContent = 'You already checked in today.';
+                manualCheckinBusy = false;
+                if (btn) { btn.disabled = false; btn.textContent = 'Check In'; }
+                return;
+            }
+
+            var sessionResult = await getAttendanceSessionByCode(code);
+            if (!sessionResult.ok || !sessionResult.session) {
+                statusEl.className = 'mt-2 small text-danger';
+                statusEl.textContent = sessionResult.error || 'Invalid or expired code.';
+                manualCheckinBusy = false;
+                if (btn) { btn.disabled = false; btn.textContent = 'Check In'; }
+                return;
+            }
+
+            var session = sessionResult.session;
+            function completeCheckin(lat, lng, geoStatus) {
+                try {
+                    insertAttendance(user.documento_id, session.group_code, lat, lng, {
+                        sessionId: session.id,
+                        sessionCode: code,
+                        geoStatus: geoStatus
+                    }).then(async function() {
+                    var award = await awardCoinsForCheckin(user.documento_id, session.starts_at || session.created_at || null);
+                    var streakResult = await updateStreak(user.documento_id);
+                    var msg = 'Checked in!';
+                    if (award.ok && award.coinsAwarded) msg += ' +' + award.coinsAwarded + ' coins!';
+                    if (streakResult.ok && streakResult.newStreak) msg += ' Streak: ' + streakResult.newStreak + ' days!';
+                    if (geoStatus !== 'ok') msg += ' (GPS tolerant mode)';
+                    statusEl.className = 'mt-2 small text-success'; statusEl.textContent = msg;
+                    var updated = await getProfileById(user.id);
+                    if (updated) { user.monedas = updated.monedas; user.current_streak = updated.current_streak; setCoins(updated.monedas); setStreak(updated.current_streak); }
+                    document.getElementById('todayStatus').className = 'alert alert-success mb-0';
+                    document.getElementById('todayStatus').innerHTML = '<i class="bi bi-check-circle-fill"></i> Checked in today';
+                    loadAttendanceHistory();
+                    }).catch(function(e) {
+                        statusEl.className = 'mt-2 small text-danger'; statusEl.textContent = 'Error: ' + (e.message || 'Try again.');
+                    }).finally(function() {
+                        manualCheckinBusy = false;
+                        if (btn) { btn.disabled = false; btn.textContent = 'Check In'; }
+                    });
+                } catch (e) {
+                    statusEl.className = 'mt-2 small text-danger'; statusEl.textContent = 'Error: ' + (e.message || 'Try again.');
+                    manualCheckinBusy = false;
+                    if (btn) { btn.disabled = false; btn.textContent = 'Check In'; }
+                }
+            }
+
+            if (!navigator.geolocation) {
+                completeCheckin(null, null, 'no_geolocation');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                var sLat = pos.coords.latitude;
+                var sLng = pos.coords.longitude;
+                var status = 'ok';
+                if (session.admin_lat != null && session.admin_lng != null) {
+                    var dist = haversineDistance(Number(session.admin_lat), Number(session.admin_lng), sLat, sLng);
+                    if (Number.isFinite(dist) && dist > (CONFIG.geofenceMeters || 50)) status = 'outside_radius';
+                }
+                completeCheckin(sLat, sLng, status);
+            }, function() {
+                completeCheckin(null, null, 'gps_failed');
+            }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+        });
+
+        // --- Marketplace (Shop + Auctions) ---
+        var bidBusyMap = {};
+        async function doBid(auctionId) {
+            if (bidBusyMap[auctionId]) return;
+            var input = document.getElementById('bidInput-' + auctionId);
+            if (!input) return;
+            var bid = parseInt(input.value, 10);
+            var minBid = parseInt(input.min, 10) || 1;
+            if (isNaN(bid) || bid < minBid) { showBidToast('Bid must be at least ' + minBid + ' coins.', 'warning'); return; }
+            var btn = document.getElementById('bidBtn-' + auctionId);
+            bidBusyMap[auctionId] = true;
+            try {
+                if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
+                var result = await placeBid(auctionId, user.documento_id, bid);
+                if (result.ok) {
+                    showBidToast('Bid placed! ' + bid + ' coins', 'success');
+                    if (result.warning) {
+                        showBidToast(result.warning, 'warning');
+                    }
+                    loadMarketplace();
+                    var u = await getProfileById(user.id);
+                    if (u) { setCoins(u.monedas); user.monedas = u.monedas; }
+                } else {
+                    showBidToast(result.error || 'Could not place bid.', 'warning');
+                    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> Bid'; }
+                }
+            } catch (e) {
+                showBidToast((e && e.message) || 'Could not place bid.', 'warning');
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> Bid'; }
+            } finally {
+                bidBusyMap[auctionId] = false;
+            }
+        }
+        window.doBid = doBid;
+
+        var buyBusyMap = {};
+        async function doBuy(itemId, price) {
+            if (buyBusyMap[itemId]) return;
+            if (!confirm('Buy this item for ' + price + ' coins?')) return;
+            buyBusyMap[itemId] = true;
+            try {
+                var result = await buyShopItem(itemId, user.documento_id);
+                if (result.ok) { showBidToast('Purchased!', 'success'); loadMarketplace(); var u = await getProfileById(user.id); if (u) { setCoins(u.monedas); user.monedas = u.monedas; } }
+                else showBidToast(result.error || 'Could not buy.', 'warning');
+            } catch (e) {
+                showBidToast((e && e.message) || 'Could not buy.', 'warning');
+            } finally {
+                buyBusyMap[itemId] = false;
+            }
+        }
+        window.doBuy = doBuy;
+
+        // Auction countdown interval
+        var _auctionTimerInterval = null;
+        function startAuctionTimers() {
+            if (_auctionTimerInterval) clearInterval(_auctionTimerInterval);
+            _auctionTimerInterval = setInterval(function() {
+                document.querySelectorAll('[data-auction-end]').forEach(function(el) {
+                    var endMs = parseInt(el.getAttribute('data-auction-end'), 10);
+                    var remain = Math.max(0, Math.round((endMs - Date.now()) / 1000));
+                    if (remain > 0) {
+                        var m = Math.floor(remain / 60), s = remain % 60;
+                        el.textContent = (m > 0 ? m + 'm ' : '') + s + 's';
+                        el.className = 'badge bg-warning text-dark';
+                    } else {
+                        el.textContent = 'Ended';
+                        el.className = 'badge bg-danger';
+                    }
+                });
+            }, 1000);
+        }
+
+        async function loadMarketplace() {
+            var list = await getActiveAuctionsForStudent(user.grupo);
+            var el = document.getElementById('marketplace');
+            auctionLeadState = {};
+            if (!list.length) { el.innerHTML = '<p class="text-muted small">No items available. Check back later!</p>'; return; }
+
+            var auctionRows = list.filter(function(a) { return (a.item_type || 'auction') !== 'shop'; });
+            if (auctionRows.length) {
+                await Promise.all(auctionRows.map(async function(a) {
+                    try {
+                        var bids = await getAuctionBids(a.id);
+                        var top = Array.isArray(bids) && bids.length ? bids[0] : null;
+                        if (top) {
+                            a.highest_bidder_id = top.bidder_id || a.highest_bidder_id || null;
+                            a.highest_bidder_name = top.bidder_name || a.highest_bidder_name || null;
+                            a.current_bid = Math.max(Number(a.current_bid) || 0, Number(top.bid_amount) || 0);
+                        }
+                    } catch (_) {}
+                }));
+            }
+
+            var cards = list.map(function(a) {
+                var isShop = a.item_type === 'shop';
+                var isMyBid = isCurrentUserLeadingAuction(a);
+                auctionLeadState[a.id] = isMyBid;
+                var leaderStatus = isMyBid
+                    ? '<span class="badge bg-success" style="font-size:0.72rem;">You are leading</span>'
+                    : (a.highest_bidder_name ? '<span class="badge bg-warning text-dark" style="font-size:0.72rem;">You were outbid</span>' : '<span class="badge bg-secondary" style="font-size:0.72rem;">No bids yet</span>');
+                var timerHtml = '';
+                if (!isShop && a.start_at && a.duration_seconds) {
+                    var endMs = new Date(a.start_at).getTime() + (a.duration_seconds * 1000);
+                    var remain = Math.max(0, Math.round((endMs - Date.now()) / 1000));
+                    timerHtml = '<span data-auction-end="' + endMs + '" class="badge ' + (remain > 0 ? 'bg-warning text-dark' : 'bg-danger') + '" style="font-size:0.75rem;"><i class="bi bi-clock"></i> ' + (remain > 0 ? remain + 's' : 'Ended') + '</span> ';
+                }
+                var bidBtnLabel = isMyBid ? 'You are highest bidder ✅' : '<i class="bi bi-lightning-charge-fill"></i> Bid';
+                var bidBtnDisabled = isMyBid ? 'disabled' : '';
+                return '<div class="marketplace-card' + (isMyBid ? ' my-bid' : '') + '" id="auction-' + a.id + '">' +
+                    '<div class="d-flex justify-content-between align-items-start">' +
+                    '<h6 class="mb-0">' + timerHtml + escapeHtml(a.item_name || '') + '</h6>' +
+                    '<span class="reward-tag">' + (a.base_price || 0) + ' coins</span></div>' +
+                    (a.description ? '<p class="small text-muted mb-1 mt-1">' + escapeHtml(a.description) + '</p>' : '') +
+                    (isShop
+                        ? '<div class="mt-2"><button type="button" class="btn btn-primary btn-sm" style="width:auto;" onclick="doBuy(\'' + a.id + '\',' + a.base_price + ')"><i class="bi bi-cart-fill"></i> Buy Now (' + (a.stock_quantity || 0) + ' left)</button></div>'
+                        : '<div class="bid-info mt-2">' +
+                          leaderStatus + ' ' +
+                          (a.highest_bidder_name ? '<span class="bid-leader"><i class="bi bi-person-fill"></i> ' + escapeHtml(a.highest_bidder_name) + '</span>' + (isMyBid ? ' <span class="badge bg-success" style="font-size:0.7rem;">You</span>' : '') : '<span class="text-muted small">No bids yet</span>') +
+                          '</div>' +
+                          '<div class="d-flex gap-2 align-items-center mt-2">' +
+                          '<input type="number" class="form-control form-control-sm" id="bidInput-' + a.id + '" min="' + ((Number(a.current_bid) || 0) + 1) + '" placeholder="Your bid" style="max-width:100px;">' +
+                          '<button type="button" class="btn btn-primary btn-sm" id="bidBtn-' + a.id + '" style="width:auto;white-space:nowrap;" ' + bidBtnDisabled + ' onclick="doBid(\'' + a.id + '\')">' + bidBtnLabel + '</button></div>'
+                    ) + '</div>';
+            });
+            var auctionCards = cards.filter(function(_, i) { return (list[i].item_type || 'auction') !== 'shop'; });
+            var shopCards = cards.filter(function(_, i) { return (list[i].item_type || 'auction') === 'shop'; });
+            var html = '';
+            html += '<h6 class="mb-2 section-title"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Auctions">Live Auctions</h6>' + (auctionCards.length ? auctionCards.join('') : '<p class="text-muted small">No active auctions right now.</p>');
+            html += '<h6 class="mb-2 mt-3 section-title"><img src="assets/images/icono-tienda.webp" class="ui-icon" loading="lazy" alt="Shop">Mini Shop</h6>' + (shopCards.length ? shopCards.join('') : '<p class="text-muted small">No shop items available.</p>');
+            el.innerHTML = html;
+            startAuctionTimers();
+        }
+
+        // Polling for live auction updates
+        var marketplacePollingInterval = null;
+        var marketplacePausedUntil = 0;
+        function startMarketplacePolling() {
+            if (marketplacePollingInterval) clearInterval(marketplacePollingInterval);
+            marketplacePollingInterval = setInterval(function() {
+                if (Date.now() < marketplacePausedUntil) return;
+                if (document.getElementById('marketplace')) {
+                    loadMarketplace();
+                } else {
+                    clearInterval(marketplacePollingInterval);
+                    marketplacePollingInterval = null;
+                }
+            }, 2500);
+        }
+        function stopMarketplacePolling() {
+            if (marketplacePollingInterval) {
+                clearInterval(marketplacePollingInterval);
+                marketplacePollingInterval = null;
+            }
+        }
+
+        // Prevent bid input from being cleared by polling re-render
+        document.addEventListener('focusin', function(e) {
+            var t = e && e.target;
+            if (t && t.id && String(t.id).indexOf('bidInput-') === 0) {
+                marketplacePausedUntil = Date.now() + 300000; // 5 minutes max
+            }
+        });
+        document.addEventListener('focusout', function(e) {
+            var t = e && e.target;
+            if (t && t.id && String(t.id).indexOf('bidInput-') === 0) {
+                marketplacePausedUntil = Date.now() + 1200; // small grace then resume
+            }
+        });
+
+        // --- Challenges (type-specific UI) ---
+        async function loadStudentChallenges() {
+            var activeEl = document.getElementById('studentChallengeActiveList');
+            var finishedEl = document.getElementById('studentChallengeFinishedList');
+            activeEl.innerHTML = '<p class="text-muted small">Loading...</p>';
+            finishedEl.innerHTML = '<p class="text-muted small mb-0">Loading...</p>';
+            var challenges = await getActiveChallengesForStudent(user.grupo);
+            var submissions = await getStudentSubmissions(user.documento_id);
+            var activeChallengeIds = {};
+            challenges.forEach(function(c) { activeChallengeIds[String(c.id)] = true; });
+            Object.keys(challengeRuntimeMap).forEach(function(id) {
+                if (!activeChallengeIds[id]) delete challengeRuntimeMap[id];
+            });
+            var attemptsMap = {};
+            submissions.forEach(function(s) {
+                if (!attemptsMap[s.challenge_id]) attemptsMap[s.challenge_id] = [];
+                attemptsMap[s.challenge_id].push(s);
+            });
+
+            for (var i = 0; i < challenges.length; i++) {
+                var c = challenges[i];
+                try {
+                    var dbQuestions = await getChallengeQuestions(c.id, c);
+                    if (dbQuestions && dbQuestions.length) c.questions = dbQuestions;
+                } catch (_) {}
+            }
+
+            if (!challenges.length) {
+                activeEl.innerHTML = '<p class="text-muted small">No active challenges right now.</p>';
+                finishedEl.innerHTML = '<p class="text-muted small mb-0">No finished challenges yet.</p>';
+                renderActiveChallengeSpotlight(null);
+                return;
+            }
+
+            renderActiveChallengeSpotlight(challenges[0]);
+
+            function renderChallengeCard(c, done, canRetry, sub) {
+                var questions = getChallengeQuestionsList(c);
+                var runtime = challengeRuntimeMap[c.id] || {};
+                if (!Array.isArray(runtime.questions) || !runtime.questions.length) runtime.questions = questions;
+                runtime.currentQuestionIndex = Number.isFinite(runtime.currentQuestionIndex) ? runtime.currentQuestionIndex : 0;
+                runtime.attemptsOnCurrentQuestion = Number.isFinite(runtime.attemptsOnCurrentQuestion) ? runtime.attemptsOnCurrentQuestion : 0;
+                runtime.retryPending = !!runtime.retryPending;
+                runtime.currentSubmitBusy = !!runtime.currentSubmitBusy;
+                runtime.retryBusy = !!runtime.retryBusy;
+                runtime.answerMap = runtime.answerMap && typeof runtime.answerMap === 'object' ? runtime.answerMap : {};
+                runtime.chargedRetries = Number(runtime.chargedRetries) || 0;
+                runtime.lastFeedback = runtime.lastFeedback || '';
+                runtime.lastFeedbackTone = runtime.lastFeedbackTone || 'info';
+                challengeRuntimeMap[c.id] = runtime;
+                var winnersInfo = (c.current_winners || 0) + '/' + (c.max_winners || 10);
+                var header = '<div class="d-flex justify-content-between align-items-start mb-1">' +
+                    '<strong>' + escapeHtml(c.title || '') + '</strong>' +
+                    '<span class="reward-tag">' + winnersInfo + '</span></div>';
+                var intro = (c.description ? '<p class="small text-muted mb-2">' + escapeHtml(c.description) + '</p>' : '');
+
+                if (done) {
+                    var coinsTxt = sub && sub.coins_awarded ? ' · +' + sub.coins_awarded + ' coins' : '';
+                    var isWin = !(sub && sub.is_correct === false);
+                    var doneHtml = isWin
+                        ? '<div class="d-flex align-items-center gap-2 mt-2"><span style="font-size:1.5rem;">🏆</span><div><div class="text-success" style="font-weight:700;">Completed!' + coinsTxt + '</div><div class="small text-muted">Challenge conquered</div></div></div>'
+                        : '<div class="d-flex align-items-center gap-2 mt-2"><span style="font-size:1.5rem;">💀</span><div><div class="text-danger" style="font-weight:700;">Incorrect' + coinsTxt + '</div><div class="small text-muted">All retries used</div></div></div>';
+                    return '<div class="challenge-card completed" style="opacity:0.82;">' + header + intro + doneHtml + '</div>';
+                }
+
+                var qIdx = Math.min(runtime.currentQuestionIndex, Math.max(0, runtime.questions.length - 1));
+                runtime.currentQuestionIndex = qIdx;
+                var currentQuestion = runtime.questions[qIdx];
+                var progressPct = Math.round(((qIdx + 1) / Math.max(1, runtime.questions.length)) * 100);
+                var progressTop = '<div class="small text-muted mb-2">Question ' + (qIdx + 1) + ' of ' + runtime.questions.length + '</div>' +
+                    '<div class="progress mb-2" style="height:8px;"><div class="progress-bar" role="progressbar" style="width:' + progressPct + '%" aria-valuenow="' + progressPct + '" aria-valuemin="0" aria-valuemax="100"></div></div>';
+                var questionHtml = '<div class="mb-2"><div class="small text-muted">Question ' + (qIdx + 1) + '</div><label class="form-label mb-1">' + escapeHtml(currentQuestion.question_text || ('Question ' + (qIdx + 1))) + '</label>' +
+                    buildQuestionInputHtml(c.id, qIdx, currentQuestion) + '</div>';
+                var retryHint = runtime.retryPending
+                    ? '<div class="small text-warning mb-2"><i class="bi bi-coin"></i> Incorrect. Retry costs 5 coins.</div>'
+                    : '<div class="small text-muted mb-2">Submit answer for immediate feedback.</div>';
+                var feedbackClass = runtime.lastFeedbackTone === 'success' ? 'text-success' : (runtime.lastFeedbackTone === 'danger' ? 'text-danger' : 'text-info');
+                var feedbackEmoji = '';
+                if (runtime.lastFeedbackTone === 'success') feedbackEmoji = '✅ ';
+                else if (runtime.lastFeedbackTone === 'danger') feedbackEmoji = '❌ ';
+                var feedbackHtml = runtime.lastFeedback
+                    ? '<div class="' + feedbackClass + ' mb-2" style="font-size:0.95rem;font-weight:600;">' + feedbackEmoji + escapeHtml(runtime.lastFeedback) + '</div>'
+                    : '';
+                var submitDisabled = runtime.currentSubmitBusy ? 'disabled' : '';
+                var retryDisabled = runtime.retryPending && runtime.retryBusy ? 'disabled' : '';
+                var submitLabel = runtime.currentSubmitBusy ? 'Checking...' : 'Submit';
+                var retryBtn = runtime.retryPending
+                    ? '<button type="button" class="btn btn-warning btn-sm me-2" style="width:auto;" ' + retryDisabled + ' onclick="doRetryChallengeQuestion(\'' + c.id + '\')">' + (runtime.retryBusy ? 'Charging...' : 'Retry (cost 5 coins)') + '</button>'
+                    : '';
+                var hintBtn = '<button type="button" class="btn btn-outline-warning btn-sm" style="width:auto;" onclick="doDrakoHint(\'' + c.id + '\')">🐉 Hint (2 coins)</button>';
+                var hintArea = runtime.drakoHint ? '<div class="alert alert-warning mt-2 mb-0 small"><strong>🐉 Drako says:</strong> ' + escapeHtml(runtime.drakoHint) + '</div>' : '';
+                return '<div class="challenge-card active-glow">' + header + intro + progressTop + retryHint + feedbackHtml + questionHtml +
+                    '<div class="d-flex gap-2">' + retryBtn + '<button type="button" class="btn btn-primary btn-sm" style="width:auto;" ' + submitDisabled + ' onclick="doSubmitChallenge(\'' + c.id + '\')">' + submitLabel + '</button>' + hintBtn + '</div>' +
+                    hintArea +
+                    '<div class="small text-info mt-2">1st-3rd: 40c · 4th-6th: 20c · 7th-10th: 10c</div>' +
+                    '</div>';
+            }
+
+            var activeCards = [];
+            var finishedCards = [];
+            challenges.forEach(function(c) {
+                var attempts = attemptsMap[c.id] || [];
+                var sub = attempts.length ? attempts[attempts.length - 1] : null;
+                var hasCorrect = attempts.some(function(a) { return a.is_correct === true; });
+                var canRetry = attempts.length === 1 && !hasCorrect;
+                var done = hasCorrect || attempts.length >= 2;
+                var card = renderChallengeCard(c, done, canRetry, sub);
+                if (done) finishedCards.push(card);
+                else activeCards.push(card);
+            });
+
+            activeEl.innerHTML = activeCards.length
+                ? activeCards.join('')
+                : '<div class="text-center py-4"><img src="assets/images/rey-lanzando-monedas.webp" style="width:100px;opacity:0.7;margin-bottom:1rem;" alt="King resting" loading="lazy"><p class="text-muted mb-1" style="font-size:1rem;font-weight:600;">El rey descansa... por ahora.</p><p class="small text-muted">Tu profesor publicará el próximo challenge pronto.<br>Revisa más tarde.</p></div>';
+            finishedEl.innerHTML = finishedCards.length
+                ? finishedCards.join('')
+                : '<p class="text-muted small mb-0">Completa tu primer challenge para verlo aquí. 🏆</p>';
+        }
+
+        var challengeSubmitBusyMap = {};
+        var challengeRetryBusyMap = {};
+        function flashChallengeCard(challengeId, tone) {
+            var cards = document.querySelectorAll('.challenge-card');
+            var targetCard = null;
+            cards.forEach(function(card) {
+                var btn = card.querySelector('[onclick*="' + challengeId + '"]');
+                if (btn) targetCard = card;
+            });
+            if (!targetCard) return;
+            var color = tone === 'correct' ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.20)';
+            targetCard.style.transition = 'background 0.15s ease';
+            targetCard.style.background = color;
+            setTimeout(function() {
+                targetCard.style.background = '';
+            }, 600);
+        }
+
+        function burstCoins(count) {
+            var coinEl = document.getElementById('studentCoins');
+            if (!coinEl) return;
+            var rect = coinEl.getBoundingClientRect();
+            var originX = rect.left + rect.width / 2;
+            var originY = rect.top + rect.height / 2;
+            var emojis = ['🪙', '💰', '⭐', '✨'];
+            for (var i = 0; i < Math.min(count || 6, 8); i++) {
+                (function(idx) {
+                    setTimeout(function() {
+                        var el = document.createElement('div');
+                        el.className = 'coin-particle';
+                        el.textContent = emojis[idx % emojis.length];
+                        var angle = (Math.random() * 360) * (Math.PI / 180);
+                        var dist = 60 + Math.random() * 80;
+                        el.style.setProperty('--tx', Math.round(Math.cos(angle) * dist) + 'px');
+                        el.style.setProperty('--ty', Math.round(Math.sin(angle) * dist - 40) + 'px');
+                        el.style.left = originX + 'px';
+                        el.style.top = originY + 'px';
+                        document.body.appendChild(el);
+                        setTimeout(function() { el.remove(); }, 1000);
+                    }, idx * 80);
+                })(i);
+            }
+        }
+
+        function humanizeError(raw) {
+            var msg = String(raw || '').toLowerCase();
+            if (msg.includes('already completed') || msg.includes('already submitted')) return 'Ya completaste este challenge. ¡Bien hecho!';
+            if (msg.includes('retry limit')) return 'Has usado todos tus intentos en este challenge.';
+            if (msg.includes('not enough coins') || msg.includes('could not process retry')) return 'No tienes suficientes monedas para reintentar.';
+            if (msg.includes('max winners')) return 'Este challenge ya tiene todos sus ganadores. ¡Llegaste tarde!';
+            if (msg.includes('no questions')) return 'Este challenge no tiene preguntas. Contacta a tu profesor.';
+            return raw || 'Algo salió mal. Intenta de nuevo.';
+        }
+
+        async function doSubmitChallenge(challengeId) {
+            if (challengeSubmitBusyMap[challengeId]) return;
+            challengeSubmitBusyMap[challengeId] = true;
+            try {
+                var runtime = challengeRuntimeMap[challengeId] || { questions: [] };
+                var questions = Array.isArray(runtime.questions) ? runtime.questions : [];
+                if (!questions.length) {
+                    showBidToast('This challenge has no questions.', 'warning');
+                    return;
+                }
+                var qIdx = Math.min(Number(runtime.currentQuestionIndex) || 0, questions.length - 1);
+                var q = questions[qIdx];
+                if (runtime.retryPending) {
+                    showBidToast('Click Retry (cost 5 coins) before submitting again.', 'warning');
+                    return;
+                }
+                var value = collectCurrentQuestionAnswer(challengeId, q, qIdx);
+                if (value == null || value === '') {
+                    showBidToast('Please answer question ' + (qIdx + 1) + '.', 'warning');
+                    return;
+                }
+
+                runtime.currentSubmitBusy = true;
+                var localEval = evaluateChallengeAnswer({
+                    challenge_type: q.question_type,
+                    correct_answer: q.correct_answer,
+                    question_payload: q.payload || {}
+                }, value);
+
+                if (localEval.isCorrect) {
+                    playCorrect();
+                    flashChallengeCard(challengeId, 'correct');
+                    runtime.answerMap[q.id || String(qIdx)] = value;
+                    runtime.answerMap[String(qIdx)] = value;
+                    runtime.retryPending = false;
+                    runtime.attemptsOnCurrentQuestion = 0;
+                    runtime.lastFeedback = 'Correct!';
+                    runtime.lastFeedbackTone = 'success';
+                    console.debug('[CHALLENGE_FLOW] Q' + (qIdx + 1) + ' submitted; correct=true; challenge=' + challengeId);
+                    if (qIdx < questions.length - 1) {
+                        runtime.currentQuestionIndex = qIdx + 1;
+                        console.debug('[CHALLENGE_FLOW] advance to Q' + (runtime.currentQuestionIndex + 1) + '; challenge=' + challengeId);
+                        showBidToast('Correct! Moving to next question.', 'success');
+                        runtime.currentSubmitBusy = false;
+                        loadStudentChallenges();
+                        return;
+                    }
+                    var result = await submitChallenge(challengeId, user.documento_id, runtime.answerMap);
+                    runtime.currentSubmitBusy = false;
+                    runtime.lastFeedback = '';
+                    if (!result.ok) {
+                        runtime.lastFeedback = result.error || 'Could not finalize challenge.';
+                        runtime.lastFeedbackTone = 'danger';
+                        showBidToast(humanizeError(runtime.lastFeedback || result.error), 'warning');
+                        loadStudentChallenges();
+                        return;
+                    }
+                    // --- DUOLINGO: Compute rewards, XP, progress, Drako feedback ---
+                    var scorePercent = result.totalQuestions > 0 ? Math.round(((result.correctCount || 0) / result.totalQuestions) * 100) : (result.isCorrect ? 100 : 0);
+                    var challengeObj = runtime._challengeObj || {};
+                    var rewards = computeChallengeRewards(scorePercent, Number(user.current_streak) || 0, challengeObj);
+
+                    // Award XP
+                    if (rewards.xpEarned > 0) {
+                        try { await awardXPToStudent(user.documento_id, rewards.xpEarned); } catch (_) {}
+                    }
+
+                    // Update streak
+                    if (result.isCorrect) {
+                        try {
+                            var streakResult = await updateStreakEnhanced(user.documento_id);
+                            if (streakResult.ok) user.current_streak = streakResult.newStreak;
+                        } catch (_) {}
+                    }
+
+                    // Update skill progress
+                    var challengeSkill = challengeObj.skill_type || challengeObj.skill || '';
+                    var challengeCefr = challengeObj.cefr_level || '';
+                    if (challengeSkill) {
+                        try { await updateStudentProgress(user.documento_id, challengeSkill, challengeCefr, result.isCorrect); } catch (_) {}
+                    }
+
+                    // Generate Drako feedback
+                    var weakSkills = [];
+                    try { weakSkills = await getStudentWeakSkills(user.documento_id); } catch (_) {}
+                    var drakoMsg = generateDrakoFeedback(scorePercent, weakSkills, user.current_streak || 0, challengeSkill);
+
+                    var msg = 'Challenge completed!';
+                    if (result.totalQuestions) msg += ' Score: ' + (result.correctCount || 0) + '/' + result.totalQuestions + '.';
+                    if (result.position) msg += ' Position #' + result.position + '.';
+                    if (result.coinsAwarded) msg += ' +' + result.coinsAwarded + ' coins!';
+                    if (rewards.xpEarned > 0) msg += ' +' + rewards.xpEarned + ' XP!';
+                    if (rewards.streakBonus > 0) msg += ' Streak bonus: +' + rewards.streakBonus + ' coins!';
+                    showBidToast(msg, 'success');
+
+                    // Show Drako feedback panel
+                    if (drakoMsg) {
+                        var drakoPanel = document.getElementById('drakoFeedbackPanel');
+                        if (drakoPanel) {
+                            drakoPanel.innerHTML = '<div class="alert alert-warning mb-3"><strong>🐉 Drako says:</strong><br>' + escapeHtml(drakoMsg).replace(/\n/g, '<br>') + '</div>';
+                            drakoPanel.style.display = '';
+                        }
+                    }
+
+                    if (result.coinsAwarded && result.coinsAwarded > 0) {
+                        burstCoins(Math.min(Math.ceil(result.coinsAwarded / 5), 8));
+                    }
+                    var u = await getProfileById(user.id);
+                    if (u) { setCoins(u.monedas); user.monedas = u.monedas; }
+                    delete challengeRuntimeMap[challengeId];
+                    loadStudentChallenges();
+                    return;
+                }
+
+                runtime.currentSubmitBusy = false;
+                runtime.retryPending = true;
+                runtime.attemptsOnCurrentQuestion = (Number(runtime.attemptsOnCurrentQuestion) || 0) + 1;
+                runtime.lastFeedback = 'Incorrect.';
+                runtime.lastFeedbackTone = 'danger';
+                playWrong();
+                console.debug('[CHALLENGE_FLOW] Q' + (qIdx + 1) + ' submitted; correct=false; challenge=' + challengeId);
+                showBidToast(humanizeError(runtime.lastFeedback), 'warning');
+                loadStudentChallenges();
+                return;
+            } finally {
+                var rt = challengeRuntimeMap[challengeId];
+                if (rt) rt.currentSubmitBusy = false;
+                challengeSubmitBusyMap[challengeId] = false;
+            }
+        }
+        window.doSubmitChallenge = doSubmitChallenge;
+
+        async function doRetryChallengeQuestion(challengeId) {
+            if (challengeRetryBusyMap[challengeId]) return;
+            challengeRetryBusyMap[challengeId] = true;
+            try {
+                var runtime = challengeRuntimeMap[challengeId];
+                if (!runtime || !runtime.retryPending) return;
+                runtime.retryBusy = true;
+                var pay = await chargeChallengeRetry(challengeId);
+                runtime.retryBusy = false;
+                if (!pay.ok) {
+                    runtime.lastFeedback = pay.error || 'Retry payment failed.';
+                    runtime.lastFeedbackTone = 'danger';
+                    showBidToast(runtime.lastFeedback, 'warning');
+                    loadStudentChallenges();
+                    return;
+                }
+                runtime.chargedRetries = (Number(runtime.chargedRetries) || 0) + 1;
+                runtime.attemptsOnCurrentQuestion = (Number(runtime.attemptsOnCurrentQuestion) || 0) + 1;
+                runtime.retryPending = false;
+                runtime.lastFeedback = 'Retry enabled. Submit your new answer.';
+                runtime.lastFeedbackTone = 'info';
+                showBidToast('Retry charged: -5 coins. Try again.', 'info');
+                loadStudentChallenges();
+            } finally {
+                var rt = challengeRuntimeMap[challengeId];
+                if (rt) rt.retryBusy = false;
+                challengeRetryBusyMap[challengeId] = false;
+            }
+        }
+        window.doRetryChallengeQuestion = doRetryChallengeQuestion;
+
+        var drakoHintBusyMap = {};
+        async function doDrakoHint(challengeId) {
+            if (drakoHintBusyMap[challengeId]) return;
+            drakoHintBusyMap[challengeId] = true;
+            try {
+                var runtime = challengeRuntimeMap[challengeId];
+                if (!runtime || !runtime.questions || !runtime.questions.length) {
+                    showBidToast('No question to hint on', 'warning');
+                    return;
+                }
+                var qIdx = runtime.currentQuestionIndex || 0;
+                var currentQ = runtime.questions[qIdx];
+                if (!currentQ) { showBidToast('No current question', 'warning'); return; }
+
+                var pay = await debitCoinsByDocumentoId(user.documento_id, 2);
+                if (!pay.ok) {
+                    showBidToast(pay.error || 'Not enough coins for hint', 'warning');
+                    return;
+                }
+
+                var questionText = currentQ.question_text || currentQ.payload && currentQ.payload.question_text || '';
+                var questionType = currentQ.question_type || 'open';
+                var hintText = '';
+
+                if (questionType === 'multiple_choice' || questionType === 'true_false') {
+                    var options = currentQ.payload && currentQ.payload.options ? currentQ.payload.options : [];
+                    var correct = currentQ.correct_answer || (currentQ.payload && currentQ.payload.correct_answer) || '';
+                    var wrongOptions = [];
+                    if (Array.isArray(options)) {
+                        wrongOptions = options.filter(function(o) {
+                            var label = typeof o === 'object' ? (o.label || o.value || '') : String(o);
+                            return label !== correct;
+                        });
+                    }
+                    if (wrongOptions.length > 0) {
+                        var eliminated = typeof wrongOptions[0] === 'object' ? (wrongOptions[0].label || wrongOptions[0].value) : String(wrongOptions[0]);
+                        hintText = 'I can tell you that "' + eliminated + '" is NOT the correct answer. Think about the remaining options!';
+                    } else {
+                        hintText = 'Read the question carefully and think about what makes grammatical sense.';
+                    }
+                } else if (questionType === 'fill_blank') {
+                    hintText = 'Focus on the grammar structure. What tense or form fits the blank? Think about subject-verb agreement.';
+                } else {
+                    hintText = 'Break down the question: identify the key vocabulary and grammar point being tested. Think step by step!';
+                }
+
+                runtime.drakoHint = hintText;
+                showBidToast('🐉 Drako gave you a hint! (-2 coins)', 'info');
+                loadStudentChallenges();
+            } catch (e) {
+                console.error('[DRAKO_HINT]', e);
+                showBidToast('Hint error: ' + (e.message || 'Unknown'), 'warning');
+            } finally {
+                drakoHintBusyMap[challengeId] = false;
+            }
+        }
+        window.doDrakoHint = doDrakoHint;
+
+        // --- Inventory (The Bag) + Billing Claims ---
+        async function loadInventory() {
+            var el = document.getElementById('inventoryList');
+            el.innerHTML = '<p class="text-muted small">Loading...</p>';
+            var items = await getStudentInventory(user.documento_id);
+            if (!items.length) { el.innerHTML = '<p class="text-muted small">Your bag is empty. Buy items from the Store!</p>'; return; }
+            function getExpireText(item) {
+                if (!item || !item.expires_at) return '';
+                var ms = new Date(item.expires_at).getTime() - Date.now();
+                if (!Number.isFinite(ms)) return '';
+                if (ms <= 0) return 'This reward has expired.';
+                var hours = Math.ceil(ms / (1000 * 60 * 60));
+                if (hours <= 24) return 'Expires in ' + hours + ' hour' + (hours === 1 ? '' : 's');
+                var days = Math.ceil(hours / 24);
+                return 'Expires in ' + days + ' day' + (days === 1 ? '' : 's');
+            }
+
+            var activeItems = [];
+            var expiredItems = [];
+            items.forEach(function(item) {
+                var status = String(item.status || '').toLowerCase();
+                if (status === 'unused') status = 'available';
+                if (status === 'active' || status === 'activated') status = 'pending_delivery';
+                if (status === 'used') status = 'delivered';
+                if (status === 'expired') expiredItems.push(item);
+                else activeItems.push(item);
+            });
+
+            var activeHtml = activeItems.map(function(item) {
+                var status = String(item.status || '').toLowerCase();
+                if (status === 'unused') status = 'available';
+                if (status === 'active' || status === 'activated') status = 'pending_delivery';
+                if (status === 'used') status = 'delivered';
+                var statusBadge = '';
+                var actionBtn = '';
+                var expireText = getExpireText(item);
+                if (status === 'available') {
+                    statusBadge = '<span class="badge bg-warning text-dark" style="font-size:0.75rem;">Available</span>';
+                    actionBtn = '<button type="button" class="btn btn-success btn-sm" style="width:auto;" onclick="doUseItem(\'' + item.id + '\',\'' + escapeHtml(item.item_name).replace(/'/g, "\\'") + '\')"><i class="bi bi-hand-index-thumb"></i> Use</button>';
+                } else if (status === 'pending_delivery') {
+                    statusBadge = '<span class="badge bg-info" style="font-size:0.75rem;">Pending delivery</span>';
+                } else if (status === 'delivered') {
+                    statusBadge = '<span class="badge bg-success" style="font-size:0.75rem;">Delivered</span>';
+                } else if (status === 'archived') {
+                    statusBadge = '<span class="badge bg-secondary" style="font-size:0.75rem;">Archived</span>';
+                } else {
+                    statusBadge = '<span class="badge bg-secondary" style="font-size:0.75rem;">' + escapeHtml(status || item.status || '-') + '</span>';
+                }
+                var dateStr = item.purchased_at ? new Date(item.purchased_at).toLocaleDateString() : '';
+                return '<div class="glass-panel mb-2" style="padding:0.75rem 1rem;">' +
+                    '<div class="d-flex justify-content-between align-items-center">' +
+                    '<div><strong>' + escapeHtml(item.item_name) + '</strong> ' + statusBadge +
+                    '<br><span class="small text-muted">From: ' + escapeHtml(item.item_source || 'shop') + ' · ' + dateStr + '</span>' +
+                    (expireText ? '<br><span class="small text-warning">Warning: ' + escapeHtml(expireText) + '</span>' : '') +
+                    '</div>' +
+                    actionBtn +
+                    '</div></div>';
+            }).join('');
+
+            var expiredHtml = expiredItems.map(function(item) {
+                var dateStr = item.purchased_at ? new Date(item.purchased_at).toLocaleDateString() : '';
+                return '<div class="glass-panel mb-2" style="padding:0.75rem 1rem;opacity:0.85;">' +
+                    '<div><strong>' + escapeHtml(item.item_name) + '</strong> <span class="badge bg-dark" style="font-size:0.75rem;">Expired</span>' +
+                    '<br><span class="small text-muted">From: ' + escapeHtml(item.item_source || 'shop') + ' · ' + dateStr + '</span>' +
+                    '<br><span class="small text-danger">This reward has expired.</span></div>' +
+                    '</div>';
+            }).join('');
+
+            el.innerHTML = (activeHtml || '<p class="text-muted small">No active rewards in your bag.</p>') +
+                (expiredHtml ? ('<hr><h6 class="mt-3">Expired rewards</h6>' + expiredHtml) : '');
+        }
+
+        async function doUseItem(inventoryId, itemName) {
+            if (!confirm('Use "' + itemName + '"? It will move to pending delivery and appear in teacher billing claims.')) return;
+            var result = await createBillingClaim(
+                inventoryId,
+                user.documento_id,
+                user.nombre_completo || user.documento_id,
+                user.grupo || '',
+                itemName
+            );
+            if (result.ok) {
+                showBidToast('Item sent to teacher billing queue (pending delivery).', 'success');
+                loadInventory();
+            } else {
+                showBidToast(result.error || 'Could not use item.', 'warning');
+            }
+        }
+        window.doUseItem = doUseItem;
+
+        // --- Attendance History ---
+        async function loadAttendanceHistory() {
+            var history = await getAttendanceHistory(user.documento_id, 20);
+            var el = document.getElementById('attendanceHistory');
+            if (!history.length) { el.innerHTML = '<p class="text-muted small">No attendance records yet.</p>'; return; }
+            el.innerHTML = history.map(function(h) {
+                var time = h.created_at ? new Date(h.created_at).toLocaleTimeString() : '';
+                return '<div class="attendance-history-item"><span><i class="bi bi-calendar-check"></i> ' + (h.attendance_date || '') + '</span><span class="text-muted small">' + time + '</span></div>';
+            }).join('');
+        }
+
+        function toDateOnly(d) {
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        async function renderProgressToTop() {
+            var top10El = document.getElementById('progressToTop10');
+            var top1El = document.getElementById('progressToTop1');
+            var bar = document.getElementById('topProgressBar');
+            if (!top10El || !top1El || !bar || !user.grupo) return;
+            try {
+                var rows = await getLeaderboard(user.grupo, 30);
+                var myCoins = Number(user.monedas || 0);
+                var top1Coins = rows && rows.length ? Number(rows[0].monedas || 0) : myCoins;
+                var top10Coins = rows && rows.length >= 10 ? Number(rows[9].monedas || 0) : myCoins;
+                var gap10 = Math.max(0, top10Coins - myCoins);
+                var gap1 = Math.max(0, top1Coins - myCoins);
+                top10El.textContent = '⬆️ ' + gap10 + ' coins to reach Top 10';
+                top1El.textContent = '⬆️ ' + gap1 + ' coins to reach #1';
+                var pct = top10Coins > 0 ? Math.max(0, Math.min(100, Math.round((myCoins / top10Coins) * 100))) : 100;
+                bar.style.width = pct + '%';
+            } catch (_) {
+                top10El.textContent = '⬆️ — coins to reach Top 10';
+                top1El.textContent = '⬆️ — coins to reach #1';
+                bar.style.width = '0%';
+            }
+        }
+
+        async function renderMiniAttendanceWeek() {
+            var weekEl = document.getElementById('attendanceMiniWeek');
+            var summaryEl = document.getElementById('attendanceMiniSummary');
+            if (!weekEl || !summaryEl) return;
+            try {
+                var rows = await getAttendanceHistory(user.documento_id, 60);
+                var today = new Date();
+                var dow = today.getDay();
+                var mondayOffset = dow === 0 ? -6 : (1 - dow);
+                var monday = new Date(today);
+                monday.setDate(today.getDate() + mondayOffset);
+                monday.setHours(0, 0, 0, 0);
+                var attendedSet = {};
+                (rows || []).forEach(function(r) { if (r.attendance_date) attendedSet[String(r.attendance_date)] = true; });
+                var marks = [];
+                var done = 0;
+                var total = 0;
+                for (var i = 0; i < 5; i++) {
+                    var d = new Date(monday);
+                    d.setDate(monday.getDate() + i);
+                    var key = toDateOnly(d);
+                    var pastOrToday = d <= today;
+                    if (!pastOrToday) {
+                        marks.push('⏳');
+                    } else {
+                        total += 1;
+                        if (attendedSet[key]) { marks.push('✅'); done += 1; }
+                        else marks.push('❌');
+                    }
+                }
+                weekEl.innerHTML = marks.map(function(m) { return '<span>' + m + '</span>'; }).join('');
+                summaryEl.textContent = 'You attended ' + done + '/' + Math.max(1, total) + ' days this week 🔥';
+            } catch (_) {
+                weekEl.innerHTML = '<span>⏳</span><span>⏳</span><span>⏳</span><span>⏳</span><span>⏳</span>';
+                summaryEl.textContent = 'You attended 0/0 days this week 🔥';
+            }
+        }
+
+        async function renderBadgesGrid() {
+            var el = document.getElementById('studentBadgesGrid');
+            if (!el) return;
+            var streak = Number(user.current_streak || 0);
+            var completedCount = 0;
+            var top3 = false;
+            var perfectWeek = false;
+            try {
+                var subs = await getStudentSubmissions(user.documento_id);
+                completedCount = (subs || []).filter(function(s) { return s.is_correct === true; }).length;
+            } catch (_) {}
+            try {
+                var lb = await getLeaderboard(user.grupo, 5);
+                var myName = String(user.nombre_completo || '').trim().toLowerCase();
+                top3 = (lb || []).slice(0, 3).some(function(r) { return String(r.nombre_completo || '').trim().toLowerCase() === myName; });
+            } catch (_) {}
+            try {
+                var rows = await getAttendanceHistory(user.documento_id, 60);
+                var today = new Date();
+                var dow = today.getDay();
+                var mondayOffset = dow === 0 ? -6 : (1 - dow);
+                var monday = new Date(today);
+                monday.setDate(today.getDate() + mondayOffset);
+                monday.setHours(0,0,0,0);
+                var set = {};
+                (rows || []).forEach(function(r) { if (r.attendance_date) set[String(r.attendance_date)] = true; });
+                perfectWeek = true;
+                for (var i = 0; i < 5; i++) {
+                    var d = new Date(monday);
+                    d.setDate(monday.getDate() + i);
+                    if (d > today) break;
+                    if (!set[toDateOnly(d)]) { perfectWeek = false; break; }
+                }
+            } catch (_) {}
+
+            var badges = [
+                { icon: '🔥', label: '5 day streak', unlocked: streak >= 5 },
+                { icon: '🏆', label: 'Top 3 in challenge', unlocked: top3 },
+                { icon: '📚', label: '10 challenges completed', unlocked: completedCount >= 10 },
+                { icon: '⭐', label: 'Perfect week', unlocked: perfectWeek }
+            ];
+            el.innerHTML = badges.map(function(b) {
+                var style = b.unlocked ? 'background:rgba(255,215,0,0.16);border:1px solid rgba(255,215,0,0.45);' : 'opacity:0.55;filter:grayscale(0.9);border:1px solid rgba(255,255,255,0.12);';
+                var lock = b.unlocked ? '' : ' 🔒';
+                return '<div class="col-6"><div class="glass-panel p-2 small" style="' + style + '"><div style="font-size:1.1rem">' + b.icon + lock + '</div><div>' + b.label + '</div></div></div>';
+            }).join('');
+        }
+
+        var activeChallengeCountdownTimer = null;
+        function renderActiveChallengeSpotlight(challenge) {
+            var el = document.getElementById('activeChallengeSpotlight');
+            if (!el) return;
+            if (activeChallengeCountdownTimer) {
+                clearInterval(activeChallengeCountdownTimer);
+                activeChallengeCountdownTimer = null;
+            }
+            if (!challenge) {
+                el.innerHTML = '<div class="small text-warning">🔥 ACTIVE — Waiting challenge...</div><div class="small text-muted">⏱️ Closes in: --:--:--</div><div class="small text-muted">🪙 Win up to 40 coins</div><button type="button" class="btn btn-sm btn-warning mt-2" onclick="return showStudentView(\'challenges\')">Start Now →</button>';
+                return;
+            }
+            var title = escapeHtml(challenge.title || 'Challenge');
+            var startMs = challenge.start_at ? new Date(challenge.start_at).getTime() : Date.now();
+            var durSec = Math.max(0, Number(challenge.duration_seconds || 0));
+            var endMs = durSec ? (startMs + durSec * 1000) : 0;
+            function fmtRemain(ms) {
+                if (ms <= 0) return '00:00:00';
+                var s = Math.floor(ms / 1000);
+                var hh = String(Math.floor(s / 3600)).padStart(2, '0');
+                var mm = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+                var ss = String(s % 60).padStart(2, '0');
+                return hh + ':' + mm + ':' + ss;
+            }
+            function repaint() {
+                var remain = endMs ? Math.max(0, endMs - Date.now()) : 0;
+                el.innerHTML = '<div class="small text-warning">🔥 ACTIVE — ' + title + '</div>' +
+                    '<div class="small text-muted">⏱️ Closes in: ' + (endMs ? fmtRemain(remain) : '--:--:--') + '</div>' +
+                    '<div class="small text-muted">🪙 Win up to 40 coins</div>' +
+                    '<button type="button" class="btn btn-sm btn-warning mt-2" onclick="return showStudentView(\'challenges\')">Start Now →</button>';
+            }
+            repaint();
+            if (endMs) activeChallengeCountdownTimer = setInterval(repaint, 1000);
+        }
+
+        async function loadActiveChallengeSpotlight() {
+            try {
+                if (!user.grupo) { renderActiveChallengeSpotlight(null); return; }
+                var challenges = await getActiveChallengesForStudent(user.grupo);
+                renderActiveChallengeSpotlight(challenges && challenges.length ? challenges[0] : null);
+            } catch (_) {
+                renderActiveChallengeSpotlight(null);
+            }
+        }
+
+        async function loadStudentActiveChallengeBanner() {
+            var banner = document.getElementById('studentActiveChallengeBanner');
+            var text = document.getElementById('studentActiveChallengeBannerText');
+            if (!banner || !text || !user || !user.grupo) return;
+            var count = 0;
+            try {
+                var q1 = await supabaseClient
+                    .from(CONFIG.tables.challenges)
+                    .select('id', { count: 'exact', head: true })
+                    .eq('status', 'active')
+                    .or('group_code.eq.' + user.grupo + ',group_code.is.null');
+                if (!q1.error) {
+                    count = Number(q1.count) || 0;
+                } else if (typeof isMissingColumnError === 'function' && isMissingColumnError(q1.error, 'group_code', CONFIG.tables.challenges)) {
+                    var q2 = await supabaseClient
+                        .from(CONFIG.tables.challenges)
+                        .select('id', { count: 'exact', head: true })
+                        .eq('status', 'active')
+                        .or('target_group.eq.' + user.grupo + ',target_group.eq.all,target_group.is.null');
+                    if (!q2.error) count = Number(q2.count) || 0;
+                }
+            } catch (_) {}
+
+            if (count > 0) {
+                text.textContent = '🎯 You have ' + count + ' active challenge(s)! Complete them to earn coins!';
+                banner.style.display = '';
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
+        // --- Init (runs once) ---
+        (async function init() {
+            console.log('[INIT] Starting student dashboard initialization...');
+            console.log('[INIT] User:', user.nombre_completo, '| Group:', user.grupo, '| ID:', user.id);
+            
+            // Load profile with error handling
+            try {
+                var updated = await getProfileById(user.id);
+                if (updated) { 
+                    user.monedas = updated.monedas; 
+                    user.current_streak = updated.current_streak;
+                    console.log('[INIT] Profile loaded - Coins:', user.monedas, '| Streak:', user.current_streak);
+                } else {
+                    console.warn('[INIT] Profile not found for ID:', user.id);
+                }
+            } catch (e) {
+                console.error('[INIT] Failed to load profile:', e);
+            }
+            
+            setCoins(user.monedas || 0);
+            setStreak(user.current_streak || 0);
+            renderProgressToTop();
+            renderMiniAttendanceWeek();
+            renderBadgesGrid();
+            loadActiveChallengeSpotlight();
+            loadStudentActiveChallengeBanner();
+
+            var bannerBtn = document.getElementById('btnGoToChallengesBanner');
+            if (bannerBtn) {
+                bannerBtn.addEventListener('click', function() {
+                    showStudentView('challenges');
+                    var target = document.getElementById('viewChallenges');
+                    if (target && typeof target.scrollIntoView === 'function') {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            }
+
+            // Load announcements bulletin
+            try {
+                var announcements = await getActiveAnnouncements(user.grupo);
+                var bulletinSection = document.getElementById('bulletinSection');
+                var bulletinList = document.getElementById('bulletinList');
+                if (announcements && announcements.length) {
+                    bulletinSection.style.display = 'block';
+                    bulletinList.innerHTML = announcements.map(function(a) {
+                        var expiry = a.expiry_date ? 'Expires: ' + a.expiry_date : '';
+                        var tone = String(a.alert_type || 'info');
+                        var cls = tone === 'warning' ? 'alert-warning' : (tone === 'danger' ? 'alert-danger' : (tone === 'success' ? 'alert-success' : 'alert-info'));
+                        var groupTag = a.target_group ? '<span class="badge bg-info" style="font-size:0.7rem;">' + escapeHtml(a.target_group) + '</span> ' : '';
+                        var links = Array.isArray(a.links) ? a.links : [];
+                        var linksHtml = links.length ? '<div class="small mt-1">' + links.map(function(l) {
+                            var label = escapeHtml(l.label || l.url || 'link');
+                            var url = escapeHtml(l.url || '#');
+                            return '<a href="' + url + '" target="_blank" rel="noopener" class="me-2">' + label + '</a>';
+                        }).join('') + '</div>' : '';
+                        return '<div class="alert ' + cls + ' mb-2" style="padding:0.75rem 1rem;">' +
+                            '<div><strong>' + escapeHtml(a.title || 'Announcement') + '</strong></div>' +
+                            '<div>' + groupTag + '<span>' + escapeHtml(a.message) + '</span></div>' +
+                            linksHtml +
+                            '<div class="small text-muted mt-1">' + expiry + '</div></div>';
+                    }).join('');
+                } else {
+                    console.log('No announcements for group:', user.grupo);
+                }
+            } catch (e) {
+                console.error('Failed to load announcements:', e);
+            }
+
+            var statusEl = document.getElementById('todayStatus');
+            try {
+                var hasToday = await hasAttendanceToday(user.documento_id);
+                if (hasToday) { statusEl.className = 'alert alert-success mb-0'; statusEl.innerHTML = '<i class="bi bi-check-circle-fill"></i> Checked in today'; }
+                else { statusEl.className = 'alert alert-warning mb-0'; statusEl.innerHTML = '<i class="bi bi-clock"></i> Not checked in today. Go to Attendance tab.'; }
+            } catch (e) {
+                console.error('Failed to check attendance status:', e);
+                statusEl.className = 'alert alert-danger mb-0';
+                statusEl.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Error loading attendance status';
+            }
+
+            var listEl = document.getElementById('leaderboard');
+            try {
+                if (!user.grupo) {
+                    listEl.innerHTML = '<li class="text-muted">No group assigned. Contact your teacher.</li>';
+                } else {
+                    var leaderboard = await getLeaderboard(user.grupo, 5);
+                    if (!leaderboard || !leaderboard.length) { 
+                        listEl.innerHTML = '<li class="text-muted">No students in your group yet.</li>'; 
+                    } else {
+                        var crownSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#fbbf24" style="vertical-align:-2px;margin-right:4px;filter:drop-shadow(0 0 4px rgba(251,191,36,0.5));"><path d="M12 1L15.09 8.26L23 9.27L17.5 14.14L18.18 22.02L12 18.77L5.82 22.02L6.5 14.14L1 9.27L8.91 8.26L12 1Z"/></svg>';
+                        listEl.innerHTML = leaderboard.map(function(p, i) {
+                            var isMe = p.nombre_completo === user.nombre_completo;
+                            var cls = 'lb-row ' + (i === 0 ? 'top' : '');
+                            if (isMe) cls += ' border border-primary';
+                            var prefix = i === 0 ? crownSvg : ((i + 1) + '. ');
+                            var delay = Math.min(800, i * 90);
+                            return '<li class="' + cls + '" style="animation-delay:' + delay + 'ms;"><span>' + prefix + (p.nombre_completo || '') + (isMe ? ' (you)' : '') + '</span><strong>' + (p.monedas || 0) + ' coins</strong></li>';
+                        }).join('');
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load leaderboard:', e);
+                listEl.innerHTML = '<li class="text-danger">Error loading leaderboard</li>';
+            }
+
+            // Real-time listeners
+            console.log('[INIT] Setting up real-time subscriptions...');
+            try {
+                subscribeToProfileChanges(user.id, function(data) {
+                    console.log('[REALTIME] Profile updated:', data);
+                    if (data.monedas != null) { user.monedas = data.monedas; setCoins(data.monedas); }
+                    if (data.current_streak != null) { user.current_streak = data.current_streak; setStreak(data.current_streak); }
+                    renderProgressToTop();
+                    renderBadgesGrid();
+                });
+                subscribeToAuctionChanges(function(payload) {
+                    console.log('[REALTIME] Auction update:', payload.eventType);
+                    if (payload.new && payload.eventType === 'UPDATE') {
+                        var a = payload.new;
+                        var nowIsMine = isCurrentUserLeadingAuction(a);
+                        var beforeIsMine = !!auctionLeadState[a.id];
+                        if (a.status === 'closed') {
+                            var isWinner = isCurrentUserLeadingAuction(a);
+                            showBidToast('<strong>' + (a.item_name || 'Item') + '</strong> auction closed!' + (isWinner ? ' You won!' : ''), isWinner ? 'success' : 'info');
+                        } else if (beforeIsMine && !nowIsMine) {
+                            showBidToast('You\'ve been outbid ⚠️ Bid again', 'warning');
+                        } else if (a.highest_bidder_name && !nowIsMine) {
+                            showBidToast('New bid on <strong>' + (a.item_name || 'item') + '</strong> by ' + (a.highest_bidder_name || '?'), 'info');
+                        }
+                        auctionLeadState[a.id] = nowIsMine;
+                    }
+                    var sv = document.getElementById('viewStore');
+                    if (sv && sv.classList.contains('active')) {
+                        loadMarketplace();
+                        startMarketplacePolling();
+                    }
+                    // Refresh coins in case we were outbid and refunded
+                    getProfileById(user.id).then(function(u) {
+                        if (u) { user.monedas = u.monedas; setCoins(u.monedas); }
+                    });
+                });
+            } catch (e) {
+                console.error('[INIT] Failed to set up real-time listeners:', e);
+            }
+            
+            console.log('[INIT] Dashboard initialization complete!');
+        })();
+    })();
+    </script>
+</body>
+</html>

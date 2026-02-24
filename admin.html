@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Lingo-Coins</title>
+    <link rel="icon" type="image/webp" href="assets/images/icono-moneda.webp">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-dashboard">
+    <div class="decor-overlay" aria-hidden="true"></div>
+    <div class="container-custom page-container" style="max-width: 960px;">
+        <div class="card card-premium" style="padding: 0; overflow: hidden;">
+            <nav class="admin-nav">
+                <span class="greeting">Hello <strong id="adminName"></strong>, welcome back!</span>
+                <a href="#" id="navDashboard" class="active" onclick="return window.showAdminView('dashboard')">Dashboard</a>
+                <a href="#" id="navAdminDashboard" onclick="return window.showAdminView('adminDashboard')">Dashboard</a>
+                <a href="#" id="navInstitutions" onclick="return window.showAdminView('institutions')">Schools</a>
+                <a href="#" id="navTeachers" onclick="return window.showAdminView('teachers')">Teachers</a>
+                <a href="#" id="navUsers" onclick="return window.showAdminView('users')">Users</a>
+                <a href="#" id="navGroups" onclick="return window.showAdminView('groups')">Groups</a>
+                <a href="#" id="navAttendance" onclick="return window.showAdminView('attendance')">Attendance</a>
+                <a href="#" id="navChallenges" onclick="return window.showAdminView('challenges')">Challenges</a>
+                <a href="#" id="navStore" onclick="return window.showAdminView('store')">Store/Auctions</a>
+                <a href="#" id="navCobros" onclick="return window.showAdminView('cobros')">Cobros</a>
+                <a href="#" id="navAnnouncements" onclick="return window.showAdminView('announcements')">Announcements</a>
+                <a href="#" id="navFeedback" onclick="return window.showAdminView('feedback')">Feedback</a>
+                <a href="#" id="navEconomy" onclick="return window.showAdminView('economy')">Economy</a>
+                <a href="#" id="navAiConfig" onclick="return window.showAdminView('aiConfig')">AI Config</a>
+                <a href="#" id="navPolicies" onclick="return window.showAdminView('policies')">Policies</a>
+                <a href="#" id="navAdmins" onclick="return window.showAdminView('admins')">Admins</a>
+                <button type="button" class="nav-btn" id="btnLogout">Logout</button>
+            </nav>
+
+            <div id="viewDashboard" class="admin-view active">
+                <h5 class="mb-2 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Dashboard">Super Admin Dashboard</h5>
+                <div id="dashboardAlert"></div>
+                <div id="dashboardCards"><p class="text-muted small">Loading dashboard...</p></div>
+            </div>
+
+            <!-- School Admin Dashboard (admin role) -->
+            <div id="viewAdminDashboard" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Dashboard">School Dashboard</h5>
+                <div id="adminDashboardCards" class="row g-3 mb-3">
+                    <p class="text-muted small">Loading...</p>
+                </div>
+                <div id="adminDashboardActivity"></div>
+            </div>
+
+            <div id="viewInstitutions" class="admin-view">
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                    <h5 class="mb-0 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Schools">Schools</h5>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnCreateSchool">Create New School</button>
+                </div>
+                <div id="institutionsList"><p class="text-muted small">Loading schools...</p></div>
+            </div>
+
+            <div id="viewTeachers" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Teachers">Teachers</h5>
+                <p class="small text-muted">Teachers in your institution. Assign groups, view students, and manage teacher PIN/credits.</p>
+                <div id="teachersList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <div id="viewUsers" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Users">Users</h5>
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <div class="row g-2">
+                        <div class="col-md-4"><label class="form-label small">Step 1: School</label><select id="usersSchoolSelect" class="form-select"><option value="">Select school</option></select></div>
+                        <div class="col-md-3"><label class="form-label small">Step 2: Group</label><select id="adminGroupFilter" class="form-select"><option value="">All groups</option></select></div>
+                        <div class="col-md-3"><label class="form-label small">Step 3: Role</label><select id="usersRoleFilter" class="form-select"><option value="">All roles</option><option value="admin">admin</option><option value="teacher">teacher</option><option value="student">student</option></select></div>
+                        <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-primary w-100" id="btnLoadUsersBySchool">Load Users</button></div>
+                    </div>
+                    <div class="small mt-2" id="usersSchoolStats">X admins | X teachers | X students</div>
+                    <div class="d-flex gap-2 mt-2 flex-wrap">
+                        <input type="text" id="studentSearch" class="form-control" style="max-width:280px;" placeholder="Search name or doc">
+                        <input type="text" id="usersDocExact" class="form-control" style="max-width:220px;" placeholder="Exact document ID">
+                        <button type="button" class="btn btn-outline-primary" id="btnRefreshUsers">Refresh</button>
+                    </div>
+                </div>
+                <div id="contentUsers"><p class="text-muted small">Select school and load users.</p></div>
+                <div id="usersPagination" class="mt-2"></div>
+            </div>
+
+            <div id="viewGroups" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Groups">Groups</h5>
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-5"><label class="form-label small">Step 1: School</label><select id="groupsSchoolSelect" class="form-select"><option value="">Select school</option></select></div>
+                        <div class="col-md-3"><button type="button" class="btn btn-primary w-100" id="btnLoadGroupsBySchool">Load Groups</button></div>
+                    </div>
+                </div>
+                <div id="groupsList"><p class="text-muted small">Select a school to load groups.</p></div>
+            </div>
+
+            <div id="viewAttendance" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-asistencia.webp" class="ui-icon" loading="lazy" alt="Attendance">Attendance</h5>
+                <p class="small text-muted">View attendance by date for your school. Export CSV.</p>
+                <div class="d-flex flex-wrap gap-2 align-items-end mb-3">
+                    <div>
+                        <label class="form-label small mb-1">Date</label>
+                        <input type="date" id="adminAttendanceDate" class="form-control" style="max-width:200px;">
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btnLoadAdminAttendance">Load</button>
+                    <button type="button" class="btn btn-outline-success" id="btnExportAdminAttendanceCsv">Export CSV</button>
+                </div>
+                <div id="adminAttendanceList"><p class="text-muted small">Select a date and click Load.</p></div>
+            </div>
+
+            <div id="viewChallenges" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-challenge.webp" class="ui-icon" loading="lazy" alt="Challenges">Challenges</h5>
+                <p class="small text-muted">View and manage challenges for your school. Teachers create challenges; you can close or reopen them.</p>
+
+                <!-- AI GENERATOR PLACEHOLDER — plug future AI module here -->
+                <div id="adminAiGeneratorPlaceholder" class="glass-panel mb-3" style="padding:1rem;border:1px dashed rgba(255,215,0,0.35);">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span style="font-size:1.5rem;">🤖</span>
+                        <span class="fw-bold" style="color:var(--gold-500,#FFD700);">AI Challenge Generator</span>
+                        <span class="badge bg-secondary ms-1">Coming soon</span>
+                    </div>
+                    <p class="small text-muted mb-2">The AI generator will appear here once enabled for your institution. It will use CEFR level, skill, role, context and topic to auto-build challenges.</p>
+                    <!-- Hook point: AI generator will inject its UI into #adminAiGeneratorMount -->
+                    <div id="adminAiGeneratorMount"></div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <select id="adminAiCefrLevel" class="form-select form-select-sm" style="max-width:100px;" disabled>
+                            <option>A1</option><option>A2</option><option selected>B1</option><option>B2</option><option>C1</option>
+                        </select>
+                        <select id="adminAiSkill" class="form-select form-select-sm" style="max-width:140px;" disabled>
+                            <option>Grammar</option><option>Vocabulary</option><option>Reading</option><option>Listening</option>
+                        </select>
+                        <input type="text" id="adminAiTopic" class="form-control form-control-sm" style="max-width:200px;" placeholder="Topic (e.g. Past Perfect)" disabled>
+                        <button type="button" class="btn btn-sm btn-warning" id="btnAdminRunAI" disabled title="AI generation not yet enabled for this institution">
+                            <i class="bi bi-stars"></i> Generate with AI
+                        </button>
+                    </div>
+                    <div id="adminAiStatus" class="small mt-2 text-muted"></div>
+                </div>
+                <!-- END AI PLACEHOLDER -->
+
+                <div id="adminChallengesList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <div id="viewStore" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-tienda.webp" class="ui-icon" loading="lazy" alt="Store">Store & Auctions</h5>
+                <p class="small text-muted">Manage active items for your school and close auctions.</p>
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <div class="row g-2">
+                        <div class="col-md-3"><label class="form-label small mb-1">Mode</label><select id="adminAuctionItemType" class="form-select"><option value="auction">Auction</option><option value="shop">Store item</option></select></div>
+                        <div class="col-md-4"><label class="form-label small mb-1">Item Name</label><input type="text" id="adminAuctionItemName" class="form-control" placeholder="Virtual reward"></div>
+                        <div class="col-md-2"><label class="form-label small mb-1">Price</label><input type="number" id="adminAuctionBasePrice" class="form-control" min="0"></div>
+                        <div class="col-md-3"><label class="form-label small mb-1">Group Target</label><select id="adminAuctionGroup" class="form-select"><option value="">All groups</option></select></div>
+                        <div class="col-md-4"><label class="form-label small mb-1">Description</label><input type="text" id="adminAuctionDescription" class="form-control" placeholder="What student receives"></div>
+                        <div class="col-md-2"><label class="form-label small mb-1">Stock</label><input type="number" id="adminAuctionStock" class="form-control" min="1" value="1"></div>
+                        <div class="col-md-2"><label class="form-label small mb-1">Duration (sec)</label><input type="number" id="adminAuctionDuration" class="form-control" min="30" value="120"></div>
+                        <div class="col-md-4 d-flex align-items-end"><button type="button" class="btn btn-primary w-100" id="btnAdminCreateAuction">Publish Item</button></div>
+                    </div>
+                    <div id="adminAuctionStatus" class="small mt-2"></div>
+                </div>
+                <div id="adminAuctionList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <div id="viewCobros" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Cobros">Cobros</h5>
+                <p class="small text-muted">Pending deliveries for your school. Confirm delivered.</p>
+                <div id="adminBillingClaimsList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <div id="viewAnnouncements" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Announcements">Announcements</h5>
+                <p class="small text-muted">Create announcements for all school or per group.</p>
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <input type="hidden" id="announcementEditId">
+                    <div class="row g-2">
+                        <div class="col-md-4"><label class="form-label small mb-1">Title</label><input type="text" id="announcementTitle" class="form-control"></div>
+                        <div class="col-md-3"><label class="form-label small mb-1">Type</label><select id="announcementType" class="form-select"><option value="info">Info</option><option value="success">Success</option><option value="warning">Warning</option><option value="danger">Danger</option></select></div>
+                        <div class="col-md-3"><label class="form-label small mb-1">Target Group</label><select id="announcementGroup" class="form-select"><option value="">All groups</option></select></div>
+                        <div class="col-md-2"><label class="form-label small mb-1">Expiry</label><input type="date" id="announcementExpiry" class="form-control"></div>
+                        <div class="col-12"><label class="form-label small mb-1">Message</label><textarea id="announcementMessage" class="form-control" rows="3"></textarea></div>
+                        <div class="col-12"><label class="form-label small mb-1">Links (one per line: Label|https://url)</label><textarea id="announcementLinks" class="form-control" rows="2"></textarea></div>
+                        <div class="col-md-4"><button type="button" class="btn btn-primary w-100" id="btnCreateAnnouncement">Save Announcement</button></div>
+                    </div>
+                    <div id="adminAnnouncementStatus" class="small mt-2"></div>
+                </div>
+                <div id="adminAnnouncementsList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <div id="viewFeedback" class="admin-view">
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Feedback">Feedback</h5>
+                <p class="small text-muted">Messages from your students.</p>
+                <div id="adminFeedbackList"><p class="text-muted small">Loading...</p></div>
+            </div>
+
+            <div id="viewEconomy" class="admin-view">
+                <h5 class="mb-2 section-title">Economy</h5>
+                <h6 class="mb-2">Coin Economy</h6>
+                <div id="economyCoinTable"><p class="text-muted small">Loading...</p></div>
+                <h6 class="mb-2 mt-3">AI Credits</h6>
+                <div id="economyAiTable"><p class="text-muted small">Loading...</p></div>
+                <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="btnExportCreditReport">Export Credit Report CSV</button>
+            </div>
+
+            <div id="viewAiConfig" class="admin-view">
+                <h5 class="mb-2 section-title">AI Config</h5>
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <h6>API Keys Globales</h6>
+                    <div class="row g-2">
+                        <div class="col-md-4"><label class="form-label small">OpenAI</label><input id="apiKeyOpenai" type="password" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label small">Anthropic</label><input id="apiKeyAnthropic" type="password" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label small">Google</label><input id="apiKeyGoogle" type="password" class="form-control"></div>
+                    </div>
+                    <button class="btn btn-primary btn-sm mt-2" id="btnSaveApiKeys">Save Keys</button>
+                </div>
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <h6>Modelos por Slot</h6>
+                    <div id="aiModelsForm"></div>
+                    <button class="btn btn-primary btn-sm mt-2" id="btnSaveAiModels">Save Models</button>
+                </div>
+                <div class="glass-panel" style="padding:1rem;">
+                    <h6>Límites Diarios por Estudiante</h6>
+                    <div class="row g-2">
+                        <div class="col-md-4"><label class="form-label small">Daily</label><input id="limitDaily" type="number" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label small">Exam</label><input id="limitExam" type="number" class="form-control"></div>
+                        <div class="col-md-4"><label class="form-label small">ESP</label><input id="limitEsp" type="number" class="form-control"></div>
+                        <div class="col-md-6"><label class="form-label small">Coins/day Challenges</label><input id="limitCoinsChallenges" type="number" class="form-control"></div>
+                        <div class="col-md-6"><label class="form-label small">Coins/day Attendance</label><input id="limitCoinsAttendance" type="number" class="form-control"></div>
+                    </div>
+                    <button class="btn btn-primary btn-sm mt-2" id="btnSaveDailyLimits">Save Limits</button>
+                </div>
+            </div>
+
+            <div id="viewAdmins" class="admin-view">
+                <h5 class="mb-3 section-title">Admins</h5>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <label class="small mb-0">School:</label>
+                    <select id="adminsSchoolFilter" class="form-select" style="max-width:280px;"><option value="">All schools</option></select>
+                </div>
+                <div id="adminUsersList"><p class="text-muted small">Loading...</p></div>
+                <div class="glass-panel mt-3" style="padding:1rem;">
+                    <div class="row g-2">
+                        <div class="col-md-3"><input type="text" id="newAdminName" class="form-control" placeholder="Full name"></div>
+                        <div class="col-md-2"><input type="text" id="newAdminDoc" class="form-control" placeholder="Document"></div>
+                        <div class="col-md-2"><input type="password" id="newAdminPin" class="form-control" placeholder="PIN"></div>
+                        <div class="col-md-2"><select id="newAdminRole" class="form-select"><option value="admin">admin</option><option value="teacher">teacher</option></select></div>
+                        <div class="col-md-3"><select id="newAdminInstitution" class="form-select"><option value="">School</option></select></div>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm mt-2" id="btnCreateAdminUser">Create Admin/Teacher</button>
+                </div>
+            </div>
+
+            <div id="viewPolicies" class="admin-view">
+                <h5 class="mb-3 section-title">Data Policies</h5>
+
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <h6 class="mb-1">Data Retention</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead><tr><th>Data type</th><th>Retention (days)</th><th>Action on expiry</th></tr></thead>
+                            <tbody>
+                                <tr><td>Attendance records</td><td><input id="policyAttendanceDays" class="form-control" type="number" min="1"></td><td>Auto-archive</td></tr>
+                                <tr><td>Challenge results</td><td><input id="policyChallengeDays" class="form-control" type="number" min="1"></td><td>Auto-archive</td></tr>
+                                <tr><td>Feedback messages</td><td><input id="policyFeedbackDays" class="form-control" type="number" min="1"></td><td>Auto-delete</td></tr>
+                                <tr><td>Audit logs</td><td><input id="policyAuditDays" class="form-control" type="number" min="1"></td><td>Auto-archive</td></tr>
+                                <tr><td>Coin transactions</td><td><input id="policyCoinDays" class="form-control" type="number" min="1"></td><td>Keep forever</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="btnSaveDataPolicies">Save Policies</button>
+                </div>
+
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <h6 class="mb-2">Student Data Privacy</h6>
+                    <div class="form-check form-switch"><input id="privacyOwnHistory" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyOwnHistory">Students can see their own coin history</label></div>
+                    <div class="form-check form-switch"><input id="privacyLeaderboard" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyLeaderboard">Students can see leaderboard rankings</label></div>
+                    <div class="form-check form-switch"><input id="privacyOthersCoins" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyOthersCoins">Students can see other students' coins</label></div>
+                    <div class="form-check form-switch"><input id="privacyTeacherLogin" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyTeacherLogin">Teachers can see student login timestamps</label></div>
+                    <div class="form-check form-switch"><input id="privacyTeacherExport" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyTeacherExport">Teachers can export student personal data</label></div>
+                    <div class="form-check form-switch"><input id="privacyAdminAttendance" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyAdminAttendance">Admins can export attendance data</label></div>
+                    <div class="form-check form-switch"><input id="privacyDailyDigest" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyDailyDigest">System sends daily digest to admins</label></div>
+                    <button class="btn btn-primary btn-sm mt-2" id="btnSavePrivacyPolicies">Save Privacy Settings</button>
+                </div>
+
+                <div class="glass-panel mb-3" style="padding:1rem;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h6 class="mb-0">Audit Log (last 50)</h6>
+                        <button class="btn btn-sm btn-outline-primary" id="btnExportAuditCsv">Export CSV</button>
+                    </div>
+                    <div class="row g-2 mt-2">
+                        <div class="col-md-4"><input id="auditUserFilter" class="form-control" placeholder="Filter by user"></div>
+                        <div class="col-md-4"><input id="auditActionFilter" class="form-control" placeholder="Filter by action"></div>
+                        <div class="col-md-3"><input id="auditDateFilter" type="date" class="form-control"></div>
+                        <div class="col-md-1"><button class="btn btn-outline-secondary w-100" id="btnRefreshAuditLog">Go</button></div>
+                    </div>
+                    <div id="policiesAuditTable" class="mt-2"><p class="text-muted small">Loading...</p></div>
+                </div>
+
+                <div class="glass-panel" style="padding:1rem;">
+                    <h6 class="mb-2">Data Export & Compliance</h6>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-outline-success btn-sm" id="btnExportAllStudents">Export All Students CSV</button>
+                        <button class="btn btn-outline-success btn-sm" id="btnExportAllTransactions">Export All Transactions CSV</button>
+                        <button class="btn btn-outline-success btn-sm" id="btnExportAllAttendance">Export All Attendance CSV</button>
+                        <button class="btn btn-outline-success btn-sm" id="btnExportAllAudit">Export Audit Log CSV</button>
+                    </div>
+                    <div class="small text-muted mt-2">All exports are logged in the audit trail.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index:1080;"></div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit user</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="editProfileId">
+                    <div class="mb-3"><label class="form-label">Full name (nombre_completo)</label><input type="text" id="editName" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Document ID</label><input type="text" id="editDoc" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">PIN</label><input type="password" id="editPin" class="form-control" placeholder="Leave blank to keep current"></div>
+                    <div class="mb-3" id="editRoleWrap"><label class="form-label">Role</label><select id="editRole" class="form-select"><option value="student">student</option><option value="admin">admin</option></select></div>
+                    <div class="mb-3"><label class="form-label">Group</label><select id="editGroup" class="form-select"></select></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="btnSaveEdit">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="groupEditModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Group</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="editGroupOldCode">
+                    <div class="mb-2"><label class="form-label">Group code</label><input type="text" id="editGroupCode" class="form-control"></div>
+                    <div class="mb-2"><label class="form-label">Student limit</label><input type="number" id="editGroupCapacity" class="form-control" min="1"></div>
+                    <div class="mb-2"><label class="form-label">Last admin latitude</label><input type="number" id="editGroupLat" class="form-control" step="any"></div>
+                    <div class="mb-2"><label class="form-label">Last admin longitude</label><input type="number" id="editGroupLng" class="form-control" step="any"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="btnSaveGroupEdit">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalImprovementPlan" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">🎯 Asignar Plan de Mejora</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="improvementStudentId">
+                    <div class="mb-3"><label class="form-label">Student</label><input type="text" id="improvementStudentName" class="form-control" readonly></div>
+                    <div class="mb-3"><label class="form-label">Critical Topic</label><input type="text" id="improvementTopic" class="form-control" placeholder="e.g. Past Perfect, Conditionals"></div>
+                    <div class="mb-3"><label class="form-label">Entry Cost (coins)</label><input type="number" id="improvementEntryCost" class="form-control" value="5" min="0"></div>
+                    <div class="mb-3"><label class="form-label">Reward on Completion (coins)</label><input type="number" id="improvementReward" class="form-control" value="50" min="0"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-warning" id="btnSubmitImprovementPlan">Emitir Plan</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs2@0.0.2/qrcode.min.js"></script>
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+    <script src="./modules/auth.js"></script>
+    <script src="./modules/ui.js"></script>
+    <script src="./modules/users.js"></script>
+    <script src="./modules/groups.js"></script>
+    <script src="./modules/attendance.js"></script>
+    <script src="./modules/challenges.js"></script>
+    <script src="./modules/store.js"></script>
+    <script src="./modules/announcements.js"></script>
+    <script src="./modules/feedback.js"></script>
+    <script src="./modules/school_admin_teachers.js"></script>
+    <script src="./modules/institutions.js"></script>
+    <script>
+var preloadedUser = null;
+try {
+    preloadedUser = JSON.parse(localStorage.getItem('lingoCoins_user') || 'null');
+} catch (_) {
+    preloadedUser = null;
+}
+
+if (preloadedUser && String(preloadedUser.rol || '') === 'student') {
+    window.location.href = 'student.html';
+}
+if (preloadedUser && String(preloadedUser.rol || '') === 'teacher') {
+    window.location.href = 'teacher.html';
+}
+
+var user = (window.Auth && typeof window.Auth.guardRole === 'function')
+    ? Auth.guardRole(['super_admin', 'admin'], 'index.html')
+    : null;
+
+if (!user || !user.id || ['super_admin', 'admin'].indexOf(String(user.rol || '')) === -1) {
+    window.location.href = 'index.html';
+}
+
+async function verifyRoleIntegrity(localUser) {
+    try {
+        var res = await supabaseClient
+            .from(CONFIG.tables.profiles)
+            .select('id, rol, institution_id, is_active')
+            .eq('id', localUser.id)
+            .maybeSingle();
+        if (res.error) {
+            if (typeof isMissingColumnError === 'function' && isMissingColumnError(res.error, 'rol', CONFIG.tables.profiles)) {
+                return true;
+            }
+            return false;
+        }
+        if (!res.data) return false;
+        if (res.data.is_active === false) return false;
+        if (String(res.data.rol || '') !== String(localUser.rol || '')) return false;
+        if (String(localUser.rol || '') === 'admin' && String(res.data.institution_id || '') !== String(localUser.institution_id || '')) return false;
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    if (String((user && user.rol) || '') === 'student') {
+        window.location.href = 'student.html';
+        return;
+    }
+    if (String((user && user.rol) || '') === 'teacher') {
+        window.location.href = 'teacher.html';
+        return;
+    }
+
+    var roleOk = await verifyRoleIntegrity(user);
+    if (!roleOk) {
+        try { localStorage.removeItem('lingoCoins_user'); } catch (_) {}
+        window.location.href = 'index.html';
+        return;
+    }
+
+    if (document.getElementById('adminName')) {
+        document.getElementById('adminName').textContent = user.nombre_completo || (user.rol === 'admin' ? 'School Admin' : 'Super Admin');
+    }
+
+    var roleNavVisibility = {
+        super_admin: ['navDashboard', 'navInstitutions', 'navUsers', 'navGroups', 'navEconomy', 'navAiConfig', 'navPolicies', 'navAdmins'],
+        admin: ['navAdminDashboard', 'navTeachers', 'navGroups', 'navUsers', 'navAttendance', 'navChallenges', 'navStore', 'navCobros', 'navAnnouncements', 'navFeedback']
+    };
+
+    var allKnownNavIds = ['navDashboard', 'navAdminDashboard', 'navInstitutions', 'navTeachers', 'navUsers', 'navGroups', 'navAttendance', 'navChallenges', 'navStore', 'navCobros', 'navAnnouncements', 'navFeedback', 'navEconomy', 'navAiConfig', 'navPolicies', 'navAdmins'];
+    var visibleNavIds = roleNavVisibility[user.rol] || [];
+    allKnownNavIds.forEach(function(navId) {
+        var navEl = document.getElementById(navId);
+        if (!navEl) return;
+        navEl.style.display = visibleNavIds.indexOf(navId) !== -1 ? '' : 'none';
+    });
+
+    var roleAllowedViews = {
+        super_admin: ['dashboard', 'institutions', 'users', 'groups', 'economy', 'aiConfig', 'policies', 'admins'],
+        admin: ['adminDashboard', 'teachers', 'users', 'groups', 'attendance', 'challenges', 'store', 'cobros', 'announcements', 'feedback']
+    };
+    var allowedViews = roleAllowedViews[user.rol] || [];
+    var operationalRedirectViews = [];
+
+    var _adminSchoolGroupsCache = null;
+    async function getAdminSchoolGroupCodes() {
+        if (_adminSchoolGroupsCache) return _adminSchoolGroupsCache;
+        var schoolId = String((user && user.institution_id) || '');
+        if (!schoolId) return [];
+        var res = await supabaseClient
+            .from(CONFIG.tables.groups)
+            .select('group_code')
+            .eq('institution_id', schoolId)
+            .order('group_code');
+        _adminSchoolGroupsCache = (res.error ? [] : (res.data || []).map(function(r) { return String(r.group_code || '').trim(); }).filter(Boolean));
+        return _adminSchoolGroupsCache;
+    }
+
+    function escapeHtml(v) {
+        return (window.UI && UI.escapeHtml) ? UI.escapeHtml(v == null ? '' : String(v)) : String(v == null ? '' : v);
+    }
+
+    function showToast(msg, type) {
+        if (window.UI && UI.showToast) return UI.showToast(msg, type || 'info');
+        alert(msg);
+    }
+
+    function parseLinksTextarea(raw) {
+        var lines = String(raw || '').split(/\r?\n/).map(function(x) { return x.trim(); }).filter(Boolean);
+        var out = [];
+        lines.forEach(function(line) {
+            var parts = line.split('|');
+            if (parts.length < 2) return;
+            var label = parts[0].trim();
+            var url = parts.slice(1).join('|').trim();
+            if (!label || !url) return;
+            out.push({ label: label, url: url });
+        });
+        return out.length ? out : null;
+    }
+
+    async function hydrateGroupSelect(selId, includeAll) {
+        var sel = document.getElementById(selId);
+        if (!sel) return;
+        var groups = await getAdminSchoolGroupCodes();
+        sel.innerHTML = (includeAll ? '<option value="">All groups</option>' : '<option value="">Select group</option>') + groups.map(function(gc) {
+            return '<option value="' + escapeHtml(gc) + '">' + escapeHtml(gc) + '</option>';
+        }).join('');
+    }
+
+    // ── Admin Dashboard ──────────────────────────────────────────────
+    async function loadAdminDashboard() {
+        var cards = document.getElementById('adminDashboardCards');
+        var activity = document.getElementById('adminDashboardActivity');
+        if (!cards) return;
+        cards.innerHTML = '<p class="text-muted small">Loading...</p>';
+        var sid = String((user && user.institution_id) || '');
+        if (!sid) { cards.innerHTML = '<div class="alert alert-warning">No institution linked to this account.</div>'; return; }
+
+        // Parallel: count students, teachers, groups; sum coins; recent attendance
+        var groups = await getAdminSchoolGroupCodes();
+        var [stuRes, tchRes, grpRes, attRes] = await Promise.all([
+            supabaseClient.from(CONFIG.tables.profiles).select('id', { count: 'exact', head: true }).eq('institution_id', sid).eq('rol', 'student').eq('is_active', true),
+            supabaseClient.from(CONFIG.tables.profiles).select('id', { count: 'exact', head: true }).eq('institution_id', sid).eq('rol', 'teacher').eq('is_active', true),
+            supabaseClient.from(CONFIG.tables.groups).select('id', { count: 'exact', head: true }).eq('institution_id', sid),
+            groups.length ? supabaseClient.from(CONFIG.tables.attendance).select('id', { count: 'exact', head: true }).in('group_code', groups).eq('attendance_date', (typeof todayDateString === 'function' ? todayDateString() : new Date().toISOString().slice(0,10))) : Promise.resolve({ count: 0, error: null })
+        ]);
+        var stuCount = stuRes.error ? '?' : (stuRes.count || 0);
+        var tchCount = tchRes.error ? '?' : (tchRes.count || 0);
+        var grpCount = grpRes.error ? '?' : (grpRes.count || 0);
+        var attCount = attRes.error ? 0 : (attRes.count || 0);
+
+        // Sum coins across all students in institution
+        var totalCoins = 0;
+        if (!stuRes.error && stuCount > 0) {
+            var coinsRes = await supabaseClient.from(CONFIG.tables.profiles).select('monedas').eq('institution_id', sid).eq('rol', 'student').eq('is_active', true);
+            if (!coinsRes.error) (coinsRes.data || []).forEach(function(r) { totalCoins += (Number(r.monedas) || 0); });
+        }
+
+        // School Pocket (institutions.coin_pool)
+        var schoolPocket = 0;
+        try {
+            var pocketRes = await supabaseClient.from(CONFIG.tables.institutions).select('id,coin_pool').eq('id', sid).maybeSingle();
+            if (!pocketRes.error && pocketRes.data) {
+                schoolPocket = Math.max(0, Number(pocketRes.data.coin_pool || 0));
+            }
+        } catch (_) {}
+
+        // Teacher budgets total (coin_budget -> coin_pocket -> monedas)
+        var teacherBudgetTotal = 0;
+        var teacherBudgetRows = [];
+        try {
+            var tRes = await supabaseClient
+                .from(CONFIG.tables.profiles)
+                .select('id,nombre_completo,coin_budget,coin_pocket,monedas')
+                .eq('institution_id', sid)
+                .eq('rol', 'teacher')
+                .eq('is_active', true)
+                .order('nombre_completo', { ascending: true });
+
+            if (tRes.error && typeof isMissingColumnError === 'function' &&
+                (isMissingColumnError(tRes.error, 'coin_budget', CONFIG.tables.profiles) || isMissingColumnError(tRes.error, 'coin_pocket', CONFIG.tables.profiles))) {
+                tRes = await supabaseClient
+                    .from(CONFIG.tables.profiles)
+                    .select('id,nombre_completo,monedas')
+                    .eq('institution_id', sid)
+                    .eq('rol', 'teacher')
+                    .eq('is_active', true)
+                    .order('nombre_completo', { ascending: true });
+            }
+
+            if (!tRes.error) {
+                teacherBudgetRows = tRes.data || [];
+                teacherBudgetRows.forEach(function(t) {
+                    var b = (t.coin_budget != null) ? Number(t.coin_budget)
+                        : ((t.coin_pocket != null) ? Number(t.coin_pocket) : Number(t.monedas || 0));
+                    teacherBudgetTotal += Math.max(0, b || 0);
+                });
+            }
+        } catch (_) {}
+
+        // Active challenges for school
+        var chalCount = 0;
+        if (groups.length) {
+            var chalRes = await supabaseClient.from(CONFIG.tables.challenges).select('id', { count: 'exact', head: true }).eq('status', 'active');
+            if (!chalRes.error) chalCount = chalRes.count || 0;
+        }
+
+        function card(icon, label, value, colorClass) {
+            return '<div class="col-6 col-md-3"><div class="glass-panel text-center" style="padding:1rem;"><div style="font-size:1.8rem;">' + icon + '</div><div class="fw-bold fs-4 ' + colorClass + '\">' + value + '</div><div class="small text-muted">' + label + '</div></div></div>';
+        }
+        cards.innerHTML =
+            card('👩‍🎓', 'Students', stuCount, 'text-primary') +
+            card('👩‍🏫', 'Teachers', tchCount, 'text-info') +
+            card('🏫', 'Groups', grpCount, 'text-success') +
+            card('🏦', 'School Pocket', schoolPocket.toLocaleString(), 'text-info') +
+            card('🪙', 'Students coins', totalCoins.toLocaleString(), 'text-warning') +
+            card('🎒', 'Teachers budgets', teacherBudgetTotal.toLocaleString(), 'text-warning') +
+            card('📋', 'Attendance today', attCount, 'text-secondary') +
+            card('⚡', 'Active challenges', chalCount, 'text-danger');
+
+        // Recent attendance list (last 10 records today)
+        if (activity) {
+            var ownedSum = (Number(schoolPocket) || 0) + (Number(teacherBudgetTotal) || 0) + (Number(totalCoins) || 0);
+            activity.innerHTML = '<div class="glass-panel mb-3" style="padding:1rem;">' +
+                '<h6 class="mb-2">Coin distribution (no floating coins)</h6>' +
+                '<div class="row g-2">' +
+                    '<div class="col-md-4"><div class="small text-muted">School pocket</div><div class="fw-bold">' + schoolPocket.toLocaleString() + '</div></div>' +
+                    '<div class="col-md-4"><div class="small text-muted">Teachers budgets (sum)</div><div class="fw-bold">' + teacherBudgetTotal.toLocaleString() + '</div></div>' +
+                    '<div class="col-md-4"><div class="small text-muted">Students coins (sum)</div><div class="fw-bold">' + totalCoins.toLocaleString() + '</div></div>' +
+                '</div>' +
+                '<hr style="border-color:rgba(255,255,255,0.12);">' +
+                '<div class="d-flex justify-content-between"><span class="small text-muted">Total owned</span><span class="fw-bold">' + ownedSum.toLocaleString() + '</span></div>' +
+                '<div class="small text-muted mt-2">Optional: install the wallet ledger to see full transaction history & reconciliation. Run <code>MIGRATION_COIN_WALLETS_LEDGER.sql</code> and then the backfill function.</div>' +
+            '</div>';
+
+            if (teacherBudgetRows && teacherBudgetRows.length) {
+                activity.innerHTML += '<div class="glass-panel mb-3" style="padding:1rem;">' +
+                    '<h6 class="mb-2">Teachers budgets</h6>' +
+                    '<div class="admin-table-wrap"><table class="table table-sm mb-0"><thead><tr><th>Teacher</th><th class="text-end">Budget</th></tr></thead><tbody>' +
+                    teacherBudgetRows.map(function(t) {
+                        var b = (t.coin_budget != null) ? Number(t.coin_budget)
+                            : ((t.coin_pocket != null) ? Number(t.coin_pocket) : Number(t.monedas || 0));
+                        return '<tr><td>' + escapeHtml(t.nombre_completo || t.id || '-') + '</td><td class="text-end">' + (Math.max(0, b || 0)).toLocaleString() + '</td></tr>';
+                    }).join('') +
+                    '</tbody></table></div>' +
+                '</div>';
+            }
+
+            // Ledger (optional)
+            try {
+                var led = await supabaseClient
+                    .from('coin_ledger')
+                    .select('created_at,amount,action,metadata')
+                    .eq('institution_id', sid)
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+                if (!led.error && led.data && led.data.length) {
+                    activity.innerHTML += '<div class="glass-panel" style="padding:1rem;">' +
+                        '<h6 class="mb-2">Wallet ledger (last 20)</h6>' +
+                        '<div class="admin-table-wrap"><table class="table table-sm mb-0"><thead><tr><th>When</th><th>Action</th><th class="text-end">Amount</th></tr></thead><tbody>' +
+                        led.data.map(function(x) {
+                            var when = x.created_at ? new Date(x.created_at).toLocaleString() : '-';
+                            return '<tr><td class="small text-muted">' + escapeHtml(when) + '</td><td>' + escapeHtml(String(x.action || 'transfer')) + '</td><td class="text-end">' + Number(x.amount || 0).toLocaleString() + '</td></tr>';
+                        }).join('') +
+                        '</tbody></table></div>' +
+                    '</div>';
+                } else if (led.error) {
+                    // Table missing or RLS issue; show hint only.
+                    var msg = String(led.error.message || '');
+                    if (msg.toLowerCase().indexOf('does not exist') !== -1) {
+                        activity.innerHTML += '<div class="small text-muted">Ledger not installed yet. Run <code>MIGRATION_COIN_WALLETS_LEDGER.sql</code> in Supabase SQL editor.</div>';
+                    }
+                }
+            } catch (_) {}
+
+            if (groups.length && attCount > 0) {
+                var recAtt = await supabaseClient.from(CONFIG.tables.attendance)
+                    .select('student_id,group_code,created_at')
+                    .in('group_code', groups)
+                    .eq('attendance_date', (typeof todayDateString === 'function' ? todayDateString() : new Date().toISOString().slice(0,10)))
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                if (!recAtt.error && recAtt.data && recAtt.data.length) {
+                    var ids = recAtt.data.map(function(r) { return r.student_id; });
+                    var nameMap = {};
+                    var profRes = await supabaseClient.from(CONFIG.tables.profiles).select('documento_id,nombre_completo').in('documento_id', ids);
+                    if (!profRes.error) (profRes.data || []).forEach(function(p) { nameMap[p.documento_id] = p.nombre_completo; });
+                    activity.innerHTML += '<h6 class="mt-2 mb-2">Recent check-ins today</h6><div class="list-group">' +
+                        recAtt.data.map(function(r) {
+                            var nm = nameMap[r.student_id] || r.student_id;
+                            var t = r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                            return '<div class="list-group-item d-flex justify-content-between"><span>' + escapeHtml(nm) + '</span><span class="text-muted small">' + escapeHtml(r.group_code || '') + ' · ' + t + '</span></div>';
+                        }).join('') + '</div>';
+                }
+            }
+        }
+    }
+
+    async function loadAdminAttendance() {
+        var host = document.getElementById('adminAttendanceList');
+        if (!host) return;
+        host.innerHTML = (window.UI && UI.renderSpinner) ? UI.renderSpinner('Loading attendance...') : '<p class="text-muted small">Loading...</p>';
+
+        var date = String((document.getElementById('adminAttendanceDate') || {}).value || '').trim();
+        if (!date) { host.innerHTML = '<p class="text-muted small">Pick a date.</p>'; return; }
+
+        var groups = await getAdminSchoolGroupCodes();
+        if (!groups.length) { host.innerHTML = '<p class="text-muted small">No groups found for this school.</p>'; return; }
+
+        var sid = String((user && user.institution_id) || '');
+
+        // Fetch attendance records for the date
+        var att = await supabaseClient
+            .from(CONFIG.tables.attendance)
+            .select('student_id,group_code,attendance_date,created_at,session_code')
+            .eq('attendance_date', date)
+            .in('group_code', groups)
+            .order('created_at', { ascending: true });
+        if (att.error) { host.innerHTML = '<div class="alert alert-danger">' + escapeHtml(att.error.message) + '</div>'; return; }
+
+        var rows = att.data || [];
+
+        // Fetch ALL enrolled students per group for absent calculation
+        var enrolledRes = await supabaseClient
+            .from(CONFIG.tables.profiles)
+            .select('documento_id,nombre_completo,grupo')
+            .eq('institution_id', sid)
+            .eq('rol', 'student')
+            .eq('is_active', true)
+            .in('grupo', groups);
+        var enrolledByGroup = {}; // group_code -> [{documento_id, nombre_completo}]
+        if (!enrolledRes.error) {
+            (enrolledRes.data || []).forEach(function(p) {
+                var gc = String(p.grupo || '').trim();
+                if (!enrolledByGroup[gc]) enrolledByGroup[gc] = [];
+                enrolledByGroup[gc].push(p);
+            });
+        }
+
+        // Build name map from enrolled students
+        var nameMap = {};
+        if (!enrolledRes.error) {
+            (enrolledRes.data || []).forEach(function(p) {
+                if (p.documento_id) nameMap[String(p.documento_id)] = p.nombre_completo || p.documento_id;
+            });
+        }
+        // Also resolve any attendance IDs not in enrolled list
+        var attendedIds = rows.map(function(r) { return String(r.student_id || '').trim(); }).filter(Boolean);
+        var unknownIds = attendedIds.filter(function(id) { return !nameMap[id]; });
+        if (unknownIds.length) {
+            var extra = await supabaseClient.from(CONFIG.tables.profiles).select('documento_id,id,nombre_completo').in('documento_id', unknownIds);
+            if (!extra.error) (extra.data || []).forEach(function(p) {
+                if (p.documento_id) nameMap[String(p.documento_id)] = p.nombre_completo || p.documento_id;
+                if (p.id) nameMap[String(p.id)] = p.nombre_completo || p.id;
+            });
+        }
+
+        // Group attendance rows by group_code
+        var byGroup = {};
+        rows.forEach(function(r) {
+            var gc = String(r.group_code || '').trim();
+            if (!byGroup[gc]) byGroup[gc] = [];
+            byGroup[gc].push(r);
+        });
+
+        // Render: all groups that have enrolled students, even if no attendance
+        var allGroupsToShow = groups.filter(function(gc) {
+            return (enrolledByGroup[gc] && enrolledByGroup[gc].length) || byGroup[gc];
+        });
+
+        if (!allGroupsToShow.length) {
+            host.innerHTML = '<div class="empty-state">No attendance records for ' + escapeHtml(date) + '.</div>';
+            return;
+        }
+
+        host.innerHTML = allGroupsToShow.sort().map(function(gc) {
+            var attended = byGroup[gc] || [];
+            var enrolled = enrolledByGroup[gc] || [];
+            var attendedSet = {};
+            attended.forEach(function(r) { attendedSet[String(r.student_id || '')] = true; });
+            var absent = enrolled.filter(function(p) { return !attendedSet[String(p.documento_id || '')]; });
+            var pct = enrolled.length ? Math.round((attended.length / enrolled.length) * 100) : 0;
+            var barColor = pct >= 80 ? 'bg-success' : (pct >= 50 ? 'bg-warning' : 'bg-danger');
+
+            var attendedHtml = attended.length
+                ? '<div class="mb-1 fw-semibold small text-success">✅ Attended (' + attended.length + ')</div>' +
+                  '<ul class="small mb-2">' + attended.map(function(r) {
+                      var nm = nameMap[String(r.student_id || '')] || r.student_id;
+                      var t = r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                      var sess = r.session_code ? ' <span class="badge bg-secondary">' + escapeHtml(r.session_code) + '</span>' : '';
+                      return '<li>' + escapeHtml(nm) + ' <span class="text-muted">' + t + '</span>' + sess + '</li>';
+                  }).join('') + '</ul>'
+                : '<div class="small text-muted mb-2">No check-ins recorded.</div>';
+
+            var absentHtml = absent.length
+                ? '<div class="mb-1 fw-semibold small text-danger">❌ Absent (' + absent.length + ')</div>' +
+                  '<ul class="small mb-0 text-muted">' + absent.map(function(p) {
+                      return '<li>' + escapeHtml(p.nombre_completo || p.documento_id) + '</li>';
+                  }).join('') + '</ul>'
+                : (enrolled.length ? '<div class="small text-success">All enrolled students attended.</div>' : '');
+
+            return '<div class="glass-panel mb-3" style="padding:0.9rem 1rem;">' +
+                '<div class="d-flex justify-content-between align-items-center mb-2">' +
+                    '<span class="fw-bold">Group: ' + escapeHtml(gc) + '</span>' +
+                    '<span class="small text-muted">' + attended.length + ' / ' + enrolled.length + ' attended (' + pct + '%)</span>' +
+                '</div>' +
+                '<div class="progress mb-3" style="height:6px;"><div class="progress-bar ' + barColor + '" style="width:' + pct + '%"></div></div>' +
+                attendedHtml + absentHtml +
+            '</div>';
+        }).join('');
+
+        window.__adminAttendanceLast = { date: date, rows: rows, nameMap: nameMap };
+    }
+
+    function exportAdminAttendanceCsv() {
+        var snap = window.__adminAttendanceLast;
+        if (!snap || !snap.rows || !snap.rows.length) return showToast('No attendance data loaded', 'warning');
+        var date = snap.date;
+        var lines = ['date,group,student_id,student_name,created_at'];
+        snap.rows.forEach(function(r) {
+            var sid = String(r.student_id || '');
+            var nm = snap.nameMap && snap.nameMap[sid] ? snap.nameMap[sid] : sid;
+            function q(s) { return '"' + String(s || '').replace(/"/g, '""') + '"'; }
+            lines.push([q(date), q(r.group_code || ''), q(sid), q(nm), q(r.created_at || '')].join(','));
+        });
+        var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'attendance_' + String(date || 'export') + '.csv';
+        a.click();
+    }
+
+    async function loadAdminChallengesList() {
+        var host = document.getElementById('adminChallengesList');
+        if (!host) return;
+        host.innerHTML = (window.UI && UI.renderSpinner) ? UI.renderSpinner('Loading challenges...') : '<p class="text-muted small">Loading...</p>';
+        var groups = await getAdminSchoolGroupCodes();
+
+        var res = await supabaseClient
+            .from(CONFIG.tables.challenges)
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (res.error) {
+            host.innerHTML = '<div class="alert alert-danger">' + escapeHtml(res.error.message) + '</div>';
+            return;
+        }
+        var rows = (res.data || []).filter(function(c) {
+            var tg = (c && (c.target_group || c.group_code)) ? String(c.target_group || c.group_code).trim() : '';
+            if (!tg || tg === 'all') return true;
+            return groups.indexOf(tg) !== -1;
+        });
+        if (!rows.length) {
+            host.innerHTML = '<div class="empty-state">No challenges found for your school.</div>';
+            return;
+        }
+        host.innerHTML = '<div class="list-group">' + rows.map(function(c) {
+            var tg = (c && (c.target_group || c.group_code)) ? String(c.target_group || c.group_code).trim() : '';
+            var scopeTxt = tg ? ('Group: ' + escapeHtml(tg)) : 'All groups';
+            var status = String(c.status || (c.is_active === false ? 'closed' : 'active') || 'active');
+            var isClosed = status === 'closed' || c.is_active === false;
+            var badge = isClosed ? '<span class="badge bg-secondary ms-2">Closed</span>' : '<span class="badge bg-success ms-2">Active</span>';
+            var btn = isClosed
+                ? '<button class="btn btn-sm btn-outline-success" onclick="window.adminToggleChallenge(\'' + escapeHtml(c.id) + '\',\'active\')">Reopen</button>'
+                : '<button class="btn btn-sm btn-outline-warning" onclick="window.adminToggleChallenge(\'' + escapeHtml(c.id) + '\',\'closed\')">Close</button>';
+            return '<div class="list-group-item d-flex justify-content-between align-items-start">' +
+                '<div><strong>' + escapeHtml(c.title || '') + '</strong>' + badge + '<br><small class="text-muted">' + scopeTxt + '</small></div>' +
+                '<div>' + btn + '</div>' +
+                '</div>';
+        }).join('') + '</div>';
+    }
+
+    window.adminToggleChallenge = async function(id, nextStatus) {
+        try {
+            var patch = { status: nextStatus };
+            if (nextStatus === 'closed') patch.is_active = false;
+            if (nextStatus === 'active') patch.is_active = true;
+            var upd = await supabaseClient.from(CONFIG.tables.challenges).update(patch).eq('id', id);
+            if (upd.error && typeof isMissingColumnError === 'function' && isMissingColumnError(upd.error, 'status', CONFIG.tables.challenges)) {
+                // Legacy schema: only is_active
+                upd = await supabaseClient.from(CONFIG.tables.challenges).update({ is_active: nextStatus !== 'closed' }).eq('id', id);
+            }
+            if (upd.error) throw upd.error;
+            showToast('Challenge updated', 'success');
+            loadAdminChallengesList();
+        } catch (e) {
+            showToast('Could not update challenge: ' + (e.message || 'Unknown'), 'danger');
+        }
+    };
+
+    async function loadAdminAuctionList() {
+        var host = document.getElementById('adminAuctionList');
+        if (!host) return;
+        host.innerHTML = (window.UI && UI.renderSpinner) ? UI.renderSpinner('Loading auctions...') : '<p class="text-muted small">Loading...</p>';
+        var groups = await getAdminSchoolGroupCodes();
+        var list = await getActiveAuctions();
+        var rows = (list || []).filter(function(a) {
+            if (!a.group_code) return true;
+            return groups.indexOf(String(a.group_code).trim()) !== -1;
+        });
+        if (!rows.length) {
+            host.innerHTML = '<div class="empty-state">No active items.</div>';
+            return;
+        }
+        host.innerHTML = '<div class="list-group">' + rows.map(function(a) {
+            var tg = a.group_code ? ('Group: ' + escapeHtml(a.group_code)) : 'All groups';
+            var type = String(a.item_type || 'auction');
+            var label = type === 'shop' ? 'Store item' : 'Auction';
+            return '<div class="list-group-item d-flex justify-content-between align-items-start">' +
+                '<div><strong>' + escapeHtml(a.item_name || '') + '</strong> <span class="badge bg-dark ms-2">' + escapeHtml(label) + '</span><br>' +
+                '<small class="text-muted">' + tg + ' · Current: ' + Number(a.current_bid || a.base_price || 0) + '</small></div>' +
+                '<div class="d-flex gap-1">' +
+                    '<button class="btn btn-sm btn-outline-danger" onclick="window.adminCloseAuction(\'' + escapeHtml(a.id) + '\')">Close</button>' +
+                '</div>' +
+                '</div>';
+        }).join('') + '</div>';
+    }
+
+    window.adminCloseAuction = async function(auctionId) {
+        var r = await closeAuction(auctionId);
+        if (!r || !r.ok) return showToast('Close failed: ' + ((r && r.error) || 'Unknown'), 'danger');
+        showToast('Auction closed', 'success');
+        loadAdminAuctionList();
+    };
+
+    async function loadAdminBillingClaims() {
+        var host = document.getElementById('adminBillingClaimsList');
+        if (!host) return;
+        host.innerHTML = (window.UI && UI.renderSpinner) ? UI.renderSpinner('Loading cobros...') : '<p class="text-muted small">Loading...</p>';
+        var groups = await getAdminSchoolGroupCodes();
+        var list = await getPendingBillingClaims();
+        var rows = (list || []).filter(function(c) {
+            if (!c.group_code) return true;
+            return groups.indexOf(String(c.group_code).trim()) !== -1;
+        });
+        if (!rows.length) {
+            host.innerHTML = '<div class="empty-state">No pending deliveries.</div>';
+            return;
+        }
+        host.innerHTML = '<div class="list-group">' + rows.map(function(c) {
+            return '<div class="list-group-item d-flex justify-content-between align-items-start">' +
+                '<div><strong>' + escapeHtml(c.student_name || c.student_id || '-') + '</strong><br>' +
+                '<small class="text-muted">' + escapeHtml(c.item_name || '-') + ' · Group: ' + escapeHtml(c.group_code || '-') + ' · Status: ' + escapeHtml(c.status || '-') + '</small></div>' +
+                '<div><button class="btn btn-sm btn-success" onclick="window.adminConfirmDelivery(\'' + escapeHtml(c.id) + '\')">Confirm delivered</button></div>' +
+                '</div>';
+        }).join('') + '</div>';
+    }
+
+    window.adminConfirmDelivery = async function(claimId) {
+        var r = await confirmDelivery(claimId);
+        if (!r || !r.ok) return showToast('Confirm failed: ' + ((r && r.error) || 'Unknown'), 'danger');
+        showToast('Delivered confirmed', 'success');
+        loadAdminBillingClaims();
+    };
+
+    async function loadAdminAnnouncementsList() {
+        var host = document.getElementById('adminAnnouncementsList');
+        if (!host) return;
+        host.innerHTML = (window.UI && UI.renderSpinner) ? UI.renderSpinner('Loading announcements...') : '<p class="text-muted small">Loading...</p>';
+        var groups = await getAdminSchoolGroupCodes();
+        var list = await getAnnouncementsForAdmin();
+        var rows = (list || []).filter(function(a) {
+            var tg = String(a.target_group || '').trim();
+            if (!tg) return true;
+            return groups.indexOf(tg) !== -1;
+        });
+        if (!rows.length) {
+            host.innerHTML = '<div class="empty-state">No announcements yet.</div>';
+            return;
+        }
+        host.innerHTML = '<div class="list-group">' + rows.map(function(a) {
+            var tg = a.target_group ? ('Group: ' + escapeHtml(a.target_group)) : 'All groups';
+            return '<div class="list-group-item">' +
+                '<div class="d-flex justify-content-between gap-2">' +
+                    '<div><strong>' + escapeHtml(a.title || 'Announcement') + '</strong> <span class="badge bg-secondary ms-2">' + escapeHtml(a.alert_type || 'info') + '</span><br>' +
+                    '<small class="text-muted">' + tg + (a.expiry_date ? (' · Expires: ' + escapeHtml(a.expiry_date)) : '') + '</small></div>' +
+                    '<div class="d-flex gap-1">' +
+                        '<button class="btn btn-sm btn-outline-primary" onclick="window.adminEditAnnouncement(\'' + escapeHtml(a.id) + '\')">Edit</button>' +
+                        '<button class="btn btn-sm btn-outline-danger" onclick="window.adminDeleteAnnouncement(\'' + escapeHtml(a.id) + '\')">Delete</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="small mt-2">' + escapeHtml(a.message || '') + '</div>' +
+            '</div>';
+        }).join('') + '</div>';
+        window.__adminAnnouncements = rows;
+    }
+
+    window.adminEditAnnouncement = function(id) {
+        var list = window.__adminAnnouncements || [];
+        var row = list.find(function(x) { return String(x.id) === String(id); });
+        if (!row) return;
+        document.getElementById('announcementEditId').value = row.id;
+        document.getElementById('announcementTitle').value = row.title || '';
+        document.getElementById('announcementType').value = row.alert_type || 'info';
+        document.getElementById('announcementGroup').value = row.target_group || '';
+        document.getElementById('announcementExpiry').value = row.expiry_date || '';
+        document.getElementById('announcementMessage').value = row.message || '';
+        var links = '';
+        try {
+            if (Array.isArray(row.links)) links = row.links.map(function(l) { return (l.label || '') + '|' + (l.url || ''); }).join('\n');
+        } catch (_) {}
+        document.getElementById('announcementLinks').value = links;
+        showToast('Editing announcement (update fields and Save)', 'info');
+    };
+
+    window.adminDeleteAnnouncement = async function(id) {
+        if (!confirm('Delete this announcement?')) return;
+        var del = await supabaseClient.from(CONFIG.tables.announcements).delete().eq('id', id);
+        if (del.error) return showToast(del.error.message, 'danger');
+        showToast('Deleted', 'success');
+        loadAdminAnnouncementsList();
+    };
+
+    async function saveAdminAnnouncement() {
+        var status = document.getElementById('adminAnnouncementStatus');
+        if (status) { status.className = 'small mt-2 text-muted'; status.textContent = 'Saving...'; }
+
+        try {
+            var id = String((document.getElementById('announcementEditId') || {}).value || '').trim();
+            var title = String((document.getElementById('announcementTitle') || {}).value || '').trim();
+            var type = String((document.getElementById('announcementType') || {}).value || 'info').trim();
+            var group = String((document.getElementById('announcementGroup') || {}).value || '').trim();
+            var expiry = String((document.getElementById('announcementExpiry') || {}).value || '').trim();
+            var msg = String((document.getElementById('announcementMessage') || {}).value || '').trim();
+            var links = parseLinksTextarea((document.getElementById('announcementLinks') || {}).value || '');
+
+            if (!msg) throw new Error('Message is required');
+            var meta = { title: title || null, alertType: type, links: links };
+            if (id) {
+                await updateAnnouncement(id, msg, group || null, expiry || null, meta);
+            } else {
+                await createAnnouncement(msg, group || null, expiry || null, meta);
+            }
+            document.getElementById('announcementEditId').value = '';
+            if (status) { status.className = 'small mt-2 text-success'; status.textContent = 'Saved!'; }
+            showToast('Announcement saved', 'success');
+            loadAdminAnnouncementsList();
+        } catch (e) {
+            if (status) { status.className = 'small mt-2 text-danger'; status.textContent = String(e && e.message || e || 'Save failed'); }
+        }
+    }
+
+    async function loadAdminFeedbackList() {
+        var host = document.getElementById('adminFeedbackList');
+        if (!host) return;
+        host.innerHTML = (window.UI && UI.renderSpinner) ? UI.renderSpinner('Loading feedback...') : '<p class="text-muted small">Loading...</p>';
+        var groups = await getAdminSchoolGroupCodes();
+        var list = await getFeedbackMessages();
+        var rows = (list || []).filter(function(m) {
+            var gc = String(m.group_code || '').trim();
+            if (!gc) return true;
+            return groups.indexOf(gc) !== -1;
+        });
+        if (!rows.length) {
+            host.innerHTML = '<div class="empty-state">No feedback messages.</div>';
+            return;
+        }
+        host.innerHTML = '<div class="list-group">' + rows.map(function(m) {
+            return '<div class="list-group-item">' +
+                '<div class="d-flex justify-content-between gap-2">' +
+                    '<div><strong>' + escapeHtml(m.student_name || m.student_id || '-') + '</strong> <span class="badge bg-secondary ms-2">' + escapeHtml(m.status || 'new') + '</span><br>' +
+                    '<small class="text-muted">Group: ' + escapeHtml(m.group_code || '-') + ' · ' + escapeHtml(m.created_at || '') + '</small></div>' +
+                    '<div class="d-flex gap-1">' +
+                        '<button class="btn btn-sm btn-outline-success" onclick="window.adminSetFeedbackStatus(\'' + escapeHtml(m.id) + '\',\'resolved\')">Resolve</button>' +
+                        '<button class="btn btn-sm btn-outline-secondary" onclick="window.adminSetFeedbackStatus(\'' + escapeHtml(m.id) + '\',\'new\')">Reopen</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="small mt-2">' + escapeHtml(m.message || '') + '</div>' +
+            '</div>';
+        }).join('') + '</div>';
+    }
+
+    window.adminSetFeedbackStatus = async function(id, status) {
+        var r = await updateFeedbackStatus(id, status);
+        if (!r || r.ok === false) return showToast('Update failed: ' + ((r && r.error) || 'Unknown'), 'danger');
+        showToast('Feedback updated', 'success');
+        loadAdminFeedbackList();
+    };
+
+    window.logout = function() {
+        localStorage.removeItem('lingoCoins_user');
+        window.location.href = 'index.html';
+    };
+
+    document.getElementById('btnLogout').addEventListener('click', window.logout);
+
+    function activateView(viewId) {
+        document.querySelectorAll('.admin-view').forEach(function(el) { el.classList.remove('active'); });
+        document.querySelectorAll('.admin-nav a').forEach(function(el) { el.classList.remove('active'); });
+        var viewEl = document.getElementById('view' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
+        var navEl = document.getElementById('nav' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
+        if (viewEl) viewEl.classList.add('active');
+        if (navEl) navEl.classList.add('active');
+
+        if (window.InstitutionsModule) {
+            if (viewId === 'dashboard') InstitutionsModule.loadDashboard();
+            if (viewId === 'institutions') InstitutionsModule.loadList();
+            if (viewId === 'economy') InstitutionsModule.loadEconomy();
+            if (viewId === 'aiConfig') InstitutionsModule.loadAiConfig();
+            if (viewId === 'policies' && InstitutionsModule.loadPolicies) InstitutionsModule.loadPolicies();
+            if (viewId === 'admins') InstitutionsModule.loadAdminsSection();
+        }
+        if (viewId === 'adminDashboard') loadAdminDashboard();
+        if (viewId === 'teachers' && window.SchoolAdminTeachersModule) SchoolAdminTeachersModule.refresh();
+        if (window.UsersModule && viewId === 'users') UsersModule.refresh();
+        if (window.GroupsModule && viewId === 'groups') GroupsModule.loadList();
+        if (viewId === 'attendance') loadAdminAttendance();
+        if (viewId === 'challenges') loadAdminChallengesList();
+        if (viewId === 'store') loadAdminAuctionList();
+        if (viewId === 'cobros') loadAdminBillingClaims();
+        if (viewId === 'announcements') loadAdminAnnouncementsList();
+        if (viewId === 'feedback') loadAdminFeedbackList();
+    }
+
+    window.showAdminView = function(viewId) {
+        if (allowedViews.indexOf(viewId) === -1) return false;
+        if (operationalRedirectViews.indexOf(viewId) !== -1) {
+            window.location.href = 'teacher.html?view=' + encodeURIComponent(viewId);
+            return false;
+        }
+        if (viewId === 'aiConfig' && window.InstitutionsModule && InstitutionsModule.requestAiConfigAccess) {
+            InstitutionsModule.requestAiConfigAccess(user).then(function(ok) {
+                if (ok) activateView('aiConfig');
+            });
+            return false;
+        }
+        activateView(viewId);
+        return false;
+    };
+
+    if (window.InstitutionsModule && user.rol === 'super_admin') InstitutionsModule.init({ user: user, role: user.rol });
+    if (window.UsersModule) UsersModule.init({ user: user, role: user.rol });
+    if (window.GroupsModule && ['super_admin', 'admin'].indexOf(user.rol) !== -1) GroupsModule.init({ user: user, role: user.rol });
+    if (window.SchoolAdminTeachersModule && user.rol === 'admin') SchoolAdminTeachersModule.init({ user: user, role: user.rol });
+
+    // Admin: hydrate group dropdowns for school-scoped views
+    if (user.rol === 'admin') {
+        hydrateGroupSelect('adminAuctionGroup', true);
+        hydrateGroupSelect('announcementGroup', true);
+        var dateEl = document.getElementById('adminAttendanceDate');
+        if (dateEl && !dateEl.value) dateEl.value = (typeof todayDateString === 'function') ? todayDateString() : '';
+        var loadBtn = document.getElementById('btnLoadAdminAttendance');
+        if (loadBtn) loadBtn.addEventListener('click', loadAdminAttendance);
+        var expBtn = document.getElementById('btnExportAdminAttendanceCsv');
+        if (expBtn) expBtn.addEventListener('click', exportAdminAttendanceCsv);
+        var saveAnn = document.getElementById('btnCreateAnnouncement');
+        if (saveAnn) saveAnn.addEventListener('click', saveAdminAnnouncement);
+        var createAuc = document.getElementById('btnAdminCreateAuction');
+        if (createAuc) createAuc.addEventListener('click', async function() {
+            var st = document.getElementById('adminAuctionStatus');
+            if (st) { st.className = 'small mt-2 text-muted'; st.textContent = 'Publishing...'; }
+            try {
+                var itemType = String((document.getElementById('adminAuctionItemType') || {}).value || 'auction');
+                var name = String((document.getElementById('adminAuctionItemName') || {}).value || '').trim();
+                var price = Number((document.getElementById('adminAuctionBasePrice') || {}).value || 0);
+                var group = String((document.getElementById('adminAuctionGroup') || {}).value || '').trim();
+                var desc = String((document.getElementById('adminAuctionDescription') || {}).value || '').trim();
+                var stock = Number((document.getElementById('adminAuctionStock') || {}).value || 1);
+                var dur = Number((document.getElementById('adminAuctionDuration') || {}).value || 120);
+                await createAuction(name, desc, price, 'active', {
+                    item_type: itemType,
+                    group_code: group || null,
+                    stock_quantity: Math.max(1, Math.floor(stock || 1)),
+                    duration_seconds: Math.max(30, Math.floor(dur || 120))
+                });
+                if (st) { st.className = 'small mt-2 text-success'; st.textContent = 'Published!'; }
+                showToast('Item published', 'success');
+                loadAdminAuctionList();
+            } catch (e) {
+                if (st) { st.className = 'small mt-2 text-danger'; st.textContent = String(e && e.message || e || 'Publish failed'); }
+            }
+        });
+    }
+
+    window.showAdminView(user.rol === 'super_admin' ? 'dashboard' : 'adminDashboard');
+});
+    </script>
+</body>
+</html>

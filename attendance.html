@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Check-in | Lingo-Coins</title>
+
+    <link rel="icon" type="image/webp" href="assets/images/icono-moneda.webp">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body class="bg-dashboard">
+
+    <div class="decor-overlay" aria-hidden="true"></div>
+
+    <div class="container-custom page-container" style="max-width: 560px;">
+
+        <div class="card card-premium">
+
+            <div class="text-center mb-4">
+
+                <h2 class="fw-bold section-title with-banner" style="justify-content:center;"><img src="assets/images/icono-asistencia.webp" class="ui-icon" loading="lazy" alt="Attendance">Check-in</h2>
+
+                <p class="text-muted mb-0">Scan the QR in the classroom to mark attendance and earn coins.</p>
+
+            </div>
+
+            <div id="manualCodeBox" class="mb-3 p-3 border rounded bg-light">
+                <label class="form-label mb-1"><strong>Manual attendance code</strong> (if QR scan fails)</label>
+                <div class="input-group">
+                    <input type="text" id="manualCodeInput" class="form-control" placeholder="Paste the code shared by your teacher">
+                    <button type="button" class="btn btn-outline-primary" id="btnApplyManualCode">Use code</button>
+                </div>
+                <div class="small text-muted mt-1">This validates the same attendance session as the QR.</div>
+            </div>
+
+
+
+            <div id="stepCheck" style="display: none;">
+
+                <div class="alert alert-info">
+
+                    <span class="spinner-border spinner-border-sm"></span> Checking location and permissions...
+
+                </div>
+
+            </div>
+
+            <div id="stepBlock" class="alert alert-danger" style="display: none;"></div>
+
+            <div id="stepConfirm" style="display: none;">
+
+                <p class="mb-2">You are within the classroom. Confirm to record your attendance and earn coins.</p>
+
+                <button type="button" class="btn btn-primary w-100" id="btnConfirm" onclick="confirmAttendance()">
+
+                    <i class="bi bi-check-circle"></i> Confirm attendance
+
+                </button>
+
+            </div>
+
+            <div id="stepSuccess" class="alert alert-success" style="display: none;"></div>
+
+            <div id="stepInvalid" class="alert alert-warning" style="display: none;">
+
+                This link is invalid or missing the group. Use the QR shown by your teacher.
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <img src="assets/images/dragon-pequeno.webp" class="mascot-fixed mascot-float" loading="lazy" alt="Attendance dragon mascot">
+
+    <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+
+    <script>
+
+        var user = JSON.parse(localStorage.getItem('lingoCoins_user') || '{}');
+        var PENDING_SESSION_KEY = 'pending_session';
+        var PENDING_ATTENDANCE_KEY = 'pending_attendance_code';
+
+        function stashPendingSession(code) {
+            var safe = String(code || '').trim();
+            if (!safe) return;
+            try { localStorage.setItem(PENDING_SESSION_KEY, safe); } catch (_) {}
+        }
+
+        function consumePendingSession() {
+            var code = '';
+            try { code = localStorage.getItem(PENDING_SESSION_KEY) || ''; } catch (_) {}
+            if (code) {
+                try { localStorage.removeItem(PENDING_SESSION_KEY); } catch (_) {}
+            }
+            return String(code || '').trim();
+        }
+
+        function stashPendingAttendanceCode(code) {
+            var safe = String(code || '').trim();
+            if (!safe) return;
+            try { sessionStorage.setItem(PENDING_ATTENDANCE_KEY, safe); } catch (_) {}
+            try { localStorage.setItem(PENDING_ATTENDANCE_KEY, safe); } catch (_) {}
+        }
+
+        function getPendingAttendanceCode() {
+            var code = '';
+            try { code = sessionStorage.getItem(PENDING_ATTENDANCE_KEY) || ''; } catch (_) {}
+            if (!code) {
+                try { code = localStorage.getItem(PENDING_ATTENDANCE_KEY) || ''; } catch (_) {}
+            }
+            return String(code || '').trim();
+        }
+
+        function clearPendingAttendanceCode() {
+            try { sessionStorage.removeItem(PENDING_ATTENDANCE_KEY); } catch (_) {}
+            try { localStorage.removeItem(PENDING_ATTENDANCE_KEY); } catch (_) {}
+        }
+
+        var preAuthParams = new URLSearchParams(window.location.search);
+        var preAuthSessionCode = preAuthParams.get('session');
+        var preAuthAttendanceCode = preAuthParams.get('attendance_code');
+        if (preAuthSessionCode) {
+            stashPendingSession(preAuthSessionCode);
+        }
+        if (preAuthAttendanceCode) {
+            stashPendingAttendanceCode(preAuthAttendanceCode);
+        }
+
+        if (!user.id || user.rol !== 'student') {
+            var base = window.location.href.split('/').slice(0, -1).join('/') + '/';
+            window.location.href = base + 'index.html';
+        }
+
+
+
+        var params = new URLSearchParams(window.location.search);
+
+        var sessionParam = params.get('session') || params.get('code');
+        if (sessionParam) {
+            stashPendingSession(sessionParam);
+        } else {
+            sessionParam = consumePendingSession();
+            if (sessionParam) params.set('session', sessionParam);
+        }
+
+        // Support attendance_code parameter for deep-linking
+        var attendanceCode = params.get('attendance_code');
+        if (attendanceCode) {
+            stashPendingAttendanceCode(attendanceCode);
+        } else {
+            attendanceCode = getPendingAttendanceCode();
+        }
+        if (attendanceCode) {
+            try {
+                var decoded = fromBase64Url(attendanceCode);
+                if (decoded) {
+                    var parts = decoded.split('|');
+                    if (parts.length >= 3) {
+                        sessionCode = parts[0] || '';
+                        groupCode = parts[1] || '';
+                        startTimeIso = parts[2] || '';
+                        params.set('session', sessionCode);
+                        params.set('g', groupCode);
+                        params.set('startTime', startTimeIso);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to decode attendance_code:', e);
+            }
+            if (!sessionCode) {
+                sessionCode = String(attendanceCode || '').trim();
+                if (sessionCode) params.set('session', sessionCode);
+            }
+        }
+
+        var tLat = parseFloat(params.get('tLat'));
+
+        var tLng = parseFloat(params.get('tLng'));
+
+        var groupCode = groupCode || params.get('g') || '';
+
+        var startTimeIso = startTimeIso || params.get('startTime') || '';
+
+        var sessionCode = sessionCode || sessionParam || params.get('session') || params.get('code') || '';
+
+        var sessionId = '';
+
+        var geoRuntimeStatus = 'unknown';
+
+        function fromBase64Url(str) {
+            try {
+                var b64 = String(str || '').replace(/-/g, '+').replace(/_/g, '/');
+                while (b64.length % 4) b64 += '=';
+                return atob(b64);
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function parseAttendanceCode(code) {
+            var raw = fromBase64Url(code);
+            if (!raw) return null;
+            try {
+                var obj = JSON.parse(raw);
+                var lat = Number(obj.tLat);
+                var lng = Number(obj.tLng);
+                var g = String(obj.g || '').trim();
+                var st = String(obj.startTime || '').trim();
+                if (!g || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+                return { tLat: lat, tLng: lng, g: g, startTime: st };
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function applySession(data) {
+            if (!data) return false;
+            tLat = Number(data.tLat);
+            tLng = Number(data.tLng);
+            groupCode = String(data.g || '').trim();
+            startTimeIso = String(data.startTime || '').trim();
+            sessionId = String(data.sessionId || sessionId || '');
+            return !!groupCode;
+        }
+
+
+
+        function show(id) {
+
+            ['stepCheck', 'stepBlock', 'stepConfirm', 'stepSuccess', 'stepInvalid'].forEach(function(x) {
+
+                var el = document.getElementById(x);
+
+                if (el) el.style.display = x === id ? 'block' : 'none';
+
+            });
+
+        }
+
+
+
+        function blockMessage(msg) {
+
+            document.getElementById('stepBlock').innerHTML = msg;
+
+            show('stepBlock');
+
+        }
+
+
+
+        async function runAttendanceFlow() {
+            geoRuntimeStatus = 'unknown';
+
+            if (sessionCode) {
+                var sessionResult = await getAttendanceSessionByCode(sessionCode);
+                if (sessionResult && sessionResult.ok && sessionResult.session) {
+                    var s = sessionResult.session;
+                    applySession({
+                        tLat: s.admin_lat,
+                        tLng: s.admin_lng,
+                        g: s.group_code,
+                        startTime: s.starts_at || s.created_at,
+                        sessionId: s.id
+                    });
+                }
+            }
+
+            if ((!tLat || !tLng || !groupCode || isNaN(tLat) || isNaN(tLng)) && sessionCode) {
+                var parsedByParamCode = parseAttendanceCode(sessionCode);
+                if (parsedByParamCode) applySession(parsedByParamCode);
+            }
+
+            if (!groupCode) {
+
+                show('stepInvalid');
+
+                return;
+
+            }
+
+
+
+            show('stepCheck');
+
+
+
+            if (await hasAttendanceToday(user.documento_id)) {
+
+                blockMessage('<i class="bi bi-exclamation-triangle-fill"></i> You already checked in today. You can only check in once per day.');
+
+                return;
+
+            }
+
+
+
+            if (!navigator.geolocation) {
+                geoRuntimeStatus = 'no_geolocation';
+                show('stepConfirm');
+                return;
+
+            }
+
+
+
+            navigator.geolocation.getCurrentPosition(
+
+                async function(pos) {
+
+                    var sLat = pos.coords.latitude;
+
+                    var sLng = pos.coords.longitude;
+                    if (Number.isFinite(tLat) && Number.isFinite(tLng)) {
+                        var dist = haversineDistance(tLat, tLng, sLat, sLng);
+                        if (dist > (window.CONFIG && CONFIG.geofenceMeters ? CONFIG.geofenceMeters : 50)) {
+                            geoRuntimeStatus = 'outside_radius';
+                        } else {
+                            geoRuntimeStatus = 'ok';
+                        }
+                    } else {
+                        geoRuntimeStatus = 'gps_no_anchor';
+                    }
+
+                    show('stepConfirm');
+
+                },
+
+                function(err) {
+                    geoRuntimeStatus = 'gps_failed';
+                    show('stepConfirm');
+
+                },
+
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+
+            );
+
+        }
+
+        document.getElementById('btnApplyManualCode').addEventListener('click', async function() {
+            var input = document.getElementById('manualCodeInput');
+            var code = input ? input.value.trim() : '';
+            if (!code) {
+                blockMessage('Enter the manual code first.');
+                return;
+            }
+
+            var dbSession = await getAttendanceSessionByCode(code);
+            if (dbSession && dbSession.ok && dbSession.session) {
+                applySession({
+                    tLat: dbSession.session.admin_lat,
+                    tLng: dbSession.session.admin_lng,
+                    g: dbSession.session.group_code,
+                    startTime: dbSession.session.starts_at || dbSession.session.created_at,
+                    sessionId: dbSession.session.id
+                });
+                sessionCode = code;
+                show('stepCheck');
+                runAttendanceFlow();
+                return;
+            }
+
+            var parsed = parseAttendanceCode(code);
+            if (!parsed) {
+                blockMessage('Invalid manual code. Ask your teacher for a new one.');
+                return;
+            }
+
+            applySession(parsed);
+            sessionCode = code;
+            show('stepCheck');
+            runAttendanceFlow();
+        });
+
+        runAttendanceFlow();
+
+
+
+        async function confirmAttendance() {
+
+            var btn = document.getElementById('btnConfirm');
+
+            btn.disabled = true;
+
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
+
+
+            if (!navigator.geolocation) {
+                try {
+                    await insertAttendance(user.documento_id, groupCode, null, null, {
+                        sessionId: sessionId || null,
+                        sessionCode: sessionCode || null,
+                        geoStatus: geoRuntimeStatus || 'no_geolocation'
+                    });
+                    var awardNoGeo = await awardCoinsForCheckin(user.documento_id, startTimeIso);
+                    var msgNoGeo = 'Check-in recorded.';
+                    if (awardNoGeo.ok && awardNoGeo.coinsAwarded) msgNoGeo += ' You earned ' + awardNoGeo.coinsAwarded + ' coins!';
+                    msgNoGeo += ' (GPS tolerant mode)';
+                    document.getElementById('stepSuccess').innerHTML = '<i class="bi bi-check-circle-fill"></i> ' + msgNoGeo;
+                    clearPendingAttendanceCode();
+                    show('stepSuccess');
+                } catch (e) {
+                    blockMessage('Error saving: ' + (e.message || 'Try again.'));
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirm attendance';
+                }
+                return;
+
+            }
+
+
+
+            navigator.geolocation.getCurrentPosition(
+
+                async function(pos) {
+
+                    var sLat = pos.coords.latitude;
+
+                    var sLng = pos.coords.longitude;
+                    var statusToSave = geoRuntimeStatus || 'unknown';
+                    if (Number.isFinite(tLat) && Number.isFinite(tLng)) {
+                        var dist = haversineDistance(tLat, tLng, sLat, sLng);
+                        statusToSave = dist > (window.CONFIG && CONFIG.geofenceMeters ? CONFIG.geofenceMeters : 50) ? 'outside_radius' : 'ok';
+                    }
+
+                    try {
+
+                        await insertAttendance(user.documento_id, groupCode, sLat, sLng, {
+                            sessionId: sessionId || null,
+                            sessionCode: sessionCode || null,
+                            geoStatus: statusToSave
+                        });
+
+                        var award = await awardCoinsForCheckin(user.documento_id, startTimeIso);
+
+                        var msg = 'Check-in recorded.';
+
+                        if (award.ok && award.coinsAwarded) msg += ' You earned ' + award.coinsAwarded + ' coins!';
+                        if (statusToSave !== 'ok') msg += ' (GPS tolerant mode)';
+
+                        document.getElementById('stepSuccess').innerHTML = '<i class="bi bi-check-circle-fill"></i> ' + msg;
+                        clearPendingAttendanceCode();
+
+                        show('stepSuccess');
+
+                    } catch (e) {
+
+                        blockMessage('Error saving: ' + (e.message || 'Try again.'));
+
+                        btn.disabled = false;
+
+                        btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirm attendance';
+
+                    }
+
+                },
+
+                function() {
+                    insertAttendance(user.documento_id, groupCode, null, null, {
+                        sessionId: sessionId || null,
+                        sessionCode: sessionCode || null,
+                        geoStatus: 'gps_failed'
+                    }).then(async function() {
+                        var award = await awardCoinsForCheckin(user.documento_id, startTimeIso);
+                        var msg = 'Check-in recorded.';
+                        if (award.ok && award.coinsAwarded) msg += ' You earned ' + award.coinsAwarded + ' coins!';
+                        msg += ' (GPS tolerant mode)';
+                        document.getElementById('stepSuccess').innerHTML = '<i class="bi bi-check-circle-fill"></i> ' + msg;
+                        clearPendingAttendanceCode();
+                        show('stepSuccess');
+                    }).catch(function(err) {
+                        blockMessage('Could not complete check-in: ' + (err.message || 'Try again.'));
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirm attendance';
+                    });
+
+                }
+
+            );
+
+        }
+
+    </script>
+
+</body>
+
+</html>
+

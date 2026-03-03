@@ -1,0 +1,12 @@
+{
+  "commit_message": "feat: admin dashboard redesign with role-based personalities",
+  "branch": "v0/ddiddimmo-4985-db65374e",
+  "description": "Admin redesign with two role-based layouts:\n- Super Admin: Linear.app-style left sidebar\n- School Admin: Duolingo for Schools top tabs\nRemoved fantasy background and decorative overlays.\nReads user role from localStorage on DOMContentLoaded for instant layout detection.",
+  "files_changed": [
+    "admin.html - New dual-layout structure, removed fantasy background and decor-overlay",
+    "admin-init.js - Reads localStorage on DOMContentLoaded, no longer waits for window.currentUser",
+    "styles.css - Added admin-layout-super/school with background-image override"
+  ],
+  "revert_instructions": "git revert HEAD --no-edit",
+  "note": "Save the commit hash after push (git log --oneline -1) to revert specific commit if needed"
+}

@@ -4,31 +4,26 @@ import os
 import glob
 
 def find_git_root():
-    # Walk up from the script location looking for .git
-    current = os.path.dirname(os.path.abspath(__file__))
-    for _ in range(5):
-        if os.path.exists(os.path.join(current, '.git')):
-            return current
-        parent = os.path.dirname(current)
-        if parent == current:
-            break
-        current = parent
-    # Fallback: search known locations
-    for candidate in ['/root', '/home/user', '/workspace', '/vercel/share/v0-project', os.path.expanduser('~')]:
-        if os.path.isdir(candidate) and os.path.exists(os.path.join(candidate, '.git')):
+    # Search known locations — no __file__ in this execution environment
+    candidates = [
+        '/vercel/share/v0-project',
+        '/root',
+        '/home/user',
+        '/workspace',
+        os.path.expanduser('~'),
+    ]
+    for candidate in candidates:
+        if os.path.isdir(candidate) and os.path.exists(os.path.join(candidate, 'admin.html')):
             return candidate
+    # Wider glob search
+    for hit in glob.glob('/*/admin.html') + glob.glob('/home/*/admin.html'):
+        return os.path.dirname(hit)
     return None
 
 try:
     project_dir = find_git_root()
     if not project_dir:
-        # Last resort: use wherever admin.html lives
-        matches = glob.glob('/*/admin.html') + glob.glob('/home/*/admin.html')
-        if matches:
-            project_dir = os.path.dirname(matches[0])
-    
-    if not project_dir:
-        raise Exception("Could not locate git repository")
+        raise Exception("Could not locate project directory")
 
     print(f"[v0] Git root: {project_dir}")
     os.chdir(project_dir)

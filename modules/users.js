@@ -1,6 +1,7 @@
 (function() {
   var state = { page: 0, pageSize: 50, total: 0, user: null, role: null, rows: [], selected: {}, adminMode: false };
-  var PROFILE_SELECT = 'id,nombre_completo,documento_id,rol,grupo,monedas,is_active,account_locked,institution_id,last_login_at,teacher_credits,force_password_reset';
+  var PROFILE_SELECT_FULL = 'id,nombre_completo,documento_id,rol,grupo,monedas,is_active,account_locked,institution_id,last_login_at,teacher_credits,force_password_reset';
+  var PROFILE_SELECT_SAFE = 'id,nombre_completo,documento_id,rol,grupo,monedas,is_active,institution_id,last_login_at';
 
   function esc(v) { return UI.escapeHtml(v == null ? '' : String(v)); }
   function isAdminMode() { return !!state.adminMode; }
@@ -113,10 +114,20 @@
 
   async function fetchRows() {
     var q = supabaseClient.from(CONFIG.tables.profiles)
-      .select(PROFILE_SELECT)
+      .select(PROFILE_SELECT_FULL)
       .eq('is_active', true)
       .order('nombre_completo', { ascending: true });
     var r = await applyCommonFilters(q, false);
+    if (r.error && typeof isMissingColumnError === 'function' &&
+        (isMissingColumnError(r.error, 'account_locked', CONFIG.tables.profiles) ||
+         isMissingColumnError(r.error, 'force_password_reset', CONFIG.tables.profiles) ||
+         isMissingColumnError(r.error, 'teacher_credits', CONFIG.tables.profiles))) {
+      var q2 = supabaseClient.from(CONFIG.tables.profiles)
+        .select(PROFILE_SELECT_SAFE)
+        .eq('is_active', true)
+        .order('nombre_completo', { ascending: true });
+      r = await applyCommonFilters(q2, false);
+    }
     if (r.error) throw r.error;
     return r.data || [];
   }

@@ -81,6 +81,7 @@
     } catch (_) {}
     var blocked = await (async function() {
       var r = await supabaseClient.from(CONFIG.tables.profiles).select('id', { count: 'exact', head: true }).eq('account_locked', true).eq('is_active', true);
+      if (r.error && typeof isMissingColumnError === 'function' && isMissingColumnError(r.error, 'account_locked', CONFIG.tables.profiles)) return 0;
       return r.error ? 0 : (r.count || 0);
     })();
 
@@ -175,10 +176,14 @@
     if (tab === 'admins' || tab === 'teachers') {
       var role = tab === 'admins' ? 'admin' : 'teacher';
       var r = await supabaseClient.from(CONFIG.tables.profiles).select('id,nombre_completo,documento_id,account_locked').eq('institution_id', school.id).eq('rol', role).eq('is_active', true).order('nombre_completo');
+      if (r.error && typeof isMissingColumnError === 'function' && isMissingColumnError(r.error, 'account_locked', CONFIG.tables.profiles)) {
+        r = await supabaseClient.from(CONFIG.tables.profiles).select('id,nombre_completo,documento_id').eq('institution_id', school.id).eq('rol', role).eq('is_active', true).order('nombre_completo');
+      }
       var rows = r.error ? [] : (r.data || []);
       body.innerHTML = '<div class="mb-2"><button class="btn btn-sm btn-primary" id="btnAddRoleUser">Add ' + role + '</button></div>' +
         '<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Name</th><th>Doc</th><th>Status</th><th>Actions</th></tr></thead><tbody>' + rows.map(function(u) {
-          return '<tr><td>' + esc(u.nombre_completo) + '</td><td>' + esc(u.documento_id) + '</td><td>' + (u.account_locked ? 'blocked' : 'active') + '</td><td><button class="btn btn-sm btn-outline-primary me-1" onclick="InstitutionsModule.editProfile(\'' + esc(u.id) + '\')">Edit</button><button class="btn btn-sm btn-outline-secondary me-1" onclick="InstitutionsModule.lockProfile(\'' + esc(u.id) + '\',' + (!u.account_locked) + ')">' + (u.account_locked ? 'Unlock' : 'Lock') + '</button><button class="btn btn-sm btn-outline-danger" onclick="InstitutionsModule.deleteProfile(\'' + esc(u.id) + '\')">Delete</button></td></tr>';
+          var locked = u.account_locked || false;
+          return '<tr><td>' + esc(u.nombre_completo) + '</td><td>' + esc(u.documento_id) + '</td><td>' + (locked ? 'blocked' : 'active') + '</td><td><button class="btn btn-sm btn-outline-primary me-1" onclick="InstitutionsModule.editProfile(\'' + esc(u.id) + '\')">Edit</button><button class="btn btn-sm btn-outline-secondary me-1" onclick="InstitutionsModule.lockProfile(\'' + esc(u.id) + '\',' + (!locked) + ')">' + (locked ? 'Unlock' : 'Lock') + '</button><button class="btn btn-sm btn-outline-danger" onclick="InstitutionsModule.deleteProfile(\'' + esc(u.id) + '\')">Delete</button></td></tr>';
         }).join('') + '</tbody></table></div>';
       document.getElementById('btnAddRoleUser').onclick = function() { createRoleUser(role, school.id); };
       return;
@@ -570,17 +575,23 @@
   }
 
   async function loadAdminsSection() {
-    var host = document.getElementById('adminUsersList');
-    if (!host) return;
-    var sid = document.getElementById('adminsSchoolFilter') ? document.getElementById('adminsSchoolFilter').value : '';
-    var q = supabaseClient.from(CONFIG.tables.profiles).select('id,nombre_completo,documento_id,rol,institution_id,last_login_at,account_locked').in('rol', ['admin', 'teacher']).eq('is_active', true).order('nombre_completo');
-    if (sid) q = q.eq('institution_id', sid);
-    var r = await q;
-    if (r.error) { host.innerHTML = '<div class="alert alert-danger">' + esc(r.error.message) + '</div>'; return; }
-    host.innerHTML = '<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Name</th><th>Doc</th><th>Role</th><th>School</th><th>Last login</th><th>Status</th><th>Actions</th></tr></thead><tbody>' + (r.data || []).map(function(u) {
-      var school = findSchool(u.institution_id);
-      return '<tr><td>' + esc(u.nombre_completo) + '</td><td>' + esc(u.documento_id) + '</td><td>' + esc(u.rol) + '</td><td>' + esc(school ? school.nombre : '-') + '</td><td>' + esc(u.last_login_at || '-') + '</td><td>' + (u.account_locked ? 'blocked' : 'active') + '</td><td><button class="btn btn-sm btn-outline-primary me-1" onclick="InstitutionsModule.editProfile(\'' + esc(u.id) + '\')">Edit</button><button class="btn btn-sm btn-outline-secondary me-1" onclick="InstitutionsModule.lockProfile(\'' + esc(u.id) + '\',' + (!u.account_locked) + ')">' + (u.account_locked ? 'Unlock' : 'Lock') + '</button><button class="btn btn-sm btn-outline-danger" onclick="InstitutionsModule.deleteProfile(\'' + esc(u.id) + '\')">Delete</button></td></tr>';
-    }).join('') + '</tbody></table></div>';
+  var host = document.getElementById('adminUsersList');
+  if (!host) return;
+  var sid = document.getElementById('adminsSchoolFilter') ? document.getElementById('adminsSchoolFilter').value : '';
+  var q = supabaseClient.from(CONFIG.tables.profiles).select('id,nombre_completo,documento_id,rol,institution_id,last_login_at,account_locked').in('rol', ['admin', 'teacher']).eq('is_active', true).order('nombre_completo');
+  if (sid) q = q.eq('institution_id', sid);
+  var r = await q;
+  if (r.error && typeof isMissingColumnError === 'function' && isMissingColumnError(r.error, 'account_locked', CONFIG.tables.profiles)) {
+    var q2 = supabaseClient.from(CONFIG.tables.profiles).select('id,nombre_completo,documento_id,rol,institution_id,last_login_at').in('rol', ['admin', 'teacher']).eq('is_active', true).order('nombre_completo');
+    if (sid) q2 = q2.eq('institution_id', sid);
+    r = await q2;
+  }
+  if (r.error) { host.innerHTML = '<div class="alert alert-danger">' + esc(r.error.message) + '</div>'; return; }
+  host.innerHTML = '<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Name</th><th>Doc</th><th>Role</th><th>School</th><th>Last login</th><th>Status</th><th>Actions</th></tr></thead><tbody>' + (r.data || []).map(function(u) {
+  var school = findSchool(u.institution_id);
+  var locked = u.account_locked || false;
+  return '<tr><td>' + esc(u.nombre_completo) + '</td><td>' + esc(u.documento_id) + '</td><td>' + esc(u.rol) + '</td><td>' + esc(school ? school.nombre : '-') + '</td><td>' + esc(u.last_login_at || '-') + '</td><td>' + (locked ? 'blocked' : 'active') + '</td><td><button class="btn btn-sm btn-outline-primary me-1" onclick="InstitutionsModule.editProfile(\'' + esc(u.id) + '\')">Edit</button><button class="btn btn-sm btn-outline-secondary me-1" onclick="InstitutionsModule.lockProfile(\'' + esc(u.id) + '\',' + (!locked) + ')">' + (locked ? 'Unlock' : 'Lock') + '</button><button class="btn btn-sm btn-outline-danger" onclick="InstitutionsModule.deleteProfile(\'' + esc(u.id) + '\')">Delete</button></td></tr>';
+  }).join('') + '</tbody></table></div>';
   }
 
   async function createAdminTeacher() {

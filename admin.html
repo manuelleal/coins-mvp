@@ -443,10 +443,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('adminName').textContent = user.nombre_completo || (user.rol === 'admin' ? 'School Admin' : 'Super Admin');
     }
 
-    var roleNavVisibility = {
-        super_admin: ['navDashboard', 'navInstitutions', 'navUsers', 'navGroups', 'navEconomy', 'navAiConfig', 'navPolicies', 'navAdmins'],
-        admin: ['navAdminDashboard', 'navTeachers', 'navGroups', 'navUsers', 'navAttendance', 'navChallenges', 'navStore', 'navCobros', 'navAnnouncements', 'navFeedback']
-    };
+  var roleNavVisibility = {
+  super_admin: ['navDashboard', 'navInstitutions', 'navEconomy', 'navAiConfig', 'navPolicies', 'navAdmins'],
+  admin: ['navAdminDashboard', 'navTeachers', 'navGroups', 'navUsers', 'navAttendance', 'navChallenges', 'navStore', 'navCobros', 'navAnnouncements', 'navFeedback']
+  };
 
     var allKnownNavIds = ['navDashboard', 'navAdminDashboard', 'navInstitutions', 'navTeachers', 'navUsers', 'navGroups', 'navAttendance', 'navChallenges', 'navStore', 'navCobros', 'navAnnouncements', 'navFeedback', 'navEconomy', 'navAiConfig', 'navPolicies', 'navAdmins'];
     var visibleNavIds = roleNavVisibility[user.rol] || [];

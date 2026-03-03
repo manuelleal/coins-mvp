@@ -1,6 +1,7 @@
 /* ========================================
    ADMIN-INIT.JS — Layout switch + view routing for admin.html
-   NO data loading here. Data loading is delegated to InstitutionsModule (modules/institutions.js).
+   Data loading delegated to InstitutionsModule (modules/institutions.js) for super_admin.
+   School admin data loaders are inline below.
    ======================================== */
 (function() {
   'use strict';
@@ -10,10 +11,20 @@
   try { user = JSON.parse(localStorage.getItem('lingoCoins_user') || 'null'); } catch(_) {}
   if (!user || !user.id || (user.rol !== 'super_admin' && user.rol !== 'admin')) {
     window.location.href = 'index.html';
+    return;
   }
 
-  var role = user ? user.rol : '';
-  var INST_ID = user ? (user.institution_id || '') : '';
+  var role = user.rol || '';
+  var INST_ID = user.institution_id || '';
+
+  // --- Wait for supabaseClient before calling any data loaders ---
+  function waitForSupabase(callback) {
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+      callback();
+    } else {
+      setTimeout(function() { waitForSupabase(callback); }, 100);
+    }
+  }
 
   // --- Apply body class (matches styles.css selectors) ---
   if (role === 'super_admin') {
@@ -27,11 +38,11 @@
   var schoolLayout = document.getElementById('schoolAdminLayout');
 
   if (role === 'super_admin') {
-    if (superLayout) superLayout.style.display = '';
+    if (superLayout) superLayout.style.display = 'block';
     if (schoolLayout) schoolLayout.style.display = 'none';
   } else if (role === 'admin') {
     if (superLayout) superLayout.style.display = 'none';
-    if (schoolLayout) schoolLayout.style.display = '';
+    if (schoolLayout) schoolLayout.style.display = 'block';
   }
 
   // --- View lists per role ---
@@ -246,8 +257,9 @@
     var d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML;
   }
 
-  // --- DOMContentLoaded: set user info, wire logout, init InstitutionsModule, load default view ---
+  // --- DOMContentLoaded: set user info, wire logout, init modules, load default view ---
   document.addEventListener('DOMContentLoaded', function() {
+
     // Set user name in header
     if (role === 'super_admin') {
       var nameEl = document.getElementById('adminNameTop');
@@ -255,20 +267,6 @@
     } else if (role === 'admin') {
       var nameEl2 = document.getElementById('adminNameTop2');
       if (nameEl2) nameEl2.textContent = user.nombre_completo || user.nombre || 'Admin';
-      // Set school name (async)
-      (async function() {
-        try {
-          if (INST_ID) {
-            var res = await supabaseClient.from(CONFIG.tables.institutions).select('name,nombre').eq('id', INST_ID).maybeSingle();
-            var school = res.data;
-            var schoolName = (school && (school.name || school.nombre)) || 'School';
-            var nameDisplay = document.getElementById('schoolNameDisplay');
-            var avatarDisplay = document.getElementById('schoolAvatarDisplay');
-            if (nameDisplay) nameDisplay.textContent = schoolName;
-            if (avatarDisplay) avatarDisplay.textContent = schoolName.charAt(0).toUpperCase();
-          }
-        } catch(_) {}
-      })();
     }
 
     // Wire logout buttons
@@ -283,18 +281,49 @@
       }
     });
 
-    // Init InstitutionsModule for super_admin
-    if (role === 'super_admin' && window.InstitutionsModule && window.InstitutionsModule.init) {
-      window.InstitutionsModule.init({ user: user }).catch(function(e) {
-        console.error('[admin-init] InstitutionsModule.init error:', e);
+    // Wire mobile sidebar toggle (super_admin)
+    var toggleBtn = document.getElementById('btnToggleSidebar');
+    var sidebar = document.querySelector('.admin-sidebar');
+    if (toggleBtn && sidebar) {
+      toggleBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+      });
+      // Close sidebar when clicking a nav item on mobile
+      sidebar.querySelectorAll('.admin-nav-item').forEach(function(link) {
+        link.addEventListener('click', function() {
+          if (window.innerWidth < 768) sidebar.classList.remove('open');
+        });
       });
     }
 
-    // Load default view
-    if (role === 'super_admin') {
-      window.showAdminView('dashboard');
-    } else if (role === 'admin') {
-      window.showAdminView('adminDashboard');
-    }
+    // --- Boot: wait for supabaseClient, then init modules and load default view ---
+    waitForSupabase(function() {
+
+      // Set school name for school admins
+      if (role === 'admin' && INST_ID) {
+        supabaseClient.from(CONFIG.tables.institutions).select('name,nombre').eq('id', INST_ID).maybeSingle().then(function(res) {
+          var school = res.data;
+          var schoolName = (school && (school.name || school.nombre)) || 'School';
+          var nameDisplay = document.getElementById('schoolNameDisplay');
+          var avatarDisplay = document.getElementById('schoolAvatarDisplay');
+          if (nameDisplay) nameDisplay.textContent = schoolName;
+          if (avatarDisplay) avatarDisplay.textContent = schoolName.charAt(0).toUpperCase();
+        }).catch(function() {});
+      }
+
+      // Init InstitutionsModule for super_admin
+      if (role === 'super_admin' && window.InstitutionsModule && window.InstitutionsModule.init) {
+        window.InstitutionsModule.init({ user: user }).catch(function(e) {
+          console.error('[admin-init] InstitutionsModule.init error:', e);
+        });
+      }
+
+      // Load default view
+      if (role === 'super_admin') {
+        window.showAdminView('dashboard');
+      } else if (role === 'admin') {
+        window.showAdminView('adminDashboard');
+      }
+    });
   });
 })();

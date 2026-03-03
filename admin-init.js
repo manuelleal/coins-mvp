@@ -97,9 +97,10 @@
             }
         });
 
-        // Logout handler
+        // Logout handler — attach once only
         const logoutBtn = document.getElementById('btnLogout');
-        if (logoutBtn) {
+        if (logoutBtn && !logoutBtn._initDone) {
+            logoutBtn._initDone = true;
             logoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (window.handleLogout) {
@@ -110,31 +111,33 @@
     }
 
     function initSchoolAdminLayout(user) {
-        // Update header with user and school info
-        document.getElementById('adminNameTop2').textContent = user.nombre || 'Admin';
-        
-        // Set school name and avatar
-        const schoolName = window.currentSchool?.nombre || user.nombre || 'School';
-        document.getElementById('schoolNameDisplay').textContent = schoolName;
-        
-        // Set avatar to first letter
-        const firstLetter = schoolName.charAt(0).toUpperCase();
-        document.getElementById('schoolAvatarDisplay').textContent = firstLetter;
+        // Update header with user info
+        const nameEl = document.getElementById('adminNameTop2');
+        if (nameEl) nameEl.textContent = user.nombre || 'Admin';
 
-        // Wire up tab clicks to update active state
-        const tabs = document.querySelectorAll('.admin-tab-item');
-        tabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                // Remove active from all tabs
-                tabs.forEach(t => t.classList.remove('active'));
-                // Add active to clicked tab
-                e.target.classList.add('active');
-            });
-        });
+        // Set school name and avatar — defer if window.currentSchool is not yet available
+        function applySchoolName() {
+            var schoolName = (window.currentSchool && window.currentSchool.nombre)
+                || user.nombre
+                || 'School';
+            var nameDisplay = document.getElementById('schoolNameDisplay');
+            var avatarDisplay = document.getElementById('schoolAvatarDisplay');
+            if (nameDisplay) nameDisplay.textContent = schoolName;
+            if (avatarDisplay) avatarDisplay.textContent = schoolName.charAt(0).toUpperCase();
+        }
 
-        // Logout handler
+        applySchoolName();
+
+        // Retry school name once app.js has had time to populate window.currentSchool
+        if (!window.currentSchool) {
+            setTimeout(applySchoolName, 600);
+            setTimeout(applySchoolName, 1500);
+        }
+
+        // Logout handler — attach once only
         const logoutBtn = document.getElementById('btnLogout2');
-        if (logoutBtn) {
+        if (logoutBtn && !logoutBtn._initDone) {
+            logoutBtn._initDone = true;
             logoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (window.handleLogout) {
@@ -145,36 +148,50 @@
     }
 
     /**
-     * Override showAdminView to handle the new layout structure
-     * Preserve existing behavior from app.js
+     * Override showAdminView to handle the new layout structure.
+     * Hides only views inside the active layout wrapper so super_admin and
+     * school admin views never accidentally clobber each other.
+     * Delegates data loading entirely to app.js (via the original handler).
      */
     const originalShowAdminView = window.showAdminView;
     window.showAdminView = function(viewName) {
-        // Hide all views first
-        document.querySelectorAll('.admin-view').forEach(view => {
+        var user = getUserFromStorage() || window.currentUser || {};
+        var role = user.rol || '';
+
+        // Determine which layout wrapper is active
+        var activeLayout = null;
+        if (role === 'super_admin') {
+            activeLayout = document.getElementById('superAdminLayout');
+        } else if (role === 'admin') {
+            activeLayout = document.getElementById('schoolAdminLayout');
+        }
+
+        // Hide all admin-view elements within the active layout only
+        var container = activeLayout || document;
+        container.querySelectorAll('.admin-view').forEach(function(view) {
             view.classList.remove('active');
         });
 
-        // Show the requested view
-        const viewElement = document.getElementById('view' + viewName.charAt(0).toUpperCase() + viewName.slice(1));
+        // Show the requested view (capitalise first letter to get element ID)
+        var viewId = 'view' + viewName.charAt(0).toUpperCase() + viewName.slice(1);
+        var viewElement = document.getElementById(viewId);
         if (viewElement) {
             viewElement.classList.add('active');
         }
 
-        // Update tab/nav active state based on role
-        const role = window.currentUser?.rol || 'student';
+        // Update nav/tab active state
         if (role === 'super_admin') {
             updateSuperAdminNav(viewName);
         } else if (role === 'admin') {
             updateSchoolAdminTabs(viewName);
         }
 
-        // Call original handler if it exists and we need to load data
+        // Delegate data loading to app.js — do NOT load data here
         if (originalShowAdminView && typeof originalShowAdminView === 'function') {
             try {
                 originalShowAdminView(viewName);
             } catch (e) {
-                console.log('[ADMIN_INIT] Original showAdminView not available or errored');
+                console.log('[ADMIN_INIT] Original showAdminView error:', e.message);
             }
         }
 
@@ -207,17 +224,19 @@
     }
 
     function updateSchoolAdminTabs(viewName) {
+        // Keys must match the argument passed to showAdminView() in admin.html tabs.
+        // Values must match the id attributes on the <a class="admin-tab-item"> elements.
         const tabMap = {
             'adminDashboard': 'tabAdminDashboard',
-            'teachers': 'tabTeachers',
-            'groups': 'tabGroups',
-            'users': 'tabUsers',
-            'attendance': 'tabAttendance',
-            'challenges': 'tabChallenges',
-            'store': 'tabStore',
-            'cobros': 'tabCobros',
-            'announcements': 'tabAnnouncements',
-            'feedback': 'tabFeedback'
+            'teachers':       'tabTeachers',
+            'groupsSchool':   'tabGroupsSchool',
+            'usersSchool':    'tabUsersSchool',
+            'attendance':     'tabAttendance',
+            'challenges':     'tabChallenges',
+            'store':          'tabStore',
+            'cobros':         'tabCobros',
+            'announcements':  'tabAnnouncements',
+            'feedback':       'tabFeedback'
         };
 
         const tabId = tabMap[viewName];

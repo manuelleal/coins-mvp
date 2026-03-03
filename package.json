@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "dev": "npx serve . --listen 3000",
+    "start": "npx serve . --listen 3000"
+  },
   "devDependencies": {
     "playwright": "^1.58.2"
   }

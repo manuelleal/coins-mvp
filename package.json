@@ -1,13 +1,11 @@
 {
   "name": "coins-mvp",
   "version": "1.0.0",
+  "type": "module",
   "description": "LINGO Coins - Educational Gamification Platform",
   "scripts": {
-    "dev": "npx serve -l 3000 .",
-    "start": "npx serve -l 3000 ."
-  },
-  "dependencies": {
-    "serve": "^14.2.0"
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
   },
   "devDependencies": {
     "playwright": "^1.58.2"

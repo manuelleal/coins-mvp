@@ -1,38 +1,58 @@
 /**
  * Admin Layout Initialization
- * Handles role-based UI switching between Super Admin and School Admin layouts
- * Preserves all existing app.js functionality
+ * Handles role-based UI switching between Super Admin and School Admin layouts.
+ * Reads user from localStorage on DOMContentLoaded so the correct layout is
+ * applied BEFORE any async auth resolves — eliminates flash of wrong content.
  */
 
 (function() {
     'use strict';
 
-    // Wait for Supabase and auth to be ready
-    function initializeAdminLayout() {
-        const user = window.currentUser || null;
-        
-        if (!user) {
-            console.error('[ADMIN_INIT] No user logged in');
-            return;
-        }
+    /**
+     * Read user synchronously from localStorage.
+     * Falls back to window.currentUser if localStorage is unavailable.
+     */
+    function getUserFromStorage() {
+        try {
+            var raw = localStorage.getItem('lingoCoins_user');
+            if (raw) return JSON.parse(raw);
+        } catch (_) {}
+        return window.currentUser || null;
+    }
 
-        const role = user.rol || 'student';
-        const layoutClass = role === 'super_admin' 
-            ? 'admin-layout-super' 
-            : 'admin-layout-school';
+    function applyAdminLayout(user) {
+        if (!user) return;
 
-        // Set body class for role-based styling
-        document.body.classList.add(layoutClass);
+        const role = user.rol || '';
 
-        // Show correct layout
+        // Remove bg-dashboard fantasy background and overlay
+        document.body.classList.remove('bg-dashboard');
+
         if (role === 'super_admin') {
+            document.body.classList.add('admin-layout-super');
+            document.body.classList.remove('admin-layout-school');
             document.getElementById('superAdminLayout').style.display = '';
             document.getElementById('schoolAdminLayout').style.display = 'none';
             initSuperAdminLayout(user);
         } else if (role === 'admin') {
+            document.body.classList.add('admin-layout-school');
+            document.body.classList.remove('admin-layout-super');
             document.getElementById('superAdminLayout').style.display = 'none';
             document.getElementById('schoolAdminLayout').style.display = '';
             initSchoolAdminLayout(user);
+        }
+    }
+
+    function initializeAdminLayout() {
+        // Try localStorage first for immediate render, then window.currentUser as fallback
+        const user = getUserFromStorage();
+        if (user && user.rol) {
+            applyAdminLayout(user);
+        } else {
+            // Retry once app.js has had time to set window.currentUser
+            setTimeout(function() {
+                applyAdminLayout(window.currentUser || getUserFromStorage());
+            }, 200);
         }
     }
 
@@ -212,21 +232,11 @@
         }
     }
 
-    // Initialize when document is ready and user is loaded
+    // Run immediately on DOMContentLoaded — reads localStorage synchronously
+    // so the correct layout is applied before any images/scripts finish loading.
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeAdminLayout);
     } else {
-        // DOM already loaded, but wait a tick for window.currentUser to be set
-        setTimeout(initializeAdminLayout, 100);
-    }
-
-    // Also listen for auth changes if using Supabase
-    if (window.supabase) {
-        window.supabase.auth.onAuthStateChange((event, session) => {
-            if (session?.user && window.currentUser) {
-                // Reinitialize layout if user info changes
-                setTimeout(initializeAdminLayout, 50);
-            }
-        });
+        initializeAdminLayout();
     }
 })();

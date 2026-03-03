@@ -1317,6 +1317,13 @@ textarea::placeholder {
    ADMIN REDESIGN — Role-Based Personalities
    ======================================== */
 
+/* Kill fantasy background for ALL admin views */
+body.admin-layout-super,
+body.admin-layout-school {
+    background: var(--admin-bg) !important;
+    background-image: none !important;
+}
+
 /* === SUPER ADMIN: Linear.app + Google Analytics Style === */
 body.admin-layout-super {
     background: var(--admin-bg);

@@ -1308,3 +1308,656 @@ textarea::placeholder {
     height: 20px;
     accent-color: var(--gold-500);
 }
+
+/* ========================================
+   REDESIGN v2 — Login Page
+   ======================================== */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft), 0 0 60px rgba(251, 191, 36, 0.06);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 2rem 1.75rem;
+    animation: fadeInUp 0.45s ease-out;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+
+.login-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin-bottom: 0.75rem;
+    border-radius: 16px;
+    padding: 4px;
+    background: linear-gradient(145deg, rgba(9, 21, 43, 0.86), rgba(19, 34, 60, 0.75));
+    border: 1px solid rgba(251, 191, 36, 0.28);
+    box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);
+}
+
+.login-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--gold-400);
+    margin: 0 0 0.25rem;
+    letter-spacing: -0.01em;
+}
+
+.login-subtitle {
+    color: var(--text-300);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.login-tabs {
+    display: flex;
+    gap: 0;
+    background: rgba(8, 19, 38, 0.6);
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 1.5rem;
+}
+
+.login-tab {
+    flex: 1;
+    padding: 0.55rem 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-300);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.login-tab.active {
+    background: rgba(251, 191, 36, 0.18);
+    color: var(--gold-400);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.login-tab:hover:not(.active) {
+    color: var(--text-100);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.login-form .form-group {
+    margin-bottom: 0;
+}
+
+.login-form .form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-200);
+    margin-bottom: 0.35rem;
+}
+
+.login-form .form-control-lg,
+.login-form .form-select-lg {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 10px;
+}
+
+.login-error {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--danger);
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.login-version {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-300);
+    margin-top: 1rem;
+    opacity: 0.6;
+}
+
+/* ========================================
+   REDESIGN v2 — Student Top Bar + Bottom Tab Bar
+   ======================================== */
+
+/* Top bar: greeting + actions */
+.student-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(120deg, rgba(9, 20, 41, 0.96), rgba(23, 38, 68, 0.96));
+    border-bottom: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.topbar-greeting {
+    font-size: 0.95rem;
+    color: var(--text-200);
+}
+
+.topbar-greeting strong {
+    color: var(--gold-400);
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.topbar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-200);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.topbar-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-100);
+}
+
+.topbar-btn-logout {
+    border-color: rgba(239, 68, 68, 0.3);
+    color: rgba(239, 68, 68, 0.7);
+}
+
+.topbar-btn-logout:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--danger);
+}
+
+/* Bottom Tab Bar */
+.student-tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    background: linear-gradient(0deg, rgba(8, 16, 32, 0.98), rgba(11, 21, 42, 0.96));
+    border-top: 1px solid rgba(159, 176, 207, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0.25rem 0 max(0.25rem, env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0.45rem 0.25rem;
+    border: none;
+    background: transparent;
+    color: var(--text-300);
+    font-size: 0.68rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tab-item i {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.tab-item.active {
+    color: var(--gold-400);
+}
+
+.tab-item:hover:not(.active) {
+    color: var(--text-100);
+}
+
+/* Primary tab (Play/Challenges) - gold accent */
+.tab-item-primary {
+    position: relative;
+}
+
+.tab-item-primary i {
+    font-size: 1.4rem;
+}
+
+.tab-item-primary.active {
+    color: var(--gold-500);
+}
+
+.tab-item-primary::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--gold-500);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tab-item-primary.active::before {
+    opacity: 1;
+}
+
+/* Add bottom padding to page for tab bar */
+body:has(.student-tab-bar) .page-container {
+    padding-bottom: 80px;
+}
+
+/* ========================================
+   REDESIGN v2 — Student Hero (Wallet + XP)
+   ======================================== */
+.student-hero {
+    padding: 1.25rem;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(251, 191, 36, 0.03));
+    border-bottom: 1px solid rgba(251, 191, 36, 0.12);
+    margin: -1.15rem -1.15rem 1rem;
+    padding-bottom: 1rem;
+}
+
+.hero-wallet {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.hero-coin-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 14px;
+    padding: 3px;
+    background: linear-gradient(145deg, rgba(9, 21, 43, 0.86), rgba(19, 34, 60, 0.75));
+    border: 1px solid rgba(251, 191, 36, 0.28);
+    box-shadow: 0 4px 14px rgba(2, 8, 23, 0.42);
+}
+
+.hero-wallet-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-wallet-label {
+    font-size: 0.75rem;
+    color: var(--text-300);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+
+.hero-wallet-amount {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--gold-500);
+    line-height: 1.1;
+}
+
+.hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.hero-xp {
+    /* inherits existing xp-bar styles */
+}
+
+/* ========================================
+   REDESIGN v2 — CTA Banner
+   ======================================== */
+.cta-banner {
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(251, 191, 36, 0.04));
+}
+
+.cta-banner-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cta-banner-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    color: var(--gold-500);
+}
+
+.cta-banner-text {
+    flex: 1;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-100);
+}
+
+.cta-banner-btn {
+    flex-shrink: 0;
+    padding: 0.4rem 0.85rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--gold-500);
+    color: #111827;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    white-space: nowrap;
+}
+
+.cta-banner-btn:hover {
+    transform: scale(1.03);
+}
+
+/* ========================================
+   REDESIGN v2 — Widget Drawers (Progressive Disclosure)
+   ======================================== */
+.widget-drawer {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    margin-bottom: 0.65rem;
+    background: var(--glass);
+    overflow: hidden;
+}
+
+.widget-drawer[open] {
+    border-color: rgba(251, 191, 36, 0.2);
+}
+
+.widget-drawer-title {
+    padding: 0.7rem 1rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-200);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    user-select: none;
+    list-style: none;
+}
+
+.widget-drawer-title::-webkit-details-marker {
+    display: none;
+}
+
+.widget-drawer-title::after {
+    content: "\F282";
+    font-family: "bootstrap-icons";
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--text-300);
+    transition: transform 0.2s ease;
+}
+
+.widget-drawer[open] .widget-drawer-title::after {
+    transform: rotate(180deg);
+}
+
+.widget-drawer-title i {
+    color: var(--gold-500);
+}
+
+.widget-drawer-body {
+    padding: 0 1rem 0.85rem;
+}
+
+.widget-row {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.widget-mini {
+    flex: 1;
+    padding: 0.6rem;
+    background: rgba(8, 19, 38, 0.5);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.widget-mini-label {
+    font-size: 0.72rem;
+    color: var(--text-300);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+.widget-mini-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-100);
+    margin-top: 0.2rem;
+}
+
+.widget-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--gold-400);
+    margin-bottom: 0.5rem;
+}
+
+/* Today Status Pill */
+.today-status-pill {
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    background: rgba(8, 19, 38, 0.6);
+    border: 1px solid var(--glass-border);
+    color: var(--text-200);
+}
+
+/* ========================================
+   REDESIGN v2 — Responsive polish
+   ======================================== */
+@media (max-width: 767px) {
+    .login-card {
+        padding: 1.5rem 1.25rem;
+    }
+    .mascot-fixed {
+        display: none;
+    }
+    .student-hero {
+        padding: 1rem;
+    }
+    .hero-wallet-amount {
+        font-size: 1.75rem;
+    }
+}
+
+@media (min-width: 768px) {
+    /* On desktop, show tab bar inline instead of fixed */
+    .student-tab-bar {
+        position: static;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        box-shadow: none;
+        border-top: 1px solid var(--glass-border);
+        padding: 0.35rem 0;
+    }
+    body:has(.student-tab-bar) .page-container {
+        padding-bottom: 0;
+    }
+    .tab-item {
+        flex-direction: row;
+        gap: 0.4rem;
+        font-size: 0.82rem;
+    }
+    .tab-item i {
+        font-size: 1rem;
+    }
+    .tab-item-primary i {
+        font-size: 1.1rem;
+    }
+}
+
+/* ========================================
+   REDESIGN v2 — Challenge Builder 2-Column Layout
+   ======================================== */
+.challenge-builder-layout {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.challenge-builder-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.challenge-builder-sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    position: sticky;
+    top: 1rem;
+}
+
+.cb-section {
+    margin-bottom: 1rem;
+}
+
+.cb-section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    background: rgba(159, 176, 207, 0.12);
+    color: var(--text-300);
+    margin-bottom: 0.65rem;
+}
+
+.cb-drako-panel {
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 10px;
+    padding: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+@media (max-width: 767px) {
+    .challenge-builder-layout {
+        flex-direction: column;
+    }
+    .challenge-builder-sidebar {
+        width: 100%;
+        position: static;
+    }
+}
+
+/* ========================================
+   REDESIGN v2 — Teacher Stats Row
+   ======================================== */
+.teacher-stats-row {
+    display: flex;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.teacher-stat-card {
+    flex: 1;
+    text-align: center;
+    padding: 0.65rem 0.5rem;
+    border-radius: 10px;
+    background: rgba(8, 19, 38, 0.55);
+    border: 1px solid var(--glass-border);
+}
+
+.teacher-stat-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-100);
+    line-height: 1.2;
+}
+
+.teacher-stat-card.teacher-stat-gold .teacher-stat-value {
+    color: var(--gold-500);
+}
+
+.teacher-stat-card.teacher-stat-green .teacher-stat-value {
+    color: var(--success);
+}
+
+.teacher-stat-label {
+    font-size: 0.72rem;
+    color: var(--text-300);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+.teacher-filter-bar {
+    background: rgba(8, 19, 38, 0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+@media (max-width: 576px) {
+    .teacher-stats-row {
+        gap: 0.4rem;
+    }
+    .teacher-stat-card {
+        padding: 0.5rem 0.3rem;
+    }
+    .teacher-stat-value {
+        font-size: 1.1rem;
+    }
+}

@@ -93,37 +93,35 @@
 
             <!-- VIEW: Users -->
             <div id="viewUsers" class="admin-view active">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Users">Manage students</h5>
-                <div id="adminQuickStats" class="d-flex flex-wrap gap-3 mb-3">
-                    <div class="glass-panel text-center" style="flex:1;min-width:120px;padding:0.75rem 1rem;">
-                        <div style="font-size:1.5rem;font-weight:800;color:var(--gold-500);" class="stat-number" id="statTotalStudents">—</div>
-                        <div class="small text-muted">Students</div>
+                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Users">Manage Students</h5>
+                <div class="teacher-stats-row" id="adminQuickStats">
+                    <div class="teacher-stat-card">
+                        <div class="teacher-stat-value" id="statTotalStudents">--</div>
+                        <div class="teacher-stat-label">Students</div>
                     </div>
-                    <div class="glass-panel text-center" style="flex:1;min-width:120px;padding:0.75rem 1rem;">
-                        <div style="font-size:1.5rem;font-weight:800;color:#10b981;" class="stat-number" id="statActiveChallenges">—</div>
-                        <div class="small text-muted">Active Challenges</div>
+                    <div class="teacher-stat-card teacher-stat-green">
+                        <div class="teacher-stat-value" id="statActiveChallenges">--</div>
+                        <div class="teacher-stat-label">Active</div>
                     </div>
-                    <div class="glass-panel text-center" style="flex:1;min-width:120px;padding:0.75rem 1rem;">
-                        <div style="font-size:1.5rem;font-weight:800;color:#fbbf24;" class="stat-number" id="statTotalCoins">—</div>
-                        <div class="small text-muted">Coins in circulation</div>
+                    <div class="teacher-stat-card teacher-stat-gold">
+                        <div class="teacher-stat-value" id="statTotalCoins">--</div>
+                        <div class="teacher-stat-label">Coins</div>
                     </div>
                 </div>
-                <p class="small text-muted">Filter students by group and search by name or document ID.</p>
-                <div class="d-flex flex-wrap gap-2 mb-3" id="teacherGroupTabs" style="display:none;"></div>
-                <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
-                    <label class="mb-0">Group:</label>
-                    <select id="adminGroupFilter" class="form-select" style="max-width: 180px;">
-                        <option value="">All groups</option>
-                    </select>
-                    <input type="text" id="studentSearch" class="form-control" style="max-width:220px;" placeholder="Search name or document">
-                    <button type="button" class="btn btn-primary" id="btnRefreshUsers">Refresh</button>
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="text" id="newGroupCode" class="form-control" placeholder="New group code" style="width: 140px;">
-                        <button type="button" class="btn btn-success" id="btnCreateGroup">Create group</button>
+                <div class="teacher-filter-bar">
+                    <div class="d-flex flex-wrap gap-2 mb-2" id="teacherGroupTabs" style="display:none;"></div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <select id="adminGroupFilter" class="form-select" style="max-width:160px;">
+                            <option value="">All groups</option>
+                        </select>
+                        <input type="text" id="studentSearch" class="form-control" style="max-width:200px;" placeholder="Search name or doc">
+                        <button type="button" class="btn btn-primary btn-sm" id="btnRefreshUsers"><i class="bi bi-arrow-clockwise"></i></button>
+                        <input type="text" id="newGroupCode" class="form-control" placeholder="New group" style="width:120px;">
+                        <button type="button" class="btn btn-success btn-sm" id="btnCreateGroup">Create</button>
                     </div>
                 </div>
                 <div id="bulkImportPanel" class="glass-panel mb-3" style="padding:1rem;display:none;">
-                    <div class="small badge-role mb-2" style="display:inline-flex;background:var(--gold-500);color:#000;">Bulk CSV Import</div>
+                    <div class="cb-section-label" style="display:inline-flex;background:var(--gold-500);color:#000;margin-bottom:0.5rem;">Bulk CSV Import</div>
                     <p class="small text-muted mb-2">CSV format: <code>nombre_completo,documento_id,pin,grupo</code> (header required). Groups auto-created if missing.</p>
                     <input type="file" id="csvFileInput" class="form-control mb-2" accept=".csv,.txt">
                     <button type="button" class="btn btn-warning btn-sm" id="btnRunBulkImport"><i class="bi bi-upload"></i> Import Students</button>
@@ -132,7 +130,7 @@
                 </div>
                 <div class="mb-2 d-flex gap-2 flex-wrap">
                     <button type="button" class="btn btn-success btn-sm" id="btnShowAddStudent"><i class="bi bi-person-plus"></i> Add Student</button>
-                    <button type="button" class="btn btn-outline-info btn-sm" id="btnShowBulkImport"><i class="bi bi-file-earmark-spreadsheet"></i> Bulk Import CSV</button>
+                    <button type="button" class="btn btn-outline-info btn-sm" id="btnShowBulkImport"><i class="bi bi-file-earmark-spreadsheet"></i> Bulk Import</button>
                 </div>
                 <div id="contentUsers">
                     <p class="text-muted">Loading students...</p>
@@ -224,111 +222,114 @@
             <!-- VIEW: Challenges -->
             <div id="viewChallenges" class="admin-view">
                 <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-challenge.webp" class="ui-icon" loading="lazy" alt="Challenges">English Challenges</h5>
-                <p class="small text-muted">Build challenges like a form: add multiple questions, set correct answers, then publish once.</p>
-                <div class="mb-3">
-                    <div class="small badge-role mb-2" style="display:inline-flex;">Step 1: Metadata</div>
-                    <div class="mb-2">
-                        <label class="form-label">Challenge Title</label>
-                        <input type="text" id="challengeTitle" class="form-control" placeholder="Example: Unit 2 Grammar Sprint">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Challenge Description</label>
-                        <textarea id="challengeDescription" class="form-control" placeholder="Brief instructions for students" rows="2"></textarea>
-                    </div>
-                    <div class="mb-2">
-                        <div class="small badge-role mb-2" style="display:inline-flex;">Step 2: Scope & Target</div>
-                        <label class="form-label">Challenge Scope</label>
-                        <select id="challengeScope" class="form-select">
-                            <option value="all">For all groups</option>
-                            <option value="group">For one specific group</option>
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Target Group</label>
-                        <select id="challengeTargetGroup" class="form-select" style="display:none;">
-                            <option value="">Select target group</option>
-                        </select>
-                    </div>
-                    <div class="challenge-questions-counter">
-                        <span>&#x1F4CB; Challenge Questions</span>
-                        <span class="counter-num" id="challengeQuestionCount">0 questions</span>
-                    </div>
-                    <div id="challengeQuestionsBuilder"></div>
-                    <button type="button" class="btn btn-outline-warning w-100 mt-2 mb-3" id="btnAddChallengeQuestion" style="position:sticky;bottom:16px;z-index:10;font-size:15px;font-weight:600;">&#x2295; Add Question</button>
-                    <div class="d-flex gap-2 flex-wrap align-items-center">
-                        <button type="button" class="btn btn-primary" id="btnCreateChallenge">Create Challenge</button>
-                        <span class="text-muted small">or</span>
-                        <button type="button" class="btn btn-outline-warning" id="btnGenerateAI"><i class="bi bi-stars"></i> Generate with AI</button>
-                    </div>
-                    <div id="aiGeneratePanel" class="glass-panel mt-3" style="display:none;padding:1rem;">
-                        <div class="row g-3">
-                            <div class="col-md-7">
-                                <div class="small badge-role mb-2" style="display:inline-flex;background:var(--gold-500);color:#000;">AI Structured Generator</div>
-                                <div class="d-flex gap-2 mb-2">
-                                    <div style="flex:1;">
-                                        <label class="form-label">CEFR Level</label>
-                                        <select id="aiCefrLevel" class="form-select">
-                                            <option value="A1">A1</option><option value="A1+">A1+</option>
-                                            <option value="A2">A2</option><option value="A2+">A2+</option>
-                                            <option value="B1-">B1-</option><option value="B1" selected>B1</option><option value="B1+">B1+</option>
-                                            <option value="B2">B2</option><option value="B2+">B2+</option>
-                                            <option value="C1">C1</option><option value="C1+">C1+</option>
-                                        </select>
-                                    </div>
-                                    <div style="flex:1;">
-                                        <label class="form-label">Skill</label>
-                                        <select id="aiSkill" class="form-select">
-                                            <option value="Grammar">Grammar</option>
-                                            <option value="Vocabulary">Vocabulary</option>
-                                            <option value="Speaking">Speaking</option>
-                                            <option value="Reading">Reading</option>
-                                            <option value="Listening">Listening</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="d-flex gap-2 mb-2">
-                                    <div style="flex:1;">
-                                        <label class="form-label">Role</label>
-                                        <input type="text" id="aiRole" class="form-control" placeholder="e.g. Tourist, Engineer, Student">
-                                    </div>
-                                    <div style="flex:1;">
-                                        <label class="form-label">Context</label>
-                                        <input type="text" id="aiContext" class="form-control" placeholder="e.g. Airport, Software Demo">
-                                    </div>
-                                </div>
-                                <div class="mb-2">
-                                    <label class="form-label">Topic</label>
-                                    <input type="text" id="aiTopic" class="form-control" placeholder="e.g. Past Perfect, Conditionals, Job Interview">
-                                </div>
-                                <div class="d-flex gap-2 mb-2">
-                                    <div style="flex:1;">
-                                        <label class="form-label">Questions</label>
-                                        <input type="number" id="aiQuestionCount" class="form-control" value="5" min="1" max="20">
-                                    </div>
-                                    <div id="aiProviderWrap" style="flex:1;display:none;"></div>
-                                </div>
-                                <div class="mb-2">
-                                    <label class="form-label">AI Credentials</label>
-                                    <div class="form-text">AI provider and API key are managed centrally by super_admin per institution.</div>
-                                </div>
-                                <button type="button" class="btn btn-warning" id="btnRunStructuredAI"><i class="bi bi-stars"></i> Generar Reto (Costo: 3 Creditos)</button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm ms-2" onclick="document.getElementById('aiGeneratePanel').style.display='none'">Cancel</button>
-                                <div id="aiGenerateStatus" class="mt-2"></div>
+                <p class="small text-muted mb-3">Build challenges like a form: add multiple questions, set correct answers, then publish once.</p>
+                <div class="challenge-builder-layout">
+                    <div class="challenge-builder-main">
+                        <div class="cb-section">
+                            <div class="cb-section-label">1. Metadata</div>
+                            <div class="mb-2">
+                                <label class="form-label">Challenge Title</label>
+                                <input type="text" id="challengeTitle" class="form-control" placeholder="Example: Unit 2 Grammar Sprint">
                             </div>
-                            <div class="col-md-5">
-                                <div id="drako-panel" style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:1rem;min-height:200px;">
-                                    <div class="text-center mb-2" style="font-size:2.5rem;line-height:1;">&#x1F409;</div>
-                                    <div class="text-center fw-bold mb-2" style="color:var(--gold-500,#FFD700);">Drako</div>
-                                    <div id="drako-message" class="small text-center" style="color:#ccc;min-height:40px;">Cargando creditos...</div>
-                                    <hr style="border-color:rgba(255,215,0,0.2);margin:0.75rem 0;">
-                                    <div id="drako-credits" class="text-center small fw-bold" style="color:var(--gold-500,#FFD700);">...</div>
-                                    <div id="aiUsageInfo" class="text-center small text-muted mt-1"></div>
+                            <div class="mb-2">
+                                <label class="form-label">Description</label>
+                                <textarea id="challengeDescription" class="form-control" placeholder="Brief instructions for students" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="cb-section">
+                            <div class="cb-section-label">2. Scope & Target</div>
+                            <div class="d-flex gap-2 mb-2 flex-wrap">
+                                <div style="flex:1;min-width:140px;">
+                                    <label class="form-label">Scope</label>
+                                    <select id="challengeScope" class="form-select">
+                                        <option value="all">All groups</option>
+                                        <option value="group">Specific group</option>
+                                    </select>
+                                </div>
+                                <div style="flex:1;min-width:140px;">
+                                    <label class="form-label">Target Group</label>
+                                    <select id="challengeTargetGroup" class="form-select" style="display:none;">
+                                        <option value="">Select target group</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
+                        <div class="cb-section">
+                            <div class="challenge-questions-counter">
+                                <span>3. Questions</span>
+                                <span class="counter-num" id="challengeQuestionCount">0 questions</span>
+                            </div>
+                            <div id="challengeQuestionsBuilder"></div>
+                            <button type="button" class="btn btn-outline-warning w-100 mt-2 mb-3" id="btnAddChallengeQuestion" style="position:sticky;bottom:16px;z-index:10;font-size:15px;font-weight:600;">+ Add Question</button>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap align-items-center">
+                            <button type="button" class="btn btn-primary" id="btnCreateChallenge">Create Challenge</button>
+                            <span class="text-muted small">or</span>
+                            <button type="button" class="btn btn-outline-warning" id="btnGenerateAI"><i class="bi bi-stars"></i> Generate with AI</button>
+                        </div>
+                    </div>
+                    <div class="challenge-builder-sidebar" id="aiGeneratePanel" style="display:none;">
+                        <div class="cb-section">
+                            <div class="cb-section-label" style="background:var(--gold-500);color:#000;">AI Generator</div>
+                            <div class="d-flex gap-2 mb-2">
+                                <div style="flex:1;">
+                                    <label class="form-label">CEFR Level</label>
+                                    <select id="aiCefrLevel" class="form-select">
+                                        <option value="A1">A1</option><option value="A1+">A1+</option>
+                                        <option value="A2">A2</option><option value="A2+">A2+</option>
+                                        <option value="B1-">B1-</option><option value="B1" selected>B1</option><option value="B1+">B1+</option>
+                                        <option value="B2">B2</option><option value="B2+">B2+</option>
+                                        <option value="C1">C1</option><option value="C1+">C1+</option>
+                                    </select>
+                                </div>
+                                <div style="flex:1;">
+                                    <label class="form-label">Skill</label>
+                                    <select id="aiSkill" class="form-select">
+                                        <option value="Grammar">Grammar</option>
+                                        <option value="Vocabulary">Vocabulary</option>
+                                        <option value="Speaking">Speaking</option>
+                                        <option value="Reading">Reading</option>
+                                        <option value="Listening">Listening</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mb-2">
+                                <div style="flex:1;">
+                                    <label class="form-label">Role</label>
+                                    <input type="text" id="aiRole" class="form-control" placeholder="e.g. Tourist">
+                                </div>
+                                <div style="flex:1;">
+                                    <label class="form-label">Context</label>
+                                    <input type="text" id="aiContext" class="form-control" placeholder="e.g. Airport">
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Topic</label>
+                                <input type="text" id="aiTopic" class="form-control" placeholder="e.g. Past Perfect">
+                            </div>
+                            <div class="d-flex gap-2 mb-2">
+                                <div style="flex:1;">
+                                    <label class="form-label">Questions</label>
+                                    <input type="number" id="aiQuestionCount" class="form-control" value="5" min="1" max="20">
+                                </div>
+                                <div id="aiProviderWrap" style="flex:1;display:none;"></div>
+                            </div>
+                            <div class="form-text mb-2">AI provider and key are managed centrally per institution.</div>
+                            <button type="button" class="btn btn-warning w-100" id="btnRunStructuredAI"><i class="bi bi-stars"></i> Generate (Cost: 3 Credits)</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="document.getElementById('aiGeneratePanel').style.display='none'">Cancel</button>
+                            <div id="aiGenerateStatus" class="mt-2"></div>
+                        </div>
+                        <div id="drako-panel" class="cb-drako-panel">
+                            <div class="text-center mb-1" style="font-size:2rem;line-height:1;">&#x1F409;</div>
+                            <div class="text-center fw-bold mb-1" style="color:var(--gold-500);">Drako</div>
+                            <div id="drako-message" class="small text-center" style="color:#ccc;min-height:32px;">Loading credits...</div>
+                            <hr style="border-color:rgba(255,215,0,0.2);margin:0.5rem 0;">
+                            <div id="drako-credits" class="text-center small fw-bold" style="color:var(--gold-500);">...</div>
+                            <div id="aiUsageInfo" class="text-center small text-muted mt-1"></div>
+                        </div>
                     </div>
                 </div>
-                <div id="challengesList"><p class="text-muted small">Loading...</p></div>
+                <div id="challengesList" class="mt-3"><p class="text-muted small">Loading...</p></div>
             </div>
 
             <!-- VIEW: Store / Auctions -->

@@ -11,120 +11,120 @@
 </head>
 <body class="bg-dashboard">
     <div class="decor-overlay" aria-hidden="true"></div>
-    <div class="container-custom page-container">
-        <div class="text-center mb-4">
-            <h1 class="mb-2 section-title" style="justify-content:center;"><img src="assets/images/icono-moneda.webp" class="ui-icon coin-pulse" loading="lazy" alt="Coins">Lingo-Coins</h1>
-            <h2 class="fw-bold mb-1">English Coins Arena</h2>
-            <p class="text-muted">Level up your English, earn rewards!</p>
-        </div>
-        
-        <div class="card card-premium">
-            <div class="section-title with-banner mb-3" style="justify-content:center;">Welcome Back</div>
-            <img src="assets/images/escudo-decorativo.webp" class="decor-emblem" alt="Decor emblem" loading="lazy">
-            <div class="nav-tabs">
-                <button id="tabLogin" class="nav-tab active" onclick="showTab('login')">
+    <div class="login-page">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="assets/images/icono-moneda.webp" class="login-logo coin-pulse" loading="lazy" alt="Lingo-Coins">
+                <h1 class="login-title">Lingo-Coins</h1>
+                <p class="login-subtitle">Level up your English, earn rewards!</p>
+            </div>
+            
+            <div class="login-tabs">
+                <button id="tabLogin" class="login-tab active" onclick="showTab('login')" type="button">
                     <i class="bi bi-box-arrow-in-right"></i> Log in
                 </button>
-                <button id="tabRegister" class="nav-tab" onclick="showTab('register')">
+                <button id="tabRegister" class="login-tab" onclick="showTab('register')" type="button">
                     <i class="bi bi-person-plus"></i> Register
                 </button>
             </div>
             
-            <form id="loginForm" onsubmit="handleLogin(event)">
+            <form id="loginForm" onsubmit="handleLogin(event)" class="login-form">
                 <div class="form-group">
-                    <label class="form-label">
+                    <label class="form-label" for="loginDoc">
                         <i class="bi bi-person-badge"></i> Document ID
                     </label>
                     <input 
                         type="text" 
                         id="loginDoc" 
-                        class="form-control" 
+                        class="form-control form-control-lg" 
                         placeholder="e.g. 1111"
                         required
+                        autocomplete="username"
                     >
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">
+                    <label class="form-label" for="loginPin">
                         <i class="bi bi-lock"></i> PIN
                     </label>
                     <input 
                         type="password" 
                         id="loginPin" 
-                        class="form-control" 
-                        placeholder="••••"
+                        class="form-control form-control-lg" 
+                        placeholder="Enter your PIN"
                         required
+                        autocomplete="current-password"
                     >
                 </div>
                 
-                <button type="submit" class="btn btn-primary" id="btnLogin">
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="btnLogin">
                     <i class="bi bi-unlock-fill"></i> Log in
                 </button>
                 
-                <div id="loginError" class="text-danger text-center mt-3 small" style="display:none"></div>
+                <div id="loginError" class="login-error" style="display:none"></div>
             </form>
             
-            <form id="registerForm" onsubmit="handleRegister(event)" class="hidden">
+            <form id="registerForm" onsubmit="handleRegister(event)" class="login-form hidden">
                 <div class="form-group">
-                    <label class="form-label">
+                    <label class="form-label" for="regName">
                         <i class="bi bi-person"></i> Full name
                     </label>
                     <input 
                         type="text" 
                         id="regName" 
-                        class="form-control" 
+                        class="form-control form-control-lg" 
                         placeholder="e.g. John Doe"
                         required
                     >
                 </div>
                 <div class="form-group">
-                    <label class="form-label">
+                    <label class="form-label" for="regDoc">
                         <i class="bi bi-person-badge"></i> Document ID
                     </label>
                     <input 
                         type="text" 
                         id="regDoc" 
-                        class="form-control" 
+                        class="form-control form-control-lg" 
                         placeholder="e.g. 1111"
                         required
                     >
                 </div>
                 <div class="form-group">
-                    <label class="form-label">
+                    <label class="form-label" for="regPin">
                         <i class="bi bi-lock"></i> PIN
                     </label>
                     <input 
                         type="password" 
                         id="regPin" 
-                        class="form-control" 
-                        placeholder="••••"
+                        class="form-control form-control-lg" 
+                        placeholder="Choose a PIN"
                         required
                     >
                 </div>
                 <div class="form-group">
-                    <label class="form-label">
+                    <label class="form-label" for="regInstitution">
                         <i class="bi bi-building"></i> School / Institution
                     </label>
-                    <select id="regInstitution" class="form-select" required>
+                    <select id="regInstitution" class="form-select form-select-lg" required>
                         <option value="">Select your school...</option>
                     </select>
-                    <div class="small text-muted" style="margin-top:6px;">First choose your school, then you'll see its available groups.</div>
+                    <div class="small text-muted mt-1">First choose your school, then you'll see its available groups.</div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">
+                    <label class="form-label" for="regGroup">
                         <i class="bi bi-people"></i> Group
                     </label>
-                    <select id="regGroup" class="form-select" required disabled>
+                    <select id="regGroup" class="form-select form-select-lg" required disabled>
                         <option value="">Select a school first...</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary" id="btnRegister">
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="btnRegister">
                     <i class="bi bi-check-circle-fill"></i> Create account
                 </button>
                 <div id="registerStatus" class="text-center mt-3 small" style="display:none"></div>
             </form>
         </div>
-        <div class="text-center small text-muted mt-3">v1.0-MVP-STABLE</div>
+        <div class="login-version">v1.0-MVP-STABLE</div>
     </div>
     <img src="assets/images/rey-lanzando-monedas.webp" class="mascot-fixed mascot-float" loading="lazy" alt="King mascot">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

@@ -75,101 +75,133 @@
 
     <div class="container-custom page-container" style="max-width: 700px;">
         <div class="card card-premium" style="padding: 0; overflow: hidden;">
-            <nav class="student-nav">
-                <span class="greeting" id="navGreeting"></span>
-                <a href="#" id="navDashboard" class="active" onclick="return showStudentView('dashboard')"><i class="bi bi-house-fill"></i> Home</a>
-                <a href="#" id="navAttendance" onclick="return showStudentView('attendance')"><i class="bi bi-calendar-check"></i> Attendance</a>
-                <a href="#" id="navChallenges" onclick="return showStudentView('challenges')"><i class="bi bi-lightning-charge-fill"></i> Challenges</a>
-                <a href="#" id="navStore" onclick="return showStudentView('store')"><i class="bi bi-shop"></i> Store</a>
-                <a href="#" id="navBag" onclick="return showStudentView('bag')"><i class="bi bi-backpack-fill"></i> Bag</a>
-                <button type="button" class="nav-btn" id="btnMute" title="Mute sounds"><i class="bi bi-volume-up"></i></button>
-                <button type="button" class="nav-btn" id="btnLogoutStudent">Logout</button>
+            <!-- Redesigned: Bottom tab bar (TikTok-style) on mobile, horizontal nav on desktop -->
+            <nav class="student-topbar" id="studentTopbar">
+                <span class="topbar-greeting" id="navGreeting"></span>
+                <div class="topbar-actions">
+                    <button type="button" class="topbar-btn" id="btnMute" title="Mute sounds"><i class="bi bi-volume-up"></i></button>
+                    <button type="button" class="topbar-btn topbar-btn-logout" id="btnLogoutStudent"><i class="bi bi-box-arrow-right"></i></button>
+                </div>
             </nav>
 
             <!-- VIEW: Dashboard -->
             <div id="viewDashboard" class="student-view active">
-                <div id="studentActiveChallengeBanner" class="alert active-challenge-banner mb-3" style="display:none;">
-                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <div id="studentActiveChallengeBannerText" style="font-weight:700;">🎯 You have active challenges!</div>
-                        <button type="button" class="btn btn-sm btn-warning" id="btnGoToChallengesBanner">Go to Challenges →</button>
+                <!-- Hero: single CTA -->
+                <div class="student-hero">
+                    <div class="hero-wallet">
+                        <img src="assets/images/icono-moneda.webp" class="hero-coin-icon coin-pulse" loading="lazy" alt="Coins">
+                        <div class="hero-wallet-info">
+                            <span class="hero-wallet-label">Your Wallet</span>
+                            <span class="hero-wallet-amount" id="studentCoins">0</span>
+                        </div>
+                    </div>
+                    <div class="hero-badges">
+                        <span class="level-badge" id="levelBadge"><i class="bi bi-star-fill"></i> Level 1</span>
+                        <span class="streak-badge" id="streakBadge">0 day streak</span>
+                        <span class="badge-group" id="studentGroup"></span>
+                    </div>
+                    <div class="hero-xp">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span id="xpLabel">XP: 0 / 50</span>
+                            <span id="xpPercLabel">0%</span>
+                        </div>
+                        <div class="xp-bar-container">
+                            <div class="xp-bar-fill" id="xpBarFill" style="width: 0%;"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="glass-panel card-premium mb-3 leaderboard-wrap" style="background:linear-gradient(135deg, rgba(16,185,129,0.22), rgba(30,58,95,0.18));">
-                    <img src="assets/images/escudo-decorativo.webp" class="decor-emblem" alt="Decor emblem" loading="lazy">
-                    <h4 class="mb-1 section-title with-banner">Challenge Arena</h4>
-                    <p class="small mb-0 text-muted">Compete • Earn • Win</p>
+
+                <!-- Primary CTA: Active Challenge or Start Practice -->
+                <div id="studentActiveChallengeBanner" class="cta-banner" style="display:none;">
+                    <div class="cta-banner-inner">
+                        <div class="cta-banner-icon"><i class="bi bi-lightning-charge-fill"></i></div>
+                        <div class="cta-banner-text" id="studentActiveChallengeBannerText">You have active challenges!</div>
+                        <button type="button" class="cta-banner-btn" id="btnGoToChallengesBanner">Go <i class="bi bi-arrow-right"></i></button>
+                    </div>
                 </div>
-                <div class="gold-card text-center">
-                    <p class="text-muted mb-1 section-title" style="justify-content:center;">
-                        <img src="assets/images/icono-moneda.webp" class="ui-icon coin-pulse" loading="lazy" alt="Coins">
-                        Your Wallet
-                    </p>
-                    <div class="coins-num"><span id="studentCoins">0</span></div>
+                <div class="glass-panel cta-banner challenge-active-card" id="activeChallengeSpotlight">
+                    <div class="cta-banner-inner">
+                        <div class="cta-banner-icon" style="color:var(--gold-500);"><i class="bi bi-fire"></i></div>
+                        <div>
+                            <div class="small" style="color:var(--gold-500);font-weight:700;">ACTIVE Challenge</div>
+                            <div class="small text-muted">Win up to 40 coins</div>
+                        </div>
+                        <button type="button" class="cta-banner-btn" onclick="return showStudentView('challenges')">Start <i class="bi bi-arrow-right"></i></button>
+                    </div>
                 </div>
-                <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
-                    <span class="level-badge" id="levelBadge"><i class="bi bi-star-fill"></i> Level 1 <i class="bi bi-crown-fill"></i></span>
-                    <span class="streak-badge" id="streakBadge">&#x1F525; 0 day streak</span>
-                    <span class="badge-group" id="studentGroup"></span>
-                </div>
+
+                <!-- Collapsible secondary widgets -->
+                <details class="widget-drawer" open>
+                    <summary class="widget-drawer-title"><i class="bi bi-bar-chart-fill"></i> Progress</summary>
+                    <div class="widget-drawer-body">
+                        <div class="widget-row">
+                            <div class="widget-mini">
+                                <div class="widget-mini-label">Top 10</div>
+                                <div class="widget-mini-value" id="progressToTop10">--</div>
+                            </div>
+                            <div class="widget-mini">
+                                <div class="widget-mini-label">To #1</div>
+                                <div class="widget-mini-value" id="progressToTop1">--</div>
+                            </div>
+                        </div>
+                        <div class="progress mt-2" style="height:6px;"><div class="progress-bar bg-warning" id="topProgressBar" style="width:0%"></div></div>
+                    </div>
+                </details>
+
+                <details class="widget-drawer">
+                    <summary class="widget-drawer-title"><i class="bi bi-calendar-check"></i> This Week</summary>
+                    <div class="widget-drawer-body">
+                        <div class="d-flex justify-content-between small text-muted mb-1"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span></div>
+                        <div class="d-flex justify-content-between fs-5" id="attendanceMiniWeek"><span>-</span><span>-</span><span>-</span><span>-</span><span>-</span></div>
+                        <div class="small mt-2" id="attendanceMiniSummary">You attended 0/0 days this week</div>
+                    </div>
+                </details>
+
+                <details class="widget-drawer">
+                    <summary class="widget-drawer-title"><i class="bi bi-award"></i> Badges</summary>
+                    <div class="widget-drawer-body">
+                        <div class="row g-2" id="studentBadgesGrid"></div>
+                    </div>
+                </details>
+
+                <!-- Today Status -->
                 <div class="mb-3">
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span id="xpLabel">XP: 0 / 50</span>
-                        <span id="xpPercLabel">0%</span>
-                    </div>
-                    <div class="xp-bar-container">
-                        <div class="xp-bar-fill" id="xpBarFill" style="width: 0%;"></div>
-                    </div>
-                </div>
-                <div class="glass-panel mb-3">
-                    <h6 class="mb-2">Progress to Top</h6>
-                    <div class="small" id="progressToTop10">⬆️ — coins to reach Top 10</div>
-                    <div class="small" id="progressToTop1">⬆️ — coins to reach #1</div>
-                    <div class="progress mt-2" style="height:8px;"><div class="progress-bar bg-warning" id="topProgressBar" style="width:0%"></div></div>
-                </div>
-                <div class="glass-panel mb-3">
-                    <h6 class="mb-2">This Week Attendance</h6>
-                    <div class="d-flex justify-content-between small text-muted mb-1"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span></div>
-                    <div class="d-flex justify-content-between fs-5" id="attendanceMiniWeek"><span>⏳</span><span>⏳</span><span>⏳</span><span>⏳</span><span>⏳</span></div>
-                    <div class="small mt-2" id="attendanceMiniSummary">You attended 0/0 days this week 🔥</div>
-                </div>
-                <div class="glass-panel mb-3">
-                    <h6 class="mb-2">Badges</h6>
-                    <div class="row g-2" id="studentBadgesGrid"></div>
-                </div>
-                <div class="glass-panel mb-3 challenge-active-card" id="activeChallengeSpotlight">
-                    <div class="small text-warning">🔥 ACTIVE — Waiting challenge...</div>
-                    <div class="small text-muted">⏱️ Closes in: --:--:--</div>
-                    <div class="small text-muted">🪙 Win up to 40 coins</div>
-                    <button type="button" class="btn btn-sm btn-warning mt-2" onclick="return showStudentView('challenges')">Start Now →</button>
-                </div>
-                <div class="mb-3">
-                    <h6 class="mb-2">Today's Status</h6>
-                    <div id="todayStatus" class="alert alert-secondary mb-0">
+                    <div id="todayStatus" class="today-status-pill">
                         <span class="spinner-border spinner-border-sm"></span> Checking...
                     </div>
                 </div>
+
+                <!-- Announcements -->
                 <div class="mb-3" id="bulletinSection" style="display:none;">
-                    <h6 class="mb-2"><i class="bi bi-megaphone-fill" style="color:var(--gold);"></i> Announcements</h6>
+                    <h6 class="widget-section-title"><i class="bi bi-megaphone-fill"></i> Announcements</h6>
                     <div id="bulletinList"></div>
                 </div>
+
+                <!-- Leaderboard -->
                 <div class="mb-4 leaderboard-wrap">
-                    <h6 class="mb-2 section-title"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Leaderboard">Top 5 in your group</h6>
+                    <h6 class="widget-section-title"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Leaderboard"> Top 5 in your group</h6>
                     <ul class="leaderboard-list" id="leaderboard"><li class="text-muted">Loading...</li></ul>
                 </div>
-                <div class="glass-panel">
-                    <h6 class="mb-2"><i class="bi bi-chat-dots"></i> Contact / Feedback</h6>
-                    <p class="small text-muted mb-2">Need help or want to report a bug? Send quick feedback.</p>
-                    <form id="feedbackForm" class="d-flex flex-column gap-2">
-                        <input type="email" id="feedbackEmail" class="form-control form-control-sm" placeholder="Your email (optional)">
-                        <textarea id="feedbackMessage" class="form-control form-control-sm" rows="2" placeholder="Write your feedback" required></textarea>
-                        <button type="submit" class="btn btn-outline-primary btn-sm" style="width:auto;">Send feedback</button>
-                    </form>
-                </div>
+
+                <!-- Feedback drawer -->
+                <details class="widget-drawer">
+                    <summary class="widget-drawer-title"><i class="bi bi-chat-dots"></i> Feedback</summary>
+                    <div class="widget-drawer-body">
+                        <p class="small text-muted mb-2">Need help or want to report a bug?</p>
+                        <form id="feedbackForm" class="d-flex flex-column gap-2">
+                            <input type="email" id="feedbackEmail" class="form-control form-control-sm" placeholder="Your email (optional)">
+                            <textarea id="feedbackMessage" class="form-control form-control-sm" rows="2" placeholder="Write your feedback" required></textarea>
+                            <button type="submit" class="btn btn-outline-primary btn-sm" style="width:auto;">Send</button>
+                        </form>
+                    </div>
+                </details>
+
+                <!-- Coming Soon -->
                 <div class="row g-2 mt-2">
-                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">🎯 Exam Prep</div></div>
-                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">💼 Business English</div></div>
-                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">🎤 Speaking AI</div></div>
-                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">🏅 School Tournaments</div></div>
+                    <div class="col-6"><div class="glass-panel coming-soon-card p-2 text-center small">Exam Prep</div></div>
+                    <div class="col-6"><div class="glass-panel coming-soon-card p-2 text-center small">Business English</div></div>
+                    <div class="col-6"><div class="glass-panel coming-soon-card p-2 text-center small">Speaking AI</div></div>
+                    <div class="col-6"><div class="glass-panel coming-soon-card p-2 text-center small">Tournaments</div></div>
                 </div>
             </div>
 
@@ -243,6 +275,25 @@
                 <div id="inventoryList"><p class="text-muted small">Loading...</p></div>
             </div>
         </div>
+
+        <!-- Bottom Tab Bar (mobile-first, TikTok-style) -->
+        <nav class="student-tab-bar" id="studentTabBar" role="tablist" aria-label="Student navigation">
+            <button role="tab" class="tab-item active" id="navDashboard" onclick="return showStudentView('dashboard')" aria-selected="true">
+                <i class="bi bi-house-fill"></i><span>Home</span>
+            </button>
+            <button role="tab" class="tab-item" id="navAttendance" onclick="return showStudentView('attendance')" aria-selected="false">
+                <i class="bi bi-calendar-check"></i><span>Check-in</span>
+            </button>
+            <button role="tab" class="tab-item tab-item-primary" id="navChallenges" onclick="return showStudentView('challenges')" aria-selected="false">
+                <i class="bi bi-lightning-charge-fill"></i><span>Play</span>
+            </button>
+            <button role="tab" class="tab-item" id="navStore" onclick="return showStudentView('store')" aria-selected="false">
+                <i class="bi bi-shop"></i><span>Store</span>
+            </button>
+            <button role="tab" class="tab-item" id="navBag" onclick="return showStudentView('bag')" aria-selected="false">
+                <i class="bi bi-backpack-fill"></i><span>Bag</span>
+            </button>
+        </nav>
     </div>
     <img src="assets/images/rey-principal.webp" class="mascot-fixed mascot-float" loading="lazy" alt="Main king mascot">
     <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
@@ -497,11 +548,11 @@
         // --- SPA view switching ---
         function showStudentView(viewId) {
             document.querySelectorAll('.student-view').forEach(function(el) { el.classList.remove('active'); });
-            document.querySelectorAll('.student-nav a').forEach(function(el) { el.classList.remove('active'); });
+            document.querySelectorAll('.student-tab-bar .tab-item').forEach(function(el) { el.classList.remove('active'); el.setAttribute('aria-selected','false'); });
             var view = document.getElementById('view' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
             var nav = document.getElementById('nav' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
             if (view) view.classList.add('active');
-            if (nav) nav.classList.add('active');
+            if (nav) { nav.classList.add('active'); nav.setAttribute('aria-selected','true'); }
             setStudentBackgroundClass(viewId);
             if (viewId === 'attendance') loadAttendanceHistory();
             if (viewId === 'challenges') {

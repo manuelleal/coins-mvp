@@ -4303,25 +4303,6 @@ function resolveInstitutionProvider(institution) {
 }
 
 // ================================================================
-// PHASE 7 — PASSWORD POWER (login integration)
-// ================================================================
-
-async function checkLoginRestrictions(profileData) {
-    if (!profileData) return { allowed: true };
-
-    if (profileData.account_locked === true) {
-        return { allowed: false, reason: 'Account is locked. Contact your administrator.' };
-    }
-    if (profileData.is_active === false) {
-        return { allowed: false, reason: 'Account is deactivated. Contact your administrator.' };
-    }
-    if (profileData.force_password_reset === true) {
-        return { allowed: true, forceReset: true };
-    }
-    return { allowed: true };
-}
-
-// ================================================================
 // PHASE 9 — SECURITY ENFORCEMENT HELPERS
 // ================================================================
 

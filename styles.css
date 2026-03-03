@@ -1329,6 +1329,18 @@ body.admin-layout-super {
     background: var(--admin-bg);
 }
 
+body.admin-layout-super,
+body.admin-layout-school {
+    padding: 0;
+    overflow: hidden;
+}
+
+body.admin-layout-super #superAdminLayout,
+body.admin-layout-school #schoolAdminLayout {
+    position: relative;
+    z-index: 1;
+}
+
 body.admin-layout-super .admin-wrapper {
     display: flex;
     height: 100vh;

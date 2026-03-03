@@ -435,35 +435,11 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js"></script>
-    <script>
-        // Apply layout based on user role after login
-        document.addEventListener('DOMContentLoaded', function() {
-            function applyAdminLayout() {
-                var user = JSON.parse(
-                    localStorage.getItem('lingoCoins_user') || '{}'
-                );
-                var role = user && user.rol;
-                if (!role) return;
-                
-                var body = document.body;
-                body.classList.remove(
-                    'layout-super-admin',
-                    'layout-school-admin', 
-                    'layout-teacher'
-                );
-                
-                if (role === 'super_admin') {
-                    body.classList.add('layout-super-admin');
-                } else if (role === 'admin') {
-                    body.classList.add('layout-school-admin');
-                } else if (role === 'teacher') {
-                    body.classList.add('layout-teacher');
-                }
-            }
-            
-            applyAdminLayout();
-        });
-    </script>
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+    <script src="./modules/auth.js"></script>
+    <script src="./modules/ui.js"></script>
+    <script src="./modules/institutions.js"></script>
+    <script src="./admin-init.js"></script>
 </body>
 </html>

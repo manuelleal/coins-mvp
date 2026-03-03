@@ -11,6 +11,490 @@
 </head>
 <body class="bg-dashboard">
     <div class="decor-overlay" aria-hidden="true"></div>
+    
+    <!-- SUPER ADMIN LAYOUT -->
+    <div id="superAdminLayout" style="display: none;">
+        <div class="admin-wrapper">
+            <!-- Sidebar Navigation -->
+            <aside class="admin-sidebar">
+                <div class="admin-sidebar-header">
+                    <i class="bi bi-building"></i>
+                    <span>Global</span>
+                </div>
+                
+                <a href="#" id="navDashboard" class="admin-nav-item active" onclick="return window.showAdminView('dashboard')">
+                    <span class="admin-nav-icon"><i class="bi bi-speedometer2"></i></span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" id="navInstitutions" class="admin-nav-item" onclick="return window.showAdminView('institutions')">
+                    <span class="admin-nav-icon"><i class="bi bi-building"></i></span>
+                    <span>Institutions</span>
+                </a>
+                <a href="#" id="navUsers" class="admin-nav-item" onclick="return window.showAdminView('users')">
+                    <span class="admin-nav-icon"><i class="bi bi-people"></i></span>
+                    <span>Global Users</span>
+                </a>
+                <a href="#" id="navGroups" class="admin-nav-item" onclick="return window.showAdminView('groups')">
+                    <span class="admin-nav-icon"><i class="bi bi-diagram-3"></i></span>
+                    <span>Global Groups</span>
+                </a>
+                <a href="#" id="navEconomy" class="admin-nav-item" onclick="return window.showAdminView('economy')">
+                    <span class="admin-nav-icon"><i class="bi bi-lightning-charge"></i></span>
+                    <span>Economy</span>
+                </a>
+                <a href="#" id="navAiConfig" class="admin-nav-item" onclick="return window.showAdminView('aiConfig')">
+                    <span class="admin-nav-icon"><i class="bi bi-robot"></i></span>
+                    <span>AI Config</span>
+                </a>
+                <a href="#" id="navPolicies" class="admin-nav-item" onclick="return window.showAdminView('policies')">
+                    <span class="admin-nav-icon"><i class="bi bi-shield-check"></i></span>
+                    <span>Policies</span>
+                </a>
+                <a href="#" id="navAdmins" class="admin-nav-item" onclick="return window.showAdminView('admins')">
+                    <span class="admin-nav-icon"><i class="bi bi-person-badge"></i></span>
+                    <span>Admins</span>
+                </a>
+                <a href="#" id="navAnalytics" class="admin-nav-item" onclick="return window.showAdminView('analytics')">
+                    <span class="admin-nav-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                    <span>Analytics</span>
+                </a>
+            </aside>
+            
+            <!-- Top Bar -->
+            <div class="admin-top-bar">
+                <div class="admin-top-bar-left">
+                    <span id="adminBreadcrumb" style="font-size: 14px; color: var(--admin-text-muted);">Dashboard</span>
+                </div>
+                <div class="admin-top-bar-right">
+                    <span id="adminNameTop" style="font-size: 14px; color: var(--admin-text);"></span>
+                    <button type="button" class="admin-btn-secondary" id="btnLogout" style="padding: 6px 12px; font-size: 13px;">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Content Area -->
+            <main class="admin-content">
+                <!-- Dashboard -->
+                <div id="viewDashboard" class="admin-view active">
+                    <h3 style="margin-bottom: 24px; color: var(--admin-text);">Super Admin Dashboard</h3>
+                    <div id="dashboardAlert"></div>
+                    <div class="row g-3" id="dashboardCards">
+                        <div class="admin-loading-skeleton" style="height: 100px;"></div>
+                        <div class="admin-loading-skeleton" style="height: 100px;"></div>
+                        <div class="admin-loading-skeleton" style="height: 100px;"></div>
+                        <div class="admin-loading-skeleton" style="height: 100px;"></div>
+                    </div>
+                </div>
+
+                <!-- Institutions -->
+                <div id="viewInstitutions" class="admin-view">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h3 style="color: var(--admin-text); margin: 0;">Institutions</h3>
+                        <button type="button" class="admin-btn-primary" id="btnCreateSchool">
+                            <i class="bi bi-plus-lg"></i> New Institution
+                        </button>
+                    </div>
+                    <div id="institutionsList">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-building"></i></div>
+                            <div class="admin-empty-state-title">No institutions yet</div>
+                            <div class="admin-empty-state-subtitle">Create your first institution to get started</div>
+                            <button type="button" class="admin-btn-primary" id="btnCreateSchool2">Create Institution</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users -->
+                <div id="viewUsers" class="admin-view">
+                    <h3 style="margin-bottom: 20px; color: var(--admin-text);">Global Users</h3>
+                    <div style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius-lg); padding: 20px; margin-bottom: 20px;">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Institution</label>
+                                <select id="usersSchoolSelect" class="admin-form-select"><option value="">Select institution</option></select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Group</label>
+                                <select id="adminGroupFilter" class="admin-form-select"><option value="">All groups</option></select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Role</label>
+                                <select id="usersRoleFilter" class="admin-form-select">
+                                    <option value="">All roles</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="teacher">Teacher</option>
+                                    <option value="student">Student</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" class="admin-btn-primary w-100" id="btnLoadUsersBySchool">Load</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="contentUsers">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-person"></i></div>
+                            <div class="admin-empty-state-title">Select institution to load users</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Groups -->
+                <div id="viewGroups" class="admin-view">
+                    <h3 style="margin-bottom: 20px; color: var(--admin-text);">Global Groups</h3>
+                    <div style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius-lg); padding: 20px; margin-bottom: 20px;">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Institution</label>
+                                <select id="groupsSchoolSelect" class="admin-form-select"><option value="">Select institution</option></select>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button" class="admin-btn-primary w-100" id="btnLoadGroupsBySchool">Load Groups</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="groupsList">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-diagram-3"></i></div>
+                            <div class="admin-empty-state-title">Select institution to load groups</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Economy -->
+                <div id="viewEconomy" class="admin-view">
+                    <h3 style="margin-bottom: 24px; color: var(--admin-text);">Economy Management</h3>
+                    <div style="margin-bottom: 32px;">
+                        <h5 style="margin-bottom: 16px; color: var(--admin-text); font-size: 16px; font-weight: 600;">Coin Economy</h5>
+                        <div id="economyCoinTable">
+                            <div class="admin-loading-skeleton"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 style="margin-bottom: 16px; color: var(--admin-text); font-size: 16px; font-weight: 600;">AI Credits</h5>
+                        <div id="economyAiTable">
+                            <div class="admin-loading-skeleton"></div>
+                        </div>
+                        <button type="button" class="admin-btn-secondary" id="btnExportCreditReport" style="margin-top: 16px;">
+                            <i class="bi bi-download"></i> Export Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Config -->
+                <div id="viewAiConfig" class="admin-view">
+                    <h3 style="margin-bottom: 24px; color: var(--admin-text);">AI Configuration</h3>
+                    
+                    <div style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius-lg); padding: 20px; margin-bottom: 20px;">
+                        <h5 style="margin-bottom: 16px; color: var(--admin-text); font-size: 15px; font-weight: 600;">Global API Keys</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">OpenAI</label>
+                                <input id="apiKeyOpenai" type="password" class="admin-form-input" placeholder="sk-...">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Anthropic</label>
+                                <input id="apiKeyAnthropic" type="password" class="admin-form-input" placeholder="claude-...">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Google</label>
+                                <input id="apiKeyGoogle" type="password" class="admin-form-input" placeholder="AIza...">
+                            </div>
+                        </div>
+                        <button class="admin-btn-primary" id="btnSaveApiKeys" style="margin-top: 16px;">Save Keys</button>
+                    </div>
+
+                    <div style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius-lg); padding: 20px;">
+                        <h5 style="margin-bottom: 16px; color: var(--admin-text); font-size: 15px; font-weight: 600;">Daily Limits per Student</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Daily Limit</label>
+                                <input id="limitDaily" type="number" class="admin-form-input">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Exam Limit</label>
+                                <input id="limitExam" type="number" class="admin-form-input">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">ESP Limit</label>
+                                <input id="limitEsp" type="number" class="admin-form-input">
+                            </div>
+                        </div>
+                        <button class="admin-btn-primary" id="btnSaveDailyLimits" style="margin-top: 16px;">Save Limits</button>
+                    </div>
+                </div>
+
+                <!-- Policies -->
+                <div id="viewPolicies" class="admin-view">
+                    <h3 style="margin-bottom: 24px; color: var(--admin-text);">Policies</h3>
+                    <div id="policiesList" class="admin-empty-state">
+                        <div class="admin-empty-state-icon"><i class="bi bi-shield-check"></i></div>
+                        <div class="admin-empty-state-title">Policy Management</div>
+                        <div class="admin-empty-state-subtitle">Global policies coming soon</div>
+                    </div>
+                </div>
+
+                <!-- Admins -->
+                <div id="viewAdmins" class="admin-view">
+                    <h3 style="margin-bottom: 24px; color: var(--admin-text);">Admin Management</h3>
+                    <div id="adminsList">
+                        <div class="admin-loading-skeleton"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- SCHOOL ADMIN LAYOUT -->
+    <div id="schoolAdminLayout" style="display: none;">
+        <div class="admin-wrapper">
+            <!-- Header -->
+            <header class="admin-header">
+                <div class="admin-header-left">
+                    <div class="admin-school-avatar" id="schoolAvatarDisplay">S</div>
+                    <div class="admin-school-name">
+                        <div class="admin-school-name-title" id="schoolNameDisplay">School</div>
+                        <span class="admin-school-badge">School Admin</span>
+                    </div>
+                </div>
+                <div class="admin-header-right">
+                    <span id="adminNameTop2" style="font-size: 14px; color: var(--admin-text);"></span>
+                    <button type="button" class="admin-btn-secondary" id="btnLogout2" style="padding: 6px 12px; font-size: 13px;">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Tabs -->
+            <nav class="admin-tabs">
+                <a href="#" class="admin-tab-item active" id="tabAdminDashboard" onclick="return window.showAdminView('adminDashboard')">
+                    Dashboard
+                </a>
+                <a href="#" class="admin-tab-item" id="tabTeachers" onclick="return window.showAdminView('teachers')">
+                    Teachers
+                </a>
+                <a href="#" class="admin-tab-item" id="tabGroups" onclick="return window.showAdminView('groups')">
+                    Groups
+                </a>
+                <a href="#" class="admin-tab-item" id="tabUsers" onclick="return window.showAdminView('users')">
+                    Users
+                </a>
+                <a href="#" class="admin-tab-item" id="tabAttendance" onclick="return window.showAdminView('attendance')">
+                    Attendance
+                </a>
+                <a href="#" class="admin-tab-item" id="tabChallenges" onclick="return window.showAdminView('challenges')">
+                    Challenges
+                </a>
+                <a href="#" class="admin-tab-item" id="tabStore" onclick="return window.showAdminView('store')">
+                    Store
+                </a>
+                <a href="#" class="admin-tab-item" id="tabCobros" onclick="return window.showAdminView('cobros')">
+                    Cobros
+                </a>
+                <a href="#" class="admin-tab-item" id="tabAnnouncements" onclick="return window.showAdminView('announcements')">
+                    Announcements
+                </a>
+                <a href="#" class="admin-tab-item" id="tabFeedback" onclick="return window.showAdminView('feedback')">
+                    Feedback
+                </a>
+            </nav>
+
+            <!-- Content Area -->
+            <main class="admin-content">
+                <!-- School Dashboard -->
+                <div id="viewAdminDashboard" class="admin-view active">
+                    <h3 style="margin-bottom: 24px; color: var(--admin-text);">School Dashboard</h3>
+                    <div class="row g-3 mb-4" id="adminDashboardCards">
+                        <div class="col-md-4">
+                            <div class="admin-loading-skeleton" style="height: 100px;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="admin-loading-skeleton" style="height: 100px;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="admin-loading-skeleton" style="height: 100px;"></div>
+                        </div>
+                    </div>
+                    <div id="adminDashboardActivity"></div>
+                </div>
+
+                <!-- Teachers -->
+                <div id="viewTeachers" class="admin-view">
+                    <h3 style="margin-bottom: 8px; color: var(--admin-text);">Teachers</h3>
+                    <p style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 24px;">Manage teachers, assign groups, and view students in your school.</p>
+                    <div id="teachersList">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-person-check"></i></div>
+                            <div class="admin-empty-state-title">Loading teachers</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Groups -->
+                <div id="viewGroupsSchool" class="admin-view">
+                    <h3 style="margin-bottom: 8px; color: var(--admin-text);">Groups</h3>
+                    <p style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 24px;">Manage your school's groups and classes.</p>
+                    <div id="groupsListSchool">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-diagram-3"></i></div>
+                            <div class="admin-empty-state-title">Loading groups</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users -->
+                <div id="viewUsersSchool" class="admin-view">
+                    <h3 style="margin-bottom: 24px; color: var(--admin-text);">Users</h3>
+                    <div style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius-lg); padding: 20px; margin-bottom: 20px;">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Group</label>
+                                <select id="adminGroupFilter2" class="admin-form-select"><option value="">All groups</option></select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Role</label>
+                                <select id="usersRoleFilter2" class="admin-form-select">
+                                    <option value="">All roles</option>
+                                    <option value="teacher">Teacher</option>
+                                    <option value="student">Student</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="button" class="admin-btn-primary w-100" id="btnLoadUsersSchool">Load Users</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="contentUsersSchool">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-person"></i></div>
+                            <div class="admin-empty-state-title">Select filters to load users</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance -->
+                <div id="viewAttendance" class="admin-view">
+                    <h3 style="margin-bottom: 8px; color: var(--admin-text);">Attendance</h3>
+                    <p style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 24px;">View and export attendance records by date.</p>
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                        <div>
+                            <label class="form-label small" style="color: var(--admin-text-muted); display: block; margin-bottom: 6px;">Date</label>
+                            <input type="date" id="adminAttendanceDate" class="admin-form-input" style="max-width: 200px;">
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: flex-end;">
+                            <button type="button" class="admin-btn-primary" id="btnLoadAdminAttendance">Load</button>
+                            <button type="button" class="admin-btn-secondary" id="btnExportAdminAttendanceCsv">
+                                <i class="bi bi-download"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div id="adminAttendanceList">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-calendar-check"></i></div>
+                            <div class="admin-empty-state-title">Select a date to load attendance</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Challenges -->
+                <div id="viewChallenges" class="admin-view">
+                    <h3 style="margin-bottom: 8px; color: var(--admin-text);">Challenges</h3>
+                    <p style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 24px;">View and manage challenges created by your teachers.</p>
+                    <div id="adminChallengesList">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-lightning-charge"></i></div>
+                            <div class="admin-empty-state-title">Loading challenges</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Store -->
+                <div id="viewStore" class="admin-view">
+                    <h3 style="margin-bottom: 8px; color: var(--admin-text);">Store & Auctions</h3>
+                    <p style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 24px;">Manage store items and active auctions.</p>
+                    <div id="adminAuctionList">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-shop"></i></div>
+                            <div class="admin-empty-state-title">Loading store items</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cobros -->
+                <div id="viewCobros" class="admin-view">
+                    <h3 style="margin-bottom: 8px; color: var(--admin-text);">Cobros</h3>
+                    <p style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 24px;">Pending deliveries and billing claims.</p>
+                    <div id="adminBillingClaimsList">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-receipt"></i></div>
+                            <div class="admin-empty-state-title">Loading cobros</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Announcements -->
+                <div id="viewAnnouncements" class="admin-view">
+                    <h3 style="margin-bottom: 8px; color: var(--admin-text);">Announcements</h3>
+                    <p style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 24px;">Create and manage announcements for your school.</p>
+                    <div style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius-lg); padding: 20px; margin-bottom: 20px;">
+                        <input type="hidden" id="announcementEditId">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Title</label>
+                                <input type="text" id="announcementTitle" class="admin-form-input">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Type</label>
+                                <select id="announcementType" class="admin-form-select">
+                                    <option value="info">Info</option>
+                                    <option value="success">Success</option>
+                                    <option value="warning">Warning</option>
+                                    <option value="danger">Danger</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Expiry</label>
+                                <input type="date" id="announcementExpiry" class="admin-form-input">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small" style="color: var(--admin-text-muted);">Message</label>
+                                <textarea id="announcementMessage" class="admin-form-input" rows="3"></textarea>
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button type="button" class="admin-btn-primary" id="btnCreateAnnouncement">Save Announcement</button>
+                                <button type="button" class="admin-btn-secondary" id="btnCancelAnnouncement" style="display: none;">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="adminAnnouncementsList">
+                        <div class="admin-loading-skeleton"></div>
+                    </div>
+                </div>
+
+                <!-- Feedback -->
+                <div id="viewFeedback" class="admin-view">
+                    <h3 style="margin-bottom: 8px; color: var(--admin-text);">Feedback</h3>
+                    <p style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 24px;">Messages and feedback from your students.</p>
+                    <div id="adminFeedbackList">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-state-icon"><i class="bi bi-chat-dots"></i></div>
+                            <div class="admin-empty-state-title">Loading feedback</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Preserve all existing JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+    <script src="admin-init.js"></script>
+</body>
+</html>
+    <div class="decor-overlay" aria-hidden="true"></div>
     <div class="container-custom page-container" style="max-width: 960px;">
         <div class="card card-premium" style="padding: 0; overflow: hidden;">
             <nav class="admin-nav">

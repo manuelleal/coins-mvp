@@ -1,4 +1,16 @@
 {
+  "name": "coins-mvp",
+  "version": "1.0.0",
+  "description": "LINGO Coins - Educational Gamification Platform",
+  "main": "app.js",
+  "scripts": {
+    "dev": "node app.js",
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "@supabase/supabase-js": "^2.45.0"
+  },
   "devDependencies": {
     "playwright": "^1.58.2"
   }

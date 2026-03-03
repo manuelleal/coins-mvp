@@ -59,6 +59,105 @@ if (typeof window.supabase !== 'undefined') {
     console.error('Supabase CDN not loaded. Check script order.');
 }
 
+async function getAttendanceByGroupDateRange(groupCode, fromDate, toDate) {
+    var g = String(groupCode || '').trim();
+    var from = String(fromDate || '').trim();
+    var to = String(toDate || '').trim();
+    if (!g || !from || !to) return [];
+    if (from > to) return [];
+    try {
+        const { data: rows, error } = await supabaseClient
+            .from(CONFIG.tables.attendance)
+            .select('student_id, group_code, attendance_date, created_at')
+            .eq('group_code', g)
+            .gte('attendance_date', from)
+            .lte('attendance_date', to)
+            .order('attendance_date', { ascending: true })
+            .order('created_at', { ascending: true });
+        if (error) throw error;
+        if (!rows || !rows.length) return [];
+        const ids = [...new Set(rows.map(function(r) { return r.student_id; }))].filter(Boolean);
+        let byDoc = {};
+        if (ids.length) {
+            const { data: profiles, error: pErr } = await supabaseClient
+                .from(CONFIG.tables.profiles)
+                .select('documento_id, nombre_completo')
+                .in('documento_id', ids);
+            if (!pErr && profiles) {
+                profiles.forEach(function(p) {
+                    byDoc[String(p.documento_id || '')] = p.nombre_completo || p.documento_id;
+                });
+            }
+        }
+        return rows.map(function(r) {
+            return {
+                student_id: r.student_id,
+                nombre_completo: byDoc[String(r.student_id || '')] || r.student_id,
+                group_code: r.group_code,
+                attendance_date: r.attendance_date,
+                created_at: r.created_at
+            };
+        });
+    } catch (err) {
+        console.error('Error getting attendance range by group:', err);
+        return [];
+    }
+}
+
+async function getStudentConsecutiveSessionAbsences(documentoId, groupCode) {
+    var sid = String(documentoId || '').trim();
+    var g = String(groupCode || '').trim();
+    if (!sid || !g) return 0;
+    try {
+        var cutoffIso = new Date(Date.now() - (45 * 24 * 60 * 60 * 1000)).toISOString();
+        var sesRes = await supabaseClient
+            .from(CONFIG.tables.attendance_sessions)
+            .select('created_at')
+            .eq('group_code', g)
+            .gte('created_at', cutoffIso)
+            .order('created_at', { ascending: false })
+            .limit(60);
+        if (sesRes.error && typeof isMissingColumnError === 'function' && isMissingColumnError(sesRes.error, 'group_code', CONFIG.tables.attendance_sessions)) {
+            return 0;
+        }
+        if (sesRes.error) throw sesRes.error;
+
+        var sessionDaysSet = {};
+        (sesRes.data || []).forEach(function(r) {
+            var d = String(r.created_at || '').slice(0, 10);
+            if (d) sessionDaysSet[d] = true;
+        });
+        var sessionDays = Object.keys(sessionDaysSet).sort().reverse();
+        if (!sessionDays.length) return 0;
+
+        var cutoffDate = sessionDays[sessionDays.length - 1];
+        var attRes = await supabaseClient
+            .from(CONFIG.tables.attendance)
+            .select('attendance_date')
+            .eq('group_code', g)
+            .eq('student_id', sid)
+            .gte('attendance_date', cutoffDate);
+        if (attRes.error) throw attRes.error;
+
+        var attendedSet = {};
+        (attRes.data || []).forEach(function(r) {
+            var d = String(r.attendance_date || '');
+            if (d) attendedSet[d] = true;
+        });
+
+        var misses = 0;
+        for (var i = 0; i < sessionDays.length; i++) {
+            var day = sessionDays[i];
+            if (attendedSet[day]) break;
+            misses += 1;
+        }
+        return misses;
+    } catch (err) {
+        console.error('Error computing consecutive session absences:', err);
+        return 0;
+    }
+}
+
 // ================================================================
 // COIN LEDGER (optional)
 // If MIGRATION_COIN_WALLETS_LEDGER.sql is applied, we can log
@@ -784,61 +883,53 @@ async function handleLogin(e) {
             throw new Error('Invalid document ID or PIN format');
         }
 
-        const { data, error } = await supabaseClient
-            .from(CONFIG.tables.profiles)
-            .select('*')
-            .eq('documento_id', doc)
-            .eq('pin', pin)
-            .maybeSingle();
-        
-        if (error) throw error;
+        var data = await getProfileByDocumentoId(doc);
         if (!data) throw new Error('Invalid credentials');
-
-        // PHASE 7: Check login restrictions (locked, deactivated, force reset)
-        var loginCheck = await checkLoginRestrictions(data);
-        if (!loginCheck.allowed) {
-            throw new Error(loginCheck.reason || 'Account access denied');
-        }
+        if (String(data.pin || '') !== String(pin)) throw new Error('Invalid credentials');
 
         setLoginThrottleState({ count: 0, firstAttemptMs: Date.now() });
 
-        // Update last_login_at
         try {
             await supabaseClient.from(CONFIG.tables.profiles).update({ last_login_at: new Date().toISOString() }).eq('id', data.id);
         } catch (_) {}
 
-        // If force_password_reset, store flag for UI to handle
-        if (loginCheck.forceReset) {
-            data._forcePasswordReset = true;
-        }
-        
-        localStorage.setItem('lingoCoins_user', JSON.stringify(data));
+        var sessionUser = {
+            id: data.id,
+            rol: data.rol,
+            documento_id: data.documento_id,
+            nombre_completo: data.nombre_completo,
+            grupo: data.grupo || null,
+            institution_id: data.institution_id || null,
+            is_active: data.is_active !== false
+        };
+
+        localStorage.setItem('lingoCoins_user', JSON.stringify(sessionUser));
         
         // New flow: pending_session for QR/login handoff
         var pendingSession = consumePendingSessionCode();
-        if (data.rol === 'student' && pendingSession) {
+        if (sessionUser.rol === 'student' && pendingSession) {
             window.location.href = CONFIG.pages.attendance + '?session=' + encodeURIComponent(pendingSession);
             return;
         }
 
         // Backward compatibility flow: pending_attendance_code
         var pendingCode = consumePendingAttendanceCode();
-        if (data.rol === 'student' && pendingCode) {
+        if (sessionUser.rol === 'student' && pendingCode) {
             window.location.href = CONFIG.pages.attendance + '?attendance_code=' + encodeURIComponent(pendingCode);
             return;
         }
         
         const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
-        if (data.rol === 'student' && redirectUrl && redirectUrl.indexOf('attendance.html') !== -1) {
+        if (sessionUser.rol === 'student' && redirectUrl && redirectUrl.indexOf('attendance.html') !== -1) {
             window.location.href = redirectUrl;
             return;
         }
         
-        if (data.rol === 'super_admin') {
+        if (sessionUser.rol === 'super_admin') {
             window.location.href = CONFIG.pages.admin;
-        } else if (data.rol === 'admin') {
+        } else if (sessionUser.rol === 'admin') {
             window.location.href = CONFIG.pages.admin;
-        } else if (data.rol === 'teacher') {
+        } else if (sessionUser.rol === 'teacher') {
             window.location.href = CONFIG.pages.teacher;
         } else {
             window.location.href = CONFIG.pages.student;
@@ -1175,7 +1266,7 @@ async function loadStudents(groupCode) {
     try {
         let query = supabaseClient
             .from(CONFIG.tables.profiles)
-            .select('id, nombre_completo, documento_id, pin, grupo, monedas, rol')
+            .select('id, nombre_completo, documento_id, grupo, monedas, rol')
             .in('rol', ['student', 'admin', 'super_admin'])
             .order('rol')
             .order('grupo')
@@ -2769,9 +2860,7 @@ async function submitChallenge(challengeId, documentoId, answer) {
 
         let coinsAwarded = 0;
         if (isCorrect) {
-            if (position <= 3) coinsAwarded = 40;
-            else if (position <= 6) coinsAwarded = 20;
-            else if (position <= 10) coinsAwarded = 10;
+            coinsAwarded = Math.floor(Math.random() * 26) + 5; // random 5–30
         }
 
         const submissionPayload = {
@@ -3100,8 +3189,14 @@ async function callAIProvider(provider, apiKey, systemPrompt, userPrompt) {
 }
 
 // ========== SYSTEM CONFIGS (API Key Vault) ==========
+function isSensitiveSystemConfigKey(keyName) {
+    var k = String(keyName || '').toLowerCase();
+    return k === 'api_keys' || k === 'active_ai_key' || k.indexOf('api_key') !== -1;
+}
+
 async function getSystemConfig(keyName) {
     try {
+        if (isSensitiveSystemConfigKey(keyName)) return null;
         var result = await supabaseClient
             .from(CONFIG.tables.system_configs)
             .select('key_value, provider')
@@ -3116,6 +3211,9 @@ async function getSystemConfig(keyName) {
 }
 
 async function setSystemConfig(keyName, keyValue, provider) {
+    if (isSensitiveSystemConfigKey(keyName)) {
+        throw new Error('Client-side API key management is disabled. Use backend secrets management.');
+    }
     var result = await supabaseClient
         .from(CONFIG.tables.system_configs)
         .upsert([{ key_name: keyName, key_value: keyValue, provider: provider || null, updated_at: new Date().toISOString() }], { onConflict: 'key_name' });

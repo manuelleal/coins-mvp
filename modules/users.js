@@ -1,6 +1,6 @@
 (function() {
   var state = { page: 0, pageSize: 50, total: 0, user: null, role: null, rows: [], selected: {}, adminMode: false };
-  var PROFILE_SELECT = 'id,nombre_completo,documento_id,pin,rol,grupo,monedas,is_active,account_locked,institution_id,last_login_at,teacher_credits,force_password_reset';
+  var PROFILE_SELECT = 'id,nombre_completo,documento_id,rol,grupo,monedas,is_active,account_locked,institution_id,last_login_at,teacher_credits,force_password_reset';
 
   function esc(v) { return UI.escapeHtml(v == null ? '' : String(v)); }
   function isAdminMode() { return !!state.adminMode; }
@@ -145,10 +145,9 @@
 
     // School admin UX: manage students only (no bulk destructive actions).
     if (isAdminMode()) {
-      el.innerHTML = '<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Name</th><th>Document</th><th>PIN</th><th>Group</th><th>Coins</th><th>Last Login</th><th>Actions</th></tr></thead><tbody>' +
+      el.innerHTML = '<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th>Name</th><th>Document</th><th>Group</th><th>Coins</th><th>Last Login</th><th>Actions</th></tr></thead><tbody>' +
         rows.map(function(u) {
           return '<tr><td>' + esc(u.nombre_completo) + '</td><td>' + esc(u.documento_id) + '</td>' +
-            '<td><span id="pin_' + esc(u.id) + '">••••</span> <button class="btn btn-sm btn-link" onclick="UsersModule.togglePin(\'' + esc(u.id) + '\',\'' + esc(u.pin || '') + '\')"><i class="bi bi-eye"></i></button></td>' +
             '<td>' + esc(u.grupo || '-') + '</td>' +
             '<td>' + esc(u.monedas || 0) + '</td>' +
             '<td>' + esc(u.last_login_at || '-') + '</td>' +
@@ -161,9 +160,9 @@
     }
 
     el.innerHTML = '<div class="mb-2 d-flex gap-2 flex-wrap"><button class="btn btn-sm btn-outline-secondary" id="usersSelectPage">Select page</button><button class="btn btn-sm btn-outline-danger" id="usersDeleteSelected">Delete Selected</button><button class="btn btn-sm btn-outline-primary" id="usersMoveSelectedGroup">Move Selected to Group</button><button class="btn btn-sm btn-outline-success" id="usersExportCsv">Export CSV</button><button class="btn btn-sm btn-primary" id="btnCreateUser">Create User</button></div>' +
-      '<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th><input id="usersCheckAll" type="checkbox"></th><th>Name</th><th>Document</th><th>PIN</th><th>Role</th><th>Group</th><th>Coins</th><th>Last Login</th><th>Status</th><th>Actions</th></tr></thead><tbody>' +
+      '<div class="admin-table-wrap"><table class="table table-sm"><thead><tr><th><input id="usersCheckAll" type="checkbox"></th><th>Name</th><th>Document</th><th>Role</th><th>Group</th><th>Coins</th><th>Last Login</th><th>Status</th><th>Actions</th></tr></thead><tbody>' +
       rows.map(function(u) {
-        return '<tr><td><input type="checkbox" class="user-check" data-id="' + esc(u.id) + '"></td><td>' + esc(u.nombre_completo) + '</td><td>' + esc(u.documento_id) + '</td><td><span id="pin_' + esc(u.id) + '">••••</span> <button class="btn btn-sm btn-link" onclick="UsersModule.togglePin(\'' + esc(u.id) + '\',\'' + esc(u.pin || '') + '\')"><i class="bi bi-eye"></i></button></td><td>' + roleBadge(u.rol) + '</td><td>' + esc(u.grupo || '-') + '</td><td>' + esc(u.monedas || 0) + '</td><td>' + esc(u.last_login_at || '-') + '</td><td>' + (u.account_locked ? 'blocked' : 'active') + '</td><td class="d-flex gap-1 flex-wrap"><button class="btn btn-sm btn-outline-primary" onclick="UsersModule.openEditModal(\'' + esc(u.id) + '\')">Edit</button><button class="btn btn-sm btn-outline-secondary" onclick="UsersModule.toggleLock(\'' + esc(u.id) + '\',' + (!u.account_locked) + ')">' + (u.account_locked ? 'Unlock' : 'Lock') + '</button><button class="btn btn-sm btn-outline-info" onclick="UsersModule.forcePinReset(\'' + esc(u.id) + '\')">Force PIN Reset</button><button class="btn btn-sm btn-outline-dark" onclick="UsersModule.moveToSchool(\'' + esc(u.id) + '\')">Move School</button><button class="btn btn-sm btn-outline-danger" onclick="UsersModule.softDelete(\'' + esc(u.id) + '\')">Delete</button></td></tr>';
+        return '<tr><td><input type="checkbox" class="user-check" data-id="' + esc(u.id) + '"></td><td>' + esc(u.nombre_completo) + '</td><td>' + esc(u.documento_id) + '</td><td>' + roleBadge(u.rol) + '</td><td>' + esc(u.grupo || '-') + '</td><td>' + esc(u.monedas || 0) + '</td><td>' + esc(u.last_login_at || '-') + '</td><td>' + (u.account_locked ? 'blocked' : 'active') + '</td><td class="d-flex gap-1 flex-wrap"><button class="btn btn-sm btn-outline-primary" onclick="UsersModule.openEditModal(\'' + esc(u.id) + '\')">Edit</button><button class="btn btn-sm btn-outline-secondary" onclick="UsersModule.toggleLock(\'' + esc(u.id) + '\',' + (!u.account_locked) + ')">' + (u.account_locked ? 'Unlock' : 'Lock') + '</button><button class="btn btn-sm btn-outline-info" onclick="UsersModule.forcePinReset(\'' + esc(u.id) + '\')">Force PIN Reset</button><button class="btn btn-sm btn-outline-dark" onclick="UsersModule.moveToSchool(\'' + esc(u.id) + '\')">Move School</button><button class="btn btn-sm btn-outline-danger" onclick="UsersModule.softDelete(\'' + esc(u.id) + '\')">Delete</button></td></tr>';
       }).join('') + '</tbody></table></div>';
     bindBulkHandlers();
   }
@@ -174,7 +173,7 @@
 
     var teachersRes = await supabaseClient
       .from(CONFIG.tables.profiles)
-      .select('id,nombre_completo,rol,grupo,monedas,pin,teacher_credits,institution_id')
+      .select('id,nombre_completo,rol,grupo,monedas,teacher_credits,institution_id')
       .eq('institution_id', sid)
       .eq('rol', 'teacher')
       .eq('is_active', true)
@@ -234,7 +233,6 @@
         rol: t.rol,
         grupo: gc,
         monedas: t.monedas,
-        pin: t.pin,
         teacher_credits: Number(t.teacher_credits) || 0,
         student_count: studentsByGroup[gc] || 0,
         active_challenges_count: (activeChallengesByGroup[gc] || 0) + activeAllCount,
@@ -298,7 +296,7 @@
     renderPagination();
   }
 
-  function togglePin(id, pin) { var el = document.getElementById('pin_' + id); if (el) el.textContent = el.textContent === '••••' ? pin : '••••'; }
+  function togglePin() { /* PIN reveal disabled by security hardening */ }
 
   function getById(id) { return (state.rows || []).find(function(r) { return String(r.id) === String(id); }); }
 
@@ -390,7 +388,7 @@
 
   async function bulkDelete() { var ids = selectedIds(); if (!ids.length) return UI.showToast('No users selected', 'warning'); if (!confirm('Soft delete selected users?')) return; var r = await supabaseClient.from(CONFIG.tables.profiles).update({ is_active: false }).in('id', ids); if (r.error) return UI.showToast(r.error.message, 'danger'); await logAudit('DELETE_USER', 'profile', 'bulk', { ids: ids, is_active: false }); refresh(); }
   async function bulkMoveGroup() { var ids = selectedIds(); if (!ids.length) return UI.showToast('No users selected', 'warning'); var g = prompt('Target group'); if (g == null) return; var r = await supabaseClient.from(CONFIG.tables.profiles).update({ grupo: String(g || '').trim() || null }).in('id', ids); if (r.error) return UI.showToast(r.error.message, 'danger'); refresh(); }
-  function exportCsv() { var lines = ['nombre_completo,documento_id,pin,rol,grupo,monedas,last_login_at,status']; state.rows.forEach(function(u) { lines.push('"' + String(u.nombre_completo || '').replace(/"/g, '""') + '","' + String(u.documento_id || '').replace(/"/g, '""') + '","' + String(u.pin || '').replace(/"/g, '""') + '",' + (u.rol || '') + ',"' + String(u.grupo || '').replace(/"/g, '""') + '",' + Number(u.monedas || 0) + ',"' + String(u.last_login_at || '') + '",' + (u.account_locked ? 'blocked' : 'active')); }); var b = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' }); var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'users_export.csv'; a.click(); logAudit('EXPORT_DATA', 'profiles', 'users_export.csv', { count: state.rows.length }); }
+  function exportCsv() { var lines = ['nombre_completo,documento_id,rol,grupo,monedas,last_login_at,status']; state.rows.forEach(function(u) { lines.push('"' + String(u.nombre_completo || '').replace(/"/g, '""') + '","' + String(u.documento_id || '').replace(/"/g, '""') + '",' + (u.rol || '') + ',"' + String(u.grupo || '').replace(/"/g, '""') + '",' + Number(u.monedas || 0) + ',"' + String(u.last_login_at || '') + '",' + (u.account_locked ? 'blocked' : 'active')); }); var b = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' }); var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'users_export.csv'; a.click(); logAudit('EXPORT_DATA', 'profiles', 'users_export.csv', { count: state.rows.length }); }
   async function createUser() {
     var sid = schoolId();
     if (!sid) return UI.showToast('Select school first', 'warning');

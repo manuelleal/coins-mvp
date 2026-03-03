@@ -7,10 +7,22 @@
     aiPinFailures: 0,
     aiKeys: { openai: '', anthropic: '', google: '' }
   };
-  var PROFILE_SELECT = 'id,nombre_completo,documento_id,pin,rol,grupo,monedas,is_active,account_locked,institution_id,last_login_at,teacher_credits,force_password_reset';
+  var PROFILE_SELECT = 'id,nombre_completo,documento_id,rol,grupo,monedas,is_active,account_locked,institution_id,last_login_at,teacher_credits,force_password_reset';
 
   function esc(v) {
     return window.UI && UI.escapeHtml ? UI.escapeHtml(v) : String(v == null ? '' : v);
+  }
+
+  function roleName() {
+    return String((state.user && state.user.rol) || '').trim().toLowerCase();
+  }
+
+  function isSuperAdmin() {
+    return roleName() === 'super_admin';
+  }
+
+  function adminInstitutionId() {
+    return String((state.user && state.user.institution_id) || '').trim();
   }
 
   function toggleKeyVisibility(provider) {
@@ -164,6 +176,15 @@
     out.nombre = out.nombre || out.name || '';
     out.plan = out.plan || out.subscription_plan || 'BASIC';
     if (out.ai_used_credits == null) out.ai_used_credits = out.ai_credits_used == null ? 0 : out.ai_credits_used;
+    var rawSuspended = out.is_suspended;
+    if (typeof rawSuspended === 'string') {
+      var s = rawSuspended.trim().toLowerCase();
+      out.is_suspended = s === 'true' || s === 't' || s === '1' || s === 'yes' || s === 'y';
+    } else if (typeof rawSuspended === 'number') {
+      out.is_suspended = rawSuspended === 1;
+    } else {
+      out.is_suspended = rawSuspended === true;
+    }
     out.ai_used_credits = Number(out.ai_used_credits || 0);
     out.ai_credit_pool = Number(out.ai_credit_pool || 0);
     out.coin_pool = Number(out.coin_pool || 0);
@@ -216,6 +237,11 @@
     var coin = document.getElementById('economyCoinTable');
     var ai = document.getElementById('economyAiTable');
     if (!coin || !ai) return;
+    if (!isSuperAdmin()) {
+      coin.innerHTML = '<div class="alert alert-warning">Not authorized.</div>';
+      ai.innerHTML = '<div class="alert alert-warning">Not authorized.</div>';
+      return;
+    }
     state.schools = await loadSchoolsResilient();
 
     var coinRows = '';
@@ -250,13 +276,22 @@
     try { return JSON.parse(String(raw)); } catch (_) { return fallback; }
   }
 
+  function isSensitiveConfigKey(keyName) {
+    var k = String(keyName || '').toLowerCase();
+    return k === 'api_keys' || k === 'active_ai_key' || k.indexOf('api_key') !== -1;
+  }
+
   async function getSystemConfig(keyName, fallback) {
+    if (isSensitiveConfigKey(keyName)) return fallback;
     var r = await supabaseClient.from(CONFIG.tables.system_configs).select('key_value').eq('key_name', keyName).maybeSingle();
     if (r.error || !r.data) return fallback;
     return parseMaybeJson(r.data.key_value, r.data.key_value || fallback);
   }
 
   async function setSystemConfig(keyName, value, provider) {
+    if (isSensitiveConfigKey(keyName)) {
+      throw new Error('Client-side API key management is disabled. Use secure backend secrets management.');
+    }
     var keyValue = typeof value === 'string' ? value : JSON.stringify(value);
     var payload = [{ key_name: keyName, key_value: keyValue, provider: provider || null, updated_at: new Date().toISOString() }];
     var r = await supabaseClient.from(CONFIG.tables.system_configs).upsert(payload, { onConflict: 'key_name' });
@@ -291,6 +326,7 @@
   }
 
   async function loadAiConfig() {
+    if (!isSuperAdmin()) return;
     var models = await getSystemConfig('ai_models', {
       daily: { provider: 'anthropic', model: 'claude-haiku-4-5-20251001', cost_credits: 1 },
       exam: { provider: 'anthropic', model: 'claude-sonnet-4-20250514', cost_credits: 3 },
@@ -303,7 +339,7 @@
       coins_per_day_challenges: 50,
       coins_per_day_attendance: 10
     });
-    var keys = await getSystemConfig('api_keys', { openai: '', anthropic: '', google: '' });
+    var keys = { openai: '', anthropic: '', google: '' };
     state.aiKeys = {
       openai: String(keys.openai || ''),
       anthropic: String(keys.anthropic || ''),
@@ -379,21 +415,7 @@
   }
 
   async function saveApiKeys() {
-    function normalizeProviderKey(provider, inputId) {
-      var current = String(state.aiKeys[provider] || '');
-      var raw = String((document.getElementById(inputId) || {}).value || '').trim();
-      if (!raw) return '';
-      if (raw === maskApiKey(current)) return current;
-      return raw;
-    }
-    await setSystemConfig('api_keys', {
-      openai: normalizeProviderKey('openai', 'apiKeyOpenai'),
-      anthropic: normalizeProviderKey('anthropic', 'apiKeyAnthropic'),
-      google: normalizeProviderKey('google', 'apiKeyGoogle')
-    });
-    await logAudit('SAVE_API_KEYS', 'system_config', 'api_keys', {});
-    toast('API keys saved', 'success');
-    loadAiConfig();
+    toast('Blocked: API keys can no longer be saved from frontend. Configure secrets in backend.', 'warning');
   }
 
   async function saveAiModels() {
@@ -407,6 +429,7 @@
   }
 
   async function loadPolicies() {
+    if (!isSuperAdmin()) return;
     var dataPolicies = await getSystemConfig('data_policies', {
       attendance_retention_days: 365,
       challenge_retention_days: 365,
@@ -574,22 +597,42 @@
   }
 
   async function loadSchoolsResilient() {
-    var attempts = [
-      { select: 'id,name,subscription_plan,active_ai_provider,ai_credit_pool,ai_used_credits,ai_credits_used,coin_pool,is_suspended,api_key', order: 'name' },
-      { select: 'id,name,subscription_plan,active_ai_provider,ai_credit_pool,ai_used_credits,coin_pool,is_suspended,api_key', order: 'name' },
-      { select: 'id,name,subscription_plan,active_ai_provider,ai_credit_pool,coin_pool,is_suspended,api_key', order: 'name' },
-      { select: 'id,name,subscription_plan,active_ai_provider', order: 'name' },
-      { select: 'id,name,subscription_plan', order: 'name' },
-      { select: 'id,nombre,plan,active_ai_provider,ai_credit_pool,ai_used_credits,coin_pool,is_suspended,api_key', order: 'nombre' },
-      { select: 'id,nombre,plan,active_ai_provider', order: 'nombre' },
-      { select: 'id,nombre,plan', order: 'nombre' }
-    ];
-    for (var i = 0; i < attempts.length; i += 1) {
-      var attempt = attempts[i];
-      var res = await supabaseClient.from(CONFIG.tables.institutions).select(attempt.select).order(attempt.order);
-      if (!res.error) return (res.data || []).map(normalizeSchoolRow);
+    var rows = null;
+    // Secure path (works when direct SELECT on institutions is blocked by RLS)
+    try {
+      var rpc = await supabaseClient.rpc('list_institutions_safe');
+      if (!rpc.error && Array.isArray(rpc.data)) {
+        rows = rpc.data.map(normalizeSchoolRow);
+      }
+    } catch (_) {}
+
+    if (!rows) {
+      var attempts = [
+        { select: 'id,name,subscription_plan,active_ai_provider,ai_credit_pool,ai_used_credits,ai_credits_used,coin_pool,is_suspended,api_key', order: 'name' },
+        { select: 'id,name,subscription_plan,active_ai_provider,ai_credit_pool,ai_used_credits,coin_pool,is_suspended,api_key', order: 'name' },
+        { select: 'id,name,subscription_plan,active_ai_provider,ai_credit_pool,coin_pool,is_suspended,api_key', order: 'name' },
+        { select: 'id,name,subscription_plan,active_ai_provider', order: 'name' },
+        { select: 'id,name,subscription_plan', order: 'name' },
+        { select: 'id,nombre,plan,active_ai_provider,ai_credit_pool,ai_used_credits,coin_pool,is_suspended,api_key', order: 'nombre' },
+        { select: 'id,nombre,plan,active_ai_provider', order: 'nombre' },
+        { select: 'id,nombre,plan', order: 'nombre' }
+      ];
+      for (var i = 0; i < attempts.length; i += 1) {
+        var attempt = attempts[i];
+        var res = await supabaseClient.from(CONFIG.tables.institutions).select(attempt.select).order(attempt.order);
+        if (!res.error) {
+          rows = (res.data || []).map(normalizeSchoolRow);
+          break;
+        }
+      }
     }
-    return [];
+
+    rows = Array.isArray(rows) ? rows : [];
+    var sid = adminInstitutionId();
+    if (!isSuperAdmin() && sid) {
+      rows = rows.filter(function(s) { return String(s.id) === sid; });
+    }
+    return rows;
   }
 
   async function countProfiles(role, schoolId) {
@@ -1001,11 +1044,24 @@
 
   async function fillSchoolSelectors() {
     var selectors = ['usersSchoolSelect', 'groupsSchoolSelect', 'challengeSchoolFilter', 'storeSchoolFilter', 'announcementSchoolFilter', 'feedbackSchoolFilter', 'adminsSchoolFilter', 'newAdminInstitution'];
+    var sid = adminInstitutionId();
+    var scopedSchool = (!isSuperAdmin() && sid) ? (state.schools || []).find(function(s) { return String(s.id) === sid; }) : null;
     selectors.forEach(function(id) {
       var sel = document.getElementById(id);
       if (!sel) return;
       var cur = sel.value;
+      if (scopedSchool) {
+        sel.innerHTML = '';
+        var only = document.createElement('option');
+        only.value = scopedSchool.id;
+        only.textContent = scopedSchool.nombre;
+        sel.appendChild(only);
+        sel.value = scopedSchool.id;
+        sel.disabled = true;
+        return;
+      }
       sel.innerHTML = '<option value="">All schools</option>';
+      sel.disabled = false;
       state.schools.forEach(function(s) {
         var o = document.createElement('option');
         o.value = s.id;
@@ -1019,6 +1075,10 @@
   async function loadDashboard() {
     var host = document.getElementById('dashboardCards');
     if (!host) return;
+    if (!isSuperAdmin()) {
+      host.innerHTML = '<div class="alert alert-warning">Not authorized.</div>';
+      return;
+    }
     host.innerHTML = '<div class="small text-muted">Loading global stats...</div>';
     var schools = (await loadSchoolsResilient()).filter(function(s) { return !s.is_suspended; });
     var teachers = await countProfiles('teacher');
@@ -1189,6 +1249,9 @@
     var host = document.getElementById('adminUsersList');
     if (!host) return;
     var schoolId = document.getElementById('adminsSchoolFilter') ? document.getElementById('adminsSchoolFilter').value : '';
+    if (!isSuperAdmin()) {
+      schoolId = adminInstitutionId();
+    }
     var q = supabaseClient.from(CONFIG.tables.profiles).select(PROFILE_SELECT).in('rol', ['admin', 'teacher']).eq('is_active', true).order('nombre_completo');
     if (schoolId) q = q.eq('institution_id', schoolId);
     var res = await q;
@@ -1200,6 +1263,7 @@
   }
 
   async function createAdminTeacher() {
+    if (!isSuperAdmin()) return toast('Not authorized', 'danger');
     var name = String((document.getElementById('newAdminName') || {}).value || '').trim();
     var doc = String((document.getElementById('newAdminDoc') || {}).value || '').trim();
     var pin = String((document.getElementById('newAdminPin') || {}).value || '').trim();
@@ -1232,6 +1296,11 @@
     var host = document.getElementById('institutionsList');
     if (!host) return;
     state.schools = await loadSchoolsResilient();
+    if (!isSuperAdmin()) {
+      host.innerHTML = '<div class="alert alert-warning">Not authorized.</div>';
+      await fillSchoolSelectors();
+      return;
+    }
     state.selectedSchoolId = state.selectedSchoolId || (state.schools[0] ? state.schools[0].id : null);
     await fillSchoolSelectors();
     var cards = [];

@@ -13,7 +13,6 @@
     if (!user || typeof user !== 'object') return false;
     if (!user.id || !user.rol || !ROLE_SET[String(user.rol)]) return false;
     if (!user.documento_id || typeof user.documento_id !== 'string') return false;
-    if (!user.pin || !/^\d{4,12}$/.test(String(user.pin))) return false;
     return true;
   }
 
@@ -38,7 +37,7 @@
 
       client
         .from(profilesTable)
-        .select('id, rol, documento_id, pin, is_active')
+        .select('id, rol, documento_id, is_active')
         .eq('id', user.id)
         .maybeSingle()
         .then(function(res) {
@@ -47,7 +46,6 @@
           if (row.is_active === false) return invalidateSession(redirectTo);
           if (String(row.rol || '') !== String(user.rol || '')) return invalidateSession(redirectTo);
           if (String(row.documento_id || '') !== String(user.documento_id || '')) return invalidateSession(redirectTo);
-          if (String(row.pin || '') !== String(user.pin || '')) return invalidateSession(redirectTo);
         })
         .catch(function() {
           // Network failures should not force logout here.

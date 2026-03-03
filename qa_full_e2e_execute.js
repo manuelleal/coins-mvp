@@ -447,7 +447,7 @@ async function testResponsiveStudentSecurityResilience(report) {
 
   const spoof = await pS.evaluate(() => {
     try {
-      localStorage.setItem('lingoCoins_user', JSON.stringify({ id: 'x', rol: 'super_admin', documento_id: 'x', pin: '1234' }));
+      localStorage.setItem('lingoCoins_user', JSON.stringify({ id: 'x', rol: 'super_admin', documento_id: 'x' }));
       return 'set';
     } catch (e) { return e.message || String(e); }
   });

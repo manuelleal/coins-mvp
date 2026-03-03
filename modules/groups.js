@@ -1,6 +1,6 @@
 (function() {
   var state = { user: null, schoolId: '', expanded: {} };
-  var PROFILE_SELECT = 'id,nombre_completo,documento_id,pin,rol,grupo,monedas,is_active,account_locked,institution_id,last_login_at,teacher_credits,force_password_reset';
+  var PROFILE_SELECT = 'id,nombre_completo,documento_id,rol,grupo,monedas,is_active,account_locked,institution_id,last_login_at,teacher_credits,force_password_reset';
 
   function esc(v) { return UI.escapeHtml(v == null ? '' : String(v)); }
 

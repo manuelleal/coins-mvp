@@ -149,6 +149,15 @@
                         <option value="">Select group</option>
                     </select>
                 </div>
+                <div class="mb-3" style="max-width: 280px;">
+                    <label class="form-label">Session duration:</label>
+                    <select id="attendanceDurationMinutes" class="form-select">
+                        <option value="30">30 minutes</option>
+                        <option value="60">60 minutes</option>
+                        <option value="90">90 minutes</option>
+                        <option value="120" selected>120 minutes</option>
+                    </select>
+                </div>
                 <button type="button" class="btn btn-primary mb-2" id="btnGenerateQR">Generate Attendance Session (QR + code)</button>
                 <div id="qrError" class="alert alert-danger mt-2" style="display: none;"></div>
                 <div id="qrcode"></div>
@@ -168,7 +177,35 @@
                     <h6 class="mb-2">Session attendance (last 30 days)</h6>
                     <div id="attendanceSessionSummary"><p class="text-muted small">Select a group to see attended vs absent by session.</p></div>
                 </div>
+                <div class="mt-3 glass-panel" style="padding:1rem;">
+                    <h6 class="mb-2">Manual check-in by teacher</h6>
+                    <p class="small text-muted mb-2">Use this if a student could not scan/register. It records attendance for today.</p>
+                    <div class="d-flex gap-2 flex-wrap align-items-end">
+                        <div style="min-width:240px;">
+                            <label class="form-label small mb-1">Student</label>
+                            <select id="manualAttendanceStudent" class="form-select">
+                                <option value="">Select student</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" id="btnManualAttendanceAdd">Register student attendance</button>
+                    </div>
+                    <div id="manualAttendanceStatus" class="small mt-2"></div>
+                </div>
                 <button type="button" class="btn btn-success mt-2" id="btnExportCSV">Export today's attendance (CSV)</button>
+                <div class="mt-3 glass-panel" style="padding:1rem;">
+                    <h6 class="mb-2">Export attendance by date range</h6>
+                    <div class="d-flex gap-2 flex-wrap align-items-end">
+                        <div>
+                            <label class="form-label small mb-1">From</label>
+                            <input type="date" id="attendanceExportFrom" class="form-control">
+                        </div>
+                        <div>
+                            <label class="form-label small mb-1">To</label>
+                            <input type="date" id="attendanceExportTo" class="form-control">
+                        </div>
+                        <button type="button" class="btn btn-outline-success" id="btnExportAttendanceRange">Export range CSV</button>
+                    </div>
+                </div>
             </div>
 
             <!-- VIEW: Groups -->
@@ -212,12 +249,12 @@
                             <option value="">Select target group</option>
                         </select>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="small badge-role" style="display:inline-flex;">Step 3: Build Questions</div>
-                        <h6 class="mb-0">Questions</h6>
-                        <button type="button" class="btn btn-outline-primary btn-sm" id="btnAddChallengeQuestion"><i class="bi bi-plus-circle"></i> Add Question</button>
+                    <div class="challenge-questions-counter">
+                        <span>&#x1F4CB; Challenge Questions</span>
+                        <span class="counter-num" id="challengeQuestionCount">0 questions</span>
                     </div>
                     <div id="challengeQuestionsBuilder"></div>
+                    <button type="button" class="btn btn-outline-warning w-100 mt-2 mb-3" id="btnAddChallengeQuestion" style="position:sticky;bottom:16px;z-index:10;font-size:15px;font-weight:600;">&#x2295; Add Question</button>
                     <div class="d-flex gap-2 flex-wrap align-items-center">
                         <button type="button" class="btn btn-primary" id="btnCreateChallenge">Create Challenge</button>
                         <span class="text-muted small">or</span>
@@ -874,9 +911,12 @@ document.addEventListener('DOMContentLoaded', function() {
     var challengeBuilderState = [];
 
     function normalizeQuestionTypeAdmin(type) {
-        var t = String(type || 'open').trim().toLowerCase();
-        if (t === 'true/false' || t === 'boolean') return 'true_false';
-        if (t === 'multiple-choice' || t === 'mcq') return 'multiple_choice';
+        var t = String(type || 'open').trim().toLowerCase().replace(/[\s-]/g, '_');
+        if (t === 'true/false' || t === 'boolean' || t === 'true_false') return 'true_false';
+        if (t === 'multiple_choice' || t === 'multiple-choice' || t === 'mcq') return 'multiple_choice';
+        if (t === 'multiple_select' || t === 'multiple-select') return 'multiple_select';
+        if (t === 'fill_blank' || t === 'fill_in_blank' || t === 'fillinblank' || t === 'fill_in_the_blank' || t === 'fill') return 'fill_blank';
+        if (t === 'matching') return 'matching';
         return t || 'open';
     }
 
@@ -887,16 +927,17 @@ document.addEventListener('DOMContentLoaded', function() {
             question_text: '',
             options: [],
             correct_answer: '',
-            matching_pairs_text: ''
+            matching_pairs_text: '',
+            _expanded: true
         };
         if (qType === 'true_false') {
             model.options = ['True', 'False'];
             model.correct_answer = 'true';
         } else if (qType === 'multiple_choice') {
-            model.options = ['Option A', 'Option B', 'Option C', 'Option D'];
-            model.correct_answer = 'Option A';
+            model.options = ['', '', '', ''];
+            model.correct_answer = '';
         } else if (qType === 'multiple_select') {
-            model.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+            model.options = ['', '', '', ''];
         }
         return model;
     }
@@ -913,77 +954,287 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!['true', 'false'].includes(String(model.correct_answer).toLowerCase())) model.correct_answer = 'true';
         }
         if ((model.question_type === 'multiple_choice' || model.question_type === 'multiple_select') && model.options.length < 2) {
-            model.options = ['Option A', 'Option B', 'Option C', 'Option D'];
+            model.options = ['', '', '', ''];
         }
         return model;
     }
 
-    function updateQuestionOrderLabels() {
-        var cards = document.querySelectorAll('.question-builder-card');
-        cards.forEach(function(card, idx) {
-            var badge = card.querySelector('[data-question-order]');
-            if (badge) badge.textContent = 'Question ' + (idx + 1);
-        });
+    var _typeLabels = {
+        open: '\uD83D\uDCAC Open Answer',
+        true_false: '\u2705 True / False',
+        multiple_choice: '\u2B55 Multiple Choice',
+        multiple_select: '\u2611\uFE0F Multiple Select',
+        matching: '\uD83D\uDD17 Matching Pairs',
+        fill_blank: '\uD83D\uDCDD Fill in the Blank'
+    };
+
+    function updateQuestionCount() {
+        var el = document.getElementById('challengeQuestionCount');
+        if (el) el.textContent = challengeBuilderState.length + ' question' + (challengeBuilderState.length !== 1 ? 's' : '') + ' added';
     }
 
     function renderChallengeBuilder() {
         var wrap = document.getElementById('challengeQuestionsBuilder');
         if (!wrap) return;
         if (!challengeBuilderState.length) challengeBuilderState = [defaultChallengeQuestion('multiple_choice')];
+
         wrap.innerHTML = challengeBuilderState.map(function(q, idx) {
             var qType = normalizeQuestionTypeAdmin(q.question_type);
-            var removeBtn = challengeBuilderState.length > 1
-                ? '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeChallengeQuestion(' + idx + ')"><i class="bi bi-trash"></i> Delete</button>'
-                : '';
-            var optionsBlock = '';
+            var isExpanded = !!q._expanded;
+            var preview = String(q.question_text || '').trim().substring(0, 50) || '(no question text)';
+            var typeLabel = _typeLabels[qType] || qType;
+            var expandedClass = isExpanded ? ' expanded' : '';
+
+            // --- Header ---
+            var headerHtml = '<div class="question-accordion-header" data-qa-toggle="' + idx + '">' +
+                '<div class="qa-left">' +
+                '<strong>Q' + (idx + 1) + '</strong>' +
+                '<span class="qa-type-badge">' + escapeHtml(typeLabel) + '</span>' +
+                (!isExpanded ? '<span class="qa-preview">' + escapeHtml(preview) + '</span>' : '') +
+                '</div>' +
+                '<div class="qa-actions">' +
+                (challengeBuilderState.length > 1 ? '<button type="button" class="btn btn-sm btn-outline-danger" data-qa-delete="' + idx + '" title="Delete"><i class="bi bi-trash"></i></button>' : '') +
+                '<span class="qa-chevron"><i class="bi bi-chevron-down"></i></span>' +
+                '</div></div>';
+
+            // --- Body ---
+            var bodyHtml = '<div class="question-accordion-body">';
+            bodyHtml += '<div class="mb-3"><label class="form-label">Question Type</label>' +
+                '<select class="form-select" data-qa-type="' + idx + '">' +
+                '<option value="open"' + (qType === 'open' ? ' selected' : '') + '>\uD83D\uDCAC Open Answer</option>' +
+                '<option value="true_false"' + (qType === 'true_false' ? ' selected' : '') + '>\u2705 True / False</option>' +
+                '<option value="multiple_choice"' + (qType === 'multiple_choice' ? ' selected' : '') + '>\u2B55 Multiple Choice</option>' +
+                '<option value="multiple_select"' + (qType === 'multiple_select' ? ' selected' : '') + '>\u2611\uFE0F Multiple Select</option>' +
+                '<option value="matching"' + (qType === 'matching' ? ' selected' : '') + '>\uD83D\uDD17 Matching Pairs</option>' +
+                '<option value="fill_blank"' + (qType === 'fill_blank' ? ' selected' : '') + '>\uD83D\uDCDD Fill in the Blank</option>' +
+                '</select></div>';
+
+            bodyHtml += '<div class="mb-3"><label class="form-label">Question</label>' +
+                '<textarea class="form-control" rows="2" placeholder="Write your question..." data-qa-text="' + idx + '">' + escapeHtml(q.question_text || '') + '</textarea></div>';
+
             if (qType === 'true_false') {
-                optionsBlock = '<div class="mb-2"><label class="form-label fw-bold">Options</label><div class="small text-muted">True / False (fixed)</div></div>' +
-                    '<div class="mb-2"><label class="form-label fw-bold">Correct Answer</label><select class="form-select" onchange="updateQuestionCorrect(' + idx + ', this.value)"><option value="true" ' + (String(q.correct_answer).toLowerCase() === 'true' ? 'selected' : '') + '>True</option><option value="false" ' + (String(q.correct_answer).toLowerCase() === 'false' ? 'selected' : '') + '>False</option></select></div>';
+                bodyHtml += '<div class="mb-3"><label class="form-label">Correct Answer</label>' +
+                    '<select class="form-select" data-qa-correct="' + idx + '">' +
+                    '<option value="true"' + (String(q.correct_answer).toLowerCase() === 'true' ? ' selected' : '') + '>True</option>' +
+                    '<option value="false"' + (String(q.correct_answer).toLowerCase() === 'false' ? ' selected' : '') + '>False</option>' +
+                    '</select></div>';
             } else if (qType === 'multiple_choice') {
-                optionsBlock = '<div class="mb-2"><label class="form-label fw-bold">Options</label>' + q.options.map(function(opt, oIdx) {
-                    var label = 'Option ' + String.fromCharCode(65 + oIdx);
-                    return '<div class="input-group input-group-sm mb-1"><span class="input-group-text">' + label + '</span><input type="text" class="form-control" value="' + escapeAttr(opt || '') + '" oninput="updateQuestionOption(' + idx + ',' + oIdx + ', this.value)"><button type="button" class="btn btn-outline-danger" onclick="removeQuestionOption(' + idx + ',' + oIdx + ')" ' + (q.options.length <= 2 ? 'disabled' : '') + '><i class="bi bi-x"></i></button></div>';
-                }).join('') + '<button type="button" class="btn btn-outline-secondary btn-sm" onclick="addQuestionOption(' + idx + ')">+ Add option</button></div>' +
-                '<div class="mb-2"><label class="form-label fw-bold">Correct Answer</label><select class="form-select" onchange="updateQuestionCorrect(' + idx + ', this.value)">' + q.options.map(function(opt) {
-                    var safe = String(opt || '').trim();
-                    return '<option value="' + escapeAttr(safe) + '" ' + (String(q.correct_answer) === safe ? 'selected' : '') + '>' + escapeHtml(safe || '(empty)') + '</option>';
-                }).join('') + '</select></div>';
+                bodyHtml += '<div class="mb-3"><label class="form-label">Options</label>';
+                q.options.forEach(function(opt, oIdx) {
+                    bodyHtml += '<div class="option-row"><input type="text" class="form-control" value="' + escapeAttr(opt || '') + '" placeholder="Type option here..." data-qa-opt="' + idx + '" data-opt-idx="' + oIdx + '">' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger" data-qa-rmopt="' + idx + '" data-opt-idx="' + oIdx + '"' + (q.options.length <= 2 ? ' disabled' : '') + '><i class="bi bi-x"></i></button></div>';
+                });
+                bodyHtml += '<button type="button" class="btn btn-outline-secondary btn-sm mt-1" data-qa-addopt="' + idx + '">+ Add option</button></div>';
+                bodyHtml += '<div class="mb-3"><label class="form-label">Correct Answer</label>' +
+                    '<select class="form-select" data-qa-correct="' + idx + '">' +
+                    '<option value="">Select correct answer...</option>' +
+                    q.options.map(function(opt) {
+                        var safe = String(opt || '').trim();
+                        var correctLower = String(q.correct_answer || '').trim().toLowerCase();
+                        var isSelected = safe && safe.toLowerCase() === correctLower;
+                        return '<option value="' + escapeAttr(safe) + '"' + (isSelected ? ' selected' : '') + '>' + escapeHtml(safe || '(empty)') + '</option>';
+                    }).join('') + '</select></div>';
             } else if (qType === 'multiple_select') {
                 var correctSelected = parseChallengeOptions(q.correct_answer || '');
-                optionsBlock = '<div class="mb-2"><label class="form-label fw-bold">Options</label>' + q.options.map(function(opt, oIdx) {
-                    var label = 'Option ' + String.fromCharCode(65 + oIdx);
-                    return '<div class="input-group input-group-sm mb-1"><span class="input-group-text">' + label + '</span><input type="text" class="form-control" value="' + escapeAttr(opt || '') + '" oninput="updateQuestionOption(' + idx + ',' + oIdx + ', this.value)"><button type="button" class="btn btn-outline-danger" onclick="removeQuestionOption(' + idx + ',' + oIdx + ')" ' + (q.options.length <= 2 ? 'disabled' : '') + '><i class="bi bi-x"></i></button></div>';
-                }).join('') + '<button type="button" class="btn btn-outline-secondary btn-sm" onclick="addQuestionOption(' + idx + ')">+ Add option</button></div>' +
-                '<div class="mb-2"><label class="form-label fw-bold">Correct Answers</label><div class="d-flex flex-column gap-1">' + q.options.map(function(opt) {
+                var correctSelectedNorm = correctSelected.map(function(x) { return String(x || '').trim().toLowerCase(); });
+                bodyHtml += '<div class="mb-3"><label class="form-label">Options</label>';
+                q.options.forEach(function(opt, oIdx) {
+                    bodyHtml += '<div class="option-row"><input type="text" class="form-control" value="' + escapeAttr(opt || '') + '" placeholder="Type option here..." data-qa-opt="' + idx + '" data-opt-idx="' + oIdx + '">' +
+                        '<button type="button" class="btn btn-sm btn-outline-danger" data-qa-rmopt="' + idx + '" data-opt-idx="' + oIdx + '"' + (q.options.length <= 2 ? ' disabled' : '') + '><i class="bi bi-x"></i></button></div>';
+                });
+                bodyHtml += '<button type="button" class="btn btn-outline-secondary btn-sm mt-1" data-qa-addopt="' + idx + '">+ Add option</button></div>';
+                bodyHtml += '<div class="mb-3"><label class="form-label">Correct Answers</label><div class="d-flex flex-column gap-1" data-qa-mscorrect-wrap="' + idx + '">';
+                q.options.forEach(function(opt) {
                     var safeOpt = String(opt || '').trim();
-                    if (!safeOpt) return '';
-                    var checked = correctSelected.includes(safeOpt) ? 'checked' : '';
-                    return '<label class="small"><input type="checkbox" ' + checked + ' onchange="toggleQuestionMultiCorrect(' + idx + ',\'' + escapeAttr(safeOpt) + '\', this.checked)"> ' + escapeHtml(safeOpt) + '</label>';
-                }).join('') + '</div><div class="form-text">Select all valid options (exact set required).</div></div>';
+                    if (!safeOpt) return;
+                    var checked = correctSelectedNorm.includes(safeOpt.toLowerCase()) ? ' checked' : '';
+                    bodyHtml += '<label class="small" style="font-size:15px;display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox"' + checked + ' data-qa-mscorrect="' + idx + '" data-opt-val="' + escapeAttr(safeOpt) + '"> ' + escapeHtml(safeOpt) + '</label>';
+                });
+                bodyHtml += '</div><div class="form-text" style="font-size:13px;">Select all correct options.</div></div>';
             } else if (qType === 'matching') {
-                optionsBlock = '<div class="mb-2"><label class="form-label fw-bold">Correct Answer</label><textarea class="form-control" rows="3" placeholder="One pair per line: Term=Definition" oninput="updateQuestionPairs(' + idx + ', this.value)">' + escapeHtml(q.matching_pairs_text || '') + '</textarea></div>';
+                bodyHtml += '<div class="mb-3"><label class="form-label">Matching Pairs</label>' +
+                    '<textarea class="form-control" rows="3" placeholder="One pair per line: Term = Definition" data-qa-pairs="' + idx + '">' + escapeHtml(q.matching_pairs_text || '') + '</textarea>' +
+                    '<div class="form-text" style="font-size:13px;">e.g. dog = perro</div></div>';
             } else if (qType === 'fill_blank') {
-                optionsBlock = '<div class="mb-2"><label class="form-label fw-bold">Correct Answer</label><input type="text" class="form-control" value="' + escapeAttr(q.correct_answer || '') + '" placeholder="Accepted blanks, separated by comma" oninput="updateQuestionCorrect(' + idx + ', this.value)"></div>';
+                bodyHtml += '<div class="mb-3"><label class="form-label">Accepted Answers</label>' +
+                    '<input type="text" class="form-control" value="' + escapeAttr(q.correct_answer || '') + '" placeholder="Type correct answer(s), separated by comma" data-qa-correct="' + idx + '"></div>' +
+                    '<div class="form-text" style="font-size:13px;">e.g. is, Is, IS — all are accepted</div>';
             } else {
-                optionsBlock = '<div class="mb-2"><label class="form-label fw-bold">Correct Answer</label><input type="text" class="form-control" value="' + escapeAttr(q.correct_answer || '') + '" placeholder="Accepted answer(s), separated by comma" oninput="updateQuestionCorrect(' + idx + ', this.value)"></div>';
+                bodyHtml += '<div class="mb-3"><label class="form-label">Accepted Answers</label>' +
+                    '<input type="text" class="form-control" value="' + escapeAttr(q.correct_answer || '') + '" placeholder="Type correct answer(s), separated by comma" data-qa-correct="' + idx + '"></div>';
             }
-            return '<div class="question-builder-card"><div class="card-title-row"><strong data-question-order>Question ' + (idx + 1) + '</strong>' + removeBtn + '</div>' +
-                '<div class="mb-2"><label class="form-label fw-bold">Question Type</label><select class="form-select" onchange="updateQuestionType(' + idx + ', this.value)">' +
-                '<option value="open" ' + (qType === 'open' ? 'selected' : '') + '>Open Answer</option>' +
-                '<option value="true_false" ' + (qType === 'true_false' ? 'selected' : '') + '>True / False</option>' +
-                '<option value="multiple_choice" ' + (qType === 'multiple_choice' ? 'selected' : '') + '>Multiple Choice</option>' +
-                '<option value="multiple_select" ' + (qType === 'multiple_select' ? 'selected' : '') + '>Multiple Select</option>' +
-                '<option value="matching" ' + (qType === 'matching' ? 'selected' : '') + '>Matching</option>' +
-                '<option value="fill_blank" ' + (qType === 'fill_blank' ? 'selected' : '') + '>Fill in the Blank</option>' +
-                '</select></div>' +
-                '<div class="mb-2"><label class="form-label fw-bold">Question</label><textarea class="form-control" rows="2" placeholder="Write the question" oninput="updateQuestionText(' + idx + ', this.value)">' + escapeHtml(q.question_text || '') + '</textarea></div>' +
-                optionsBlock +
-                '</div>';
+            bodyHtml += '</div>';
+
+            return '<div class="question-accordion-card' + expandedClass + '" data-qa-idx="' + idx + '">' + headerHtml + bodyHtml + '</div>';
         }).join('');
-        updateQuestionOrderLabels();
+
+        updateQuestionCount();
+        bindBuilderEvents(wrap);
     }
 
+    function bindBuilderEvents(wrap) {
+        // Toggle accordion
+        wrap.querySelectorAll('[data-qa-toggle]').forEach(function(header) {
+            header.addEventListener('click', function(e) {
+                if (e.target.closest('[data-qa-delete]')) return;
+                var idx = parseInt(header.getAttribute('data-qa-toggle'), 10);
+                challengeBuilderState[idx]._expanded = !challengeBuilderState[idx]._expanded;
+                var card = header.closest('.question-accordion-card');
+                if (card) card.classList.toggle('expanded');
+            });
+        });
+        // Delete question
+        wrap.querySelectorAll('[data-qa-delete]').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var idx = parseInt(btn.getAttribute('data-qa-delete'), 10);
+                challengeBuilderState.splice(idx, 1);
+                if (!challengeBuilderState.length) challengeBuilderState = [defaultChallengeQuestion('multiple_choice')];
+                renderChallengeBuilder();
+            });
+        });
+        // Type change
+        wrap.querySelectorAll('[data-qa-type]').forEach(function(sel) {
+            sel.addEventListener('change', function() {
+                var idx = parseInt(sel.getAttribute('data-qa-type'), 10);
+                var next = defaultChallengeQuestion(sel.value);
+                next.question_text = challengeBuilderState[idx].question_text || '';
+                challengeBuilderState[idx] = next;
+                renderChallengeBuilder();
+            });
+        });
+        // Question text (no re-render)
+        wrap.querySelectorAll('[data-qa-text]').forEach(function(ta) {
+            ta.addEventListener('input', function() {
+                var idx = parseInt(ta.getAttribute('data-qa-text'), 10);
+                challengeBuilderState[idx].question_text = String(ta.value || '');
+            });
+        });
+        // Option text — update model on keystroke, update correct-answer dropdown on blur (non-destructive)
+        wrap.querySelectorAll('[data-qa-opt]').forEach(function(inp) {
+            inp.addEventListener('input', function() {
+                var idx = parseInt(inp.getAttribute('data-qa-opt'), 10);
+                var oIdx = parseInt(inp.getAttribute('data-opt-idx'), 10);
+                var oldValue = String(challengeBuilderState[idx].options[oIdx] || '').trim();
+                var nextValue = String(inp.value || '');
+                challengeBuilderState[idx].options[oIdx] = nextValue;
+                var q = challengeBuilderState[idx];
+                var qType = normalizeQuestionTypeAdmin(q.question_type);
+                if (qType === 'multiple_choice' && oldValue && String(q.correct_answer).trim().toLowerCase() === oldValue.toLowerCase()) {
+                    q.correct_answer = nextValue.trim();
+                }
+                if (qType === 'multiple_select' && oldValue && oldValue !== nextValue.trim()) {
+                    var selected = parseChallengeOptions(q.correct_answer || '');
+                    selected = selected.map(function(x) { return x.toLowerCase() === oldValue.toLowerCase() ? nextValue.trim() : x; }).filter(Boolean);
+                    q.correct_answer = selected.join(',');
+                }
+            });
+            // On blur, surgically update correct-answer UI without full re-render
+            inp.addEventListener('blur', function() {
+                var idx = parseInt(inp.getAttribute('data-qa-opt'), 10);
+                var q = challengeBuilderState[idx];
+                var qType = normalizeQuestionTypeAdmin(q.question_type);
+                var card = wrap.querySelector('[data-qa-idx="' + idx + '"]');
+                if (!card) return;
+                if (qType === 'multiple_choice') {
+                    var sel = card.querySelector('[data-qa-correct="' + idx + '"]');
+                    if (sel) {
+                        var currentCorrectLower = String(q.correct_answer || '').trim().toLowerCase();
+                        sel.innerHTML = '<option value="">Select correct answer...</option>' +
+                            q.options.map(function(opt) {
+                                var safe = String(opt || '').trim();
+                                var isSelected = safe && safe.toLowerCase() === currentCorrectLower;
+                                return '<option value="' + escapeAttr(safe) + '"' + (isSelected ? ' selected' : '') + '>' + escapeHtml(safe || '(empty)') + '</option>';
+                            }).join('');
+                    }
+                }
+                if (qType === 'multiple_select') {
+                    var correctSelected = parseChallengeOptions(q.correct_answer || '');
+                    var correctSelectedNorm = correctSelected.map(function(x) { return String(x || '').trim().toLowerCase(); });
+                    var container = card.querySelector('[data-qa-mscorrect-wrap="' + idx + '"]');
+                    if (container) {
+                        container.innerHTML = q.options.map(function(opt) {
+                            var safeOpt = String(opt || '').trim();
+                            if (!safeOpt) return '';
+                            var checked = correctSelectedNorm.includes(safeOpt.toLowerCase()) ? ' checked' : '';
+                            return '<label class="small" style="font-size:15px;display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox"' + checked + ' data-qa-mscorrect="' + idx + '" data-opt-val="' + escapeAttr(safeOpt) + '"> ' + escapeHtml(safeOpt) + '</label>';
+                        }).join('');
+                        // Re-bind checkbox events
+                        container.querySelectorAll('[data-qa-mscorrect]').forEach(function(cb) {
+                            cb.addEventListener('change', function() {
+                                var optVal = cb.getAttribute('data-opt-val') || '';
+                                var selected = parseChallengeOptions(q.correct_answer || '');
+                                var optNorm = optVal.toLowerCase().trim();
+                                if (cb.checked) {
+                                    var exists = selected.some(function(x) { return String(x || '').trim().toLowerCase() === optNorm; });
+                                    if (!exists) selected.push(optVal);
+                                } else {
+                                    selected = selected.filter(function(x) { return String(x || '').trim().toLowerCase() !== optNorm; });
+                                }
+                                q.correct_answer = selected.join(',');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+        // Add option
+        wrap.querySelectorAll('[data-qa-addopt]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var idx = parseInt(btn.getAttribute('data-qa-addopt'), 10);
+                challengeBuilderState[idx].options.push('');
+                renderChallengeBuilder();
+            });
+        });
+        // Remove option
+        wrap.querySelectorAll('[data-qa-rmopt]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var idx = parseInt(btn.getAttribute('data-qa-rmopt'), 10);
+                var oIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
+                challengeBuilderState[idx].options.splice(oIdx, 1);
+                renderChallengeBuilder();
+            });
+        });
+        // Correct answer (select or input)
+        wrap.querySelectorAll('[data-qa-correct]').forEach(function(el) {
+            el.addEventListener('change', function() {
+                var idx = parseInt(el.getAttribute('data-qa-correct'), 10);
+                challengeBuilderState[idx].correct_answer = String(el.value == null ? '' : el.value);
+            });
+            el.addEventListener('input', function() {
+                var idx = parseInt(el.getAttribute('data-qa-correct'), 10);
+                challengeBuilderState[idx].correct_answer = String(el.value == null ? '' : el.value);
+            });
+        });
+        // Multiple select checkboxes
+        wrap.querySelectorAll('[data-qa-mscorrect]').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                var idx = parseInt(cb.getAttribute('data-qa-mscorrect'), 10);
+                var optVal = cb.getAttribute('data-opt-val') || '';
+                var q = challengeBuilderState[idx];
+                var selected = parseChallengeOptions(q.correct_answer || '');
+                var optNorm = optVal.toLowerCase().trim();
+                if (cb.checked) {
+                    var exists = selected.some(function(x) { return String(x || '').trim().toLowerCase() === optNorm; });
+                    if (!exists) selected.push(optVal);
+                } else {
+                    selected = selected.filter(function(x) { return String(x || '').trim().toLowerCase() !== optNorm; });
+                }
+                q.correct_answer = selected.join(',');
+            });
+        });
+        // Matching pairs
+        wrap.querySelectorAll('[data-qa-pairs]').forEach(function(ta) {
+            ta.addEventListener('input', function() {
+                var idx = parseInt(ta.getAttribute('data-qa-pairs'), 10);
+                challengeBuilderState[idx].matching_pairs_text = String(ta.value || '');
+            });
+        });
+    }
+
+    // Keep global refs for backward compat (AI generator uses these)
     window.addChallengeQuestion = function(type) {
+        challengeBuilderState.forEach(function(q) { q._expanded = false; });
         challengeBuilderState.push(defaultChallengeQuestion(type || 'multiple_choice'));
         renderChallengeBuilder();
     };
@@ -1002,19 +1253,7 @@ document.addEventListener('DOMContentLoaded', function() {
         challengeBuilderState[index].question_text = String(value || '');
     };
     window.updateQuestionOption = function(index, optIndex, value) {
-        var oldValue = String(challengeBuilderState[index].options[optIndex] || '').trim();
-        var nextValue = String(value || '');
         challengeBuilderState[index].options[optIndex] = String(value || '');
-        var q = challengeBuilderState[index];
-        var qType = normalizeQuestionTypeAdmin(q.question_type);
-        if (qType === 'multiple_choice' && oldValue && String(q.correct_answer).trim() === oldValue) {
-            q.correct_answer = nextValue.trim();
-        }
-        if (qType === 'multiple_select' && oldValue && oldValue !== nextValue.trim()) {
-            var selected = parseChallengeOptions(q.correct_answer || '');
-            selected = selected.map(function(x) { return x === oldValue ? nextValue.trim() : x; }).filter(Boolean);
-            q.correct_answer = selected.join(',');
-        }
     };
     window.addQuestionOption = function(index) {
         challengeBuilderState[index].options.push('');
@@ -1027,15 +1266,17 @@ document.addEventListener('DOMContentLoaded', function() {
     window.updateQuestionCorrect = function(index, value) {
         challengeBuilderState[index].correct_answer = String(value == null ? '' : value);
     };
-    window.toggleQuestionMultiCorrect = function(index, optionLabel, checked) {
+    window.toggleQuestionMultiCorrect = function(index, optionValue, checked) {
         var q = challengeBuilderState[index];
         var selected = parseChallengeOptions(q.correct_answer || '');
-        var opt = String(optionLabel || '').trim();
+        var opt = String(optionValue || '').trim();
+        var optNorm = opt.toLowerCase();
         if (!opt) return;
         if (checked) {
-            if (!selected.includes(opt)) selected.push(opt);
+            var exists = selected.some(function(x) { return String(x || '').trim().toLowerCase() === optNorm; });
+            if (!exists) selected.push(opt);
         } else {
-            selected = selected.filter(function(x) { return x !== opt; });
+            selected = selected.filter(function(x) { return String(x || '').trim().toLowerCase() !== optNorm; });
         }
         q.correct_answer = selected.join(',');
     };
@@ -1066,9 +1307,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 var options = q.options.map(function(x) { return String(x || '').trim(); }).filter(Boolean);
                 if (options.length < 2) throw new Error('Question ' + (i + 1) + ': add at least 2 options');
                 var correct = String(q.correct_answer || '').trim();
-                if (!correct || !options.includes(correct)) throw new Error('Question ' + (i + 1) + ': correct answer must match one option');
+                var correctLower = correct.toLowerCase();
+                var optionsLower = options.map(function(x) { return x.toLowerCase(); });
+                if (!correct || !optionsLower.includes(correctLower)) throw new Error('Question ' + (i + 1) + ': correct answer must match one option');
+                var matchedOption = options[optionsLower.indexOf(correctLower)];
                 var optionObjects = buildChallengeOptionObjects(options);
-                var correctOption = optionObjects.find(function(opt) { return opt.label === correct; });
+                var correctOption = optionObjects.find(function(opt) { return opt.label.toLowerCase() === correctLower; });
                 if (!correctOption) throw new Error('Question ' + (i + 1) + ': correct answer must match one option');
                 model.payload = { options: optionObjects, correct_answer: correctOption.value };
                 model.correct_answer = correctOption.value;
@@ -1077,11 +1321,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 var multiCorrect = parseChallengeOptions(q.correct_answer || '');
                 if (multiOpts.length < 2) throw new Error('Question ' + (i + 1) + ': add at least 2 options');
                 if (!multiCorrect.length) throw new Error('Question ' + (i + 1) + ': add at least one correct option');
-                var invalidCorrect = multiCorrect.filter(function(x) { return !multiOpts.includes(x); });
+                var multiOptsNorm = multiOpts.map(function(x) { return x.toLowerCase().trim(); });
+                var multiCorrectNorm = multiCorrect.map(function(x) { return x.toLowerCase().trim(); });
+                var invalidCorrect = multiCorrectNorm.filter(function(x) { return !multiOptsNorm.includes(x); });
                 if (invalidCorrect.length) throw new Error('Question ' + (i + 1) + ': correct answers must exist in options');
                 var multiOptionObjects = buildChallengeOptionObjects(multiOpts);
                 var multiValues = multiOptionObjects
-                    .filter(function(opt) { return multiCorrect.includes(opt.label); })
+                    .filter(function(opt) { return multiCorrectNorm.includes(opt.label.toLowerCase().trim()); })
                     .map(function(opt) { return opt.value; });
                 model.payload = { options: multiOptionObjects, correct_answers: multiValues };
                 model.correct_answer = multiValues.join(',');
@@ -1948,10 +2194,146 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- Attendance: group required for QR; today's list ---
+    var ATTENDANCE_DURATION_KEY = 'lingo_attendance_duration_minutes';
+
+    function getAttendanceDurationMinutes() {
+        var select = document.getElementById('attendanceDurationMinutes');
+        var raw = select ? select.value : '';
+        var mins = Math.max(30, Math.min(240, Number(raw) || 120));
+        return mins;
+    }
+
+    function initAttendanceDurationControl() {
+        var select = document.getElementById('attendanceDurationMinutes');
+        if (!select) return;
+        var saved = '';
+        try { saved = localStorage.getItem(ATTENDANCE_DURATION_KEY) || ''; } catch (_) {}
+        if (saved && ['30', '60', '90', '120', '180', '240'].indexOf(String(saved)) !== -1) {
+            select.value = String(saved);
+        }
+        select.addEventListener('change', function() {
+            try { localStorage.setItem(ATTENDANCE_DURATION_KEY, String(select.value || '120')); } catch (_) {}
+        });
+    }
+
+    async function loadAttendanceStudentsForGroup(groupCode) {
+        var sel = document.getElementById('manualAttendanceStudent');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">Select student</option>';
+        if (!groupCode || !user.institution_id) return;
+        try {
+            var res = await supabaseClient
+                .from(CONFIG.tables.profiles)
+                .select('documento_id,nombre_completo')
+                .eq('institution_id', user.institution_id)
+                .eq('rol', 'student')
+                .eq('grupo', groupCode)
+                .eq('is_active', true)
+                .order('nombre_completo', { ascending: true });
+            if (res.error) throw res.error;
+            (res.data || []).forEach(function(s) {
+                var doc = String(s.documento_id || '').trim();
+                if (!doc) return;
+                var opt = document.createElement('option');
+                opt.value = doc;
+                opt.textContent = (s.nombre_completo || doc) + ' (' + doc + ')';
+                sel.appendChild(opt);
+            });
+        } catch (e) {
+            console.error('[ATTENDANCE_MANUAL_STUDENTS]', e);
+        }
+    }
+
+    async function manualTeacherAttendanceCheckin() {
+        var groupCode = getSelectedQRGroup();
+        var sel = document.getElementById('manualAttendanceStudent');
+        var statusEl = document.getElementById('manualAttendanceStatus');
+        var btn = document.getElementById('btnManualAttendanceAdd');
+        var studentDoc = String(sel && sel.value || '').trim();
+
+        if (!groupCode) {
+            if (statusEl) {
+                statusEl.className = 'small mt-2 text-danger';
+                statusEl.textContent = 'Select a group first.';
+            }
+            return;
+        }
+        if (!studentDoc) {
+            if (statusEl) {
+                statusEl.className = 'small mt-2 text-danger';
+                statusEl.textContent = 'Select a student first.';
+            }
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Registering...';
+        }
+        if (statusEl) {
+            statusEl.className = 'small mt-2 text-info';
+            statusEl.textContent = 'Saving manual attendance...';
+        }
+
+        try {
+            var already = await hasAttendanceToday(studentDoc);
+            if (already) {
+                if (statusEl) {
+                    statusEl.className = 'small mt-2 text-warning';
+                    statusEl.textContent = 'This student already has attendance today.';
+                }
+                return;
+            }
+
+            await insertAttendance(studentDoc, groupCode, null, null, {
+                sessionCode: 'MANUAL',
+                geoStatus: 'manual_teacher'
+            });
+            await awardCoinsForCheckin(studentDoc, null);
+
+            if (statusEl) {
+                statusEl.className = 'small mt-2 text-success';
+                statusEl.textContent = 'Manual attendance registered successfully.';
+            }
+            showToast('Manual attendance recorded', 'success');
+            await window.refreshAttendanceList();
+            if (typeof window.refreshStudents === 'function') {
+                await window.refreshStudents();
+            }
+        } catch (e) {
+            console.error('[ATTENDANCE_MANUAL_ADD]', e);
+            if (statusEl) {
+                statusEl.className = 'small mt-2 text-danger';
+                statusEl.textContent = e.message || 'Could not register attendance.';
+            }
+            showToast('Could not register manual attendance', 'danger');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Register student attendance';
+            }
+        }
+    }
+
+    function initAttendanceRangeDefaults() {
+        var fromEl = document.getElementById('attendanceExportFrom');
+        var toEl = document.getElementById('attendanceExportTo');
+        if (!fromEl || !toEl) return;
+        var today = new Date();
+        var from = new Date();
+        from.setDate(today.getDate() - 7);
+        function fmt(d) {
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+        toEl.value = fmt(today);
+        fromEl.value = fmt(from);
+    }
+
     window.generateQR = function() {
         var g = getSelectedQRGroup();
         if (!g) { document.getElementById('qrError').style.display = 'block'; document.getElementById('qrError').textContent = 'Select a group first.'; return; }
         var btn = document.getElementById('btnGenerateQR');
+        var ttlMinutes = getAttendanceDurationMinutes();
         btn.disabled = true;
         btn.textContent = 'Creating session...';
         document.getElementById('qrError').style.display = 'none';
@@ -1962,7 +2344,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 adminLat: lat,
                 adminLng: lng,
                 createdBy: user.documento_id || user.id,
-                durationMinutes: 30,
+                durationMinutes: ttlMinutes,
                 qrPayload: { g: g, startTime: startTime, geoStatus: geoStatus || 'unknown' }
             }).then(function(sessionRes) {
                 if (!sessionRes.ok || !sessionRes.session) throw new Error(sessionRes.error || 'Could not create attendance session');
@@ -2003,6 +2385,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 });
     };
     document.getElementById('btnGenerateQR').addEventListener('click', window.generateQR);
+    initAttendanceDurationControl();
+    initAttendanceRangeDefaults();
     document.getElementById('btnCopyAttendanceCode').addEventListener('click', function() {
         var input = document.getElementById('manualAttendanceCode');
         if (!input || !input.value) {
@@ -2198,12 +2582,14 @@ document.addEventListener('DOMContentLoaded', function() {
             var time = r.created_at ? new Date(r.created_at).toLocaleTimeString() : '';
             return '<li class="list-group-item d-flex justify-content-between"><span>' + escapeHtml(r.nombre_completo) + '</span><span class="text-muted small">' + time + '</span></li>';
         }).join('') + '</ul>';
+        await loadAttendanceStudentsForGroup(g);
         await loadAttendanceSessionSummary(g);
         if (isTeacherRole) {
             await loadTeacherAbsenceAlerts(g, true);
         }
     };
     document.getElementById('qrGroup').addEventListener('change', window.refreshAttendanceList);
+    document.getElementById('btnManualAttendanceAdd').addEventListener('click', manualTeacherAttendanceCheckin);
 
     document.getElementById('btnExportCSV').addEventListener('click', function() {
         getTodayAttendanceForReport().then(function(rows) {
@@ -2220,6 +2606,43 @@ document.addEventListener('DOMContentLoaded', function() {
             a.click();
             URL.revokeObjectURL(a.href);
         });
+    });
+
+    document.getElementById('btnExportAttendanceRange').addEventListener('click', async function() {
+        var groupCode = getSelectedQRGroup();
+        var fromDate = String(document.getElementById('attendanceExportFrom').value || '').trim();
+        var toDate = String(document.getElementById('attendanceExportTo').value || '').trim();
+        if (!groupCode) {
+            showToast('Select a group first', 'danger');
+            return;
+        }
+        if (!fromDate || !toDate || fromDate > toDate) {
+            showToast('Select a valid date range', 'danger');
+            return;
+        }
+
+        try {
+            var rows = await getAttendanceByGroupDateRange(groupCode, fromDate, toDate);
+            if (!rows.length) {
+                showToast('No attendance in selected date range.', 'danger');
+                return;
+            }
+            var csv = 'Name,Document,Group,Date,Time\n';
+            rows.forEach(function(r) {
+                var time = r.created_at ? new Date(r.created_at).toLocaleTimeString() : '';
+                csv += '"' + String(r.nombre_completo || '').replace(/"/g, '""') + '","' + String(r.student_id || '').replace(/"/g, '""') + '","' + String(r.group_code || '').replace(/"/g, '""') + '","' + String(r.attendance_date || '').replace(/"/g, '""') + '","' + String(time || '').replace(/"/g, '""') + '"\n';
+            });
+            var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'attendance_' + groupCode + '_' + fromDate + '_to_' + toDate + '.csv';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast('Attendance range exported', 'success');
+        } catch (e) {
+            console.error('[ATTENDANCE_EXPORT_RANGE]', e);
+            showToast('Could not export attendance range', 'danger');
+        }
     });
 
     // --- Store: create auctions with group + duration ---

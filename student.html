@@ -177,6 +177,7 @@
             <div id="viewAttendance" class="student-view">
                 <h5 class="mb-2 section-title"><img src="assets/images/icono-asistencia.webp" class="ui-icon" loading="lazy" alt="Attendance">Attendance</h5>
                 <p class="small text-muted mb-3">Scan the QR code shown by your teacher, or enter the daily code manually.</p>
+                <div id="attendanceRiskWarning" class="alert alert-warning mb-3" style="display:none;"></div>
                 <div class="glass-panel mb-3">
                     <h6 class="mb-2">Manual Code Entry</h6>
                     <p class="small text-muted">If your camera doesn't work, type the 6-character code shown on the board.</p>
@@ -809,35 +810,37 @@
 
             var session = sessionResult.session;
             function completeCheckin(lat, lng, geoStatus) {
-                try {
-                    insertAttendance(user.documento_id, session.group_code, lat, lng, {
-                        sessionId: session.id,
-                        sessionCode: code,
-                        geoStatus: geoStatus
-                    }).then(async function() {
+                insertAttendance(user.documento_id, session.group_code, lat, lng, {
+                    sessionId: session.id,
+                    sessionCode: code,
+                    geoStatus: geoStatus
+                }).then(async function() {
                     var award = await awardCoinsForCheckin(user.documento_id, session.starts_at || session.created_at || null);
                     var streakResult = await updateStreak(user.documento_id);
                     var msg = 'Checked in!';
                     if (award.ok && award.coinsAwarded) msg += ' +' + award.coinsAwarded + ' coins!';
                     if (streakResult.ok && streakResult.newStreak) msg += ' Streak: ' + streakResult.newStreak + ' days!';
                     if (geoStatus !== 'ok') msg += ' (GPS tolerant mode)';
-                    statusEl.className = 'mt-2 small text-success'; statusEl.textContent = msg;
+                    statusEl.className = 'mt-2 small text-success';
+                    statusEl.textContent = msg;
                     var updated = await getProfileById(user.id);
-                    if (updated) { user.monedas = updated.monedas; user.current_streak = updated.current_streak; setCoins(updated.monedas); setStreak(updated.current_streak); }
+                    if (updated) {
+                        user.monedas = updated.monedas;
+                        user.current_streak = updated.current_streak;
+                        setCoins(updated.monedas);
+                        setStreak(updated.current_streak);
+                    }
                     document.getElementById('todayStatus').className = 'alert alert-success mb-0';
                     document.getElementById('todayStatus').innerHTML = '<i class="bi bi-check-circle-fill"></i> Checked in today';
                     loadAttendanceHistory();
-                    }).catch(function(e) {
-                        statusEl.className = 'mt-2 small text-danger'; statusEl.textContent = 'Error: ' + (e.message || 'Try again.');
-                    }).finally(function() {
-                        manualCheckinBusy = false;
-                        if (btn) { btn.disabled = false; btn.textContent = 'Check In'; }
-                    });
-                } catch (e) {
-                    statusEl.className = 'mt-2 small text-danger'; statusEl.textContent = 'Error: ' + (e.message || 'Try again.');
+                    loadAttendanceRiskWarning();
+                }).catch(function(e) {
+                    statusEl.className = 'mt-2 small text-danger';
+                    statusEl.textContent = 'Error: ' + (e.message || 'Try again.');
+                }).finally(function() {
                     manualCheckinBusy = false;
                     if (btn) { btn.disabled = false; btn.textContent = 'Check In'; }
-                }
+                });
             }
 
             if (!navigator.geolocation) {
@@ -1068,16 +1071,9 @@
                 var questions = getChallengeQuestionsList(c);
                 var runtime = challengeRuntimeMap[c.id] || {};
                 if (!Array.isArray(runtime.questions) || !runtime.questions.length) runtime.questions = questions;
-                runtime.currentQuestionIndex = Number.isFinite(runtime.currentQuestionIndex) ? runtime.currentQuestionIndex : 0;
-                runtime.attemptsOnCurrentQuestion = Number.isFinite(runtime.attemptsOnCurrentQuestion) ? runtime.attemptsOnCurrentQuestion : 0;
-                runtime.retryPending = !!runtime.retryPending;
-                runtime.currentSubmitBusy = !!runtime.currentSubmitBusy;
-                runtime.retryBusy = !!runtime.retryBusy;
                 runtime.answerMap = runtime.answerMap && typeof runtime.answerMap === 'object' ? runtime.answerMap : {};
-                runtime.chargedRetries = Number(runtime.chargedRetries) || 0;
-                runtime.lastFeedback = runtime.lastFeedback || '';
-                runtime.lastFeedbackTone = runtime.lastFeedbackTone || 'info';
                 challengeRuntimeMap[c.id] = runtime;
+                runtime._challengeObj = c;
                 var winnersInfo = (c.current_winners || 0) + '/' + (c.max_winners || 10);
                 var header = '<div class="d-flex justify-content-between align-items-start mb-1">' +
                     '<strong>' + escapeHtml(c.title || '') + '</strong>' +
@@ -1085,45 +1081,21 @@
                 var intro = (c.description ? '<p class="small text-muted mb-2">' + escapeHtml(c.description) + '</p>' : '');
 
                 if (done) {
-                    var coinsTxt = sub && sub.coins_awarded ? ' · +' + sub.coins_awarded + ' coins' : '';
+                    var coinsTxt = sub && sub.coins_awarded ? ' \u00B7 +' + sub.coins_awarded + ' coins' : '';
                     var isWin = !(sub && sub.is_correct === false);
                     var doneHtml = isWin
-                        ? '<div class="d-flex align-items-center gap-2 mt-2"><span style="font-size:1.5rem;">🏆</span><div><div class="text-success" style="font-weight:700;">Completed!' + coinsTxt + '</div><div class="small text-muted">Challenge conquered</div></div></div>'
-                        : '<div class="d-flex align-items-center gap-2 mt-2"><span style="font-size:1.5rem;">💀</span><div><div class="text-danger" style="font-weight:700;">Incorrect' + coinsTxt + '</div><div class="small text-muted">All retries used</div></div></div>';
+                        ? '<div class="d-flex align-items-center gap-2 mt-2"><span style="font-size:1.5rem;">\uD83C\uDFC6</span><div><div class="text-success" style="font-weight:700;">Completed!' + coinsTxt + '</div><div class="small text-muted">Challenge conquered</div></div></div>'
+                        : '<div class="d-flex align-items-center gap-2 mt-2"><span style="font-size:1.5rem;">\uD83D\uDC80</span><div><div class="text-danger" style="font-weight:700;">Incorrect' + coinsTxt + '</div><div class="small text-muted">All retries used</div></div></div>';
                     return '<div class="challenge-card completed" style="opacity:0.82;">' + header + intro + doneHtml + '</div>';
                 }
 
-                var qIdx = Math.min(runtime.currentQuestionIndex, Math.max(0, runtime.questions.length - 1));
-                runtime.currentQuestionIndex = qIdx;
-                var currentQuestion = runtime.questions[qIdx];
-                var progressPct = Math.round(((qIdx + 1) / Math.max(1, runtime.questions.length)) * 100);
-                var progressTop = '<div class="small text-muted mb-2">Question ' + (qIdx + 1) + ' of ' + runtime.questions.length + '</div>' +
-                    '<div class="progress mb-2" style="height:8px;"><div class="progress-bar" role="progressbar" style="width:' + progressPct + '%" aria-valuenow="' + progressPct + '" aria-valuemin="0" aria-valuemax="100"></div></div>';
-                var questionHtml = '<div class="mb-2"><div class="small text-muted">Question ' + (qIdx + 1) + '</div><label class="form-label mb-1">' + escapeHtml(currentQuestion.question_text || ('Question ' + (qIdx + 1))) + '</label>' +
-                    buildQuestionInputHtml(c.id, qIdx, currentQuestion) + '</div>';
-                var retryHint = runtime.retryPending
-                    ? '<div class="small text-warning mb-2"><i class="bi bi-coin"></i> Incorrect. Retry costs 5 coins.</div>'
-                    : '<div class="small text-muted mb-2">Submit answer for immediate feedback.</div>';
-                var feedbackClass = runtime.lastFeedbackTone === 'success' ? 'text-success' : (runtime.lastFeedbackTone === 'danger' ? 'text-danger' : 'text-info');
-                var feedbackEmoji = '';
-                if (runtime.lastFeedbackTone === 'success') feedbackEmoji = '✅ ';
-                else if (runtime.lastFeedbackTone === 'danger') feedbackEmoji = '❌ ';
-                var feedbackHtml = runtime.lastFeedback
-                    ? '<div class="' + feedbackClass + ' mb-2" style="font-size:0.95rem;font-weight:600;">' + feedbackEmoji + escapeHtml(runtime.lastFeedback) + '</div>'
-                    : '';
-                var submitDisabled = runtime.currentSubmitBusy ? 'disabled' : '';
-                var retryDisabled = runtime.retryPending && runtime.retryBusy ? 'disabled' : '';
-                var submitLabel = runtime.currentSubmitBusy ? 'Checking...' : 'Submit';
-                var retryBtn = runtime.retryPending
-                    ? '<button type="button" class="btn btn-warning btn-sm me-2" style="width:auto;" ' + retryDisabled + ' onclick="doRetryChallengeQuestion(\'' + c.id + '\')">' + (runtime.retryBusy ? 'Charging...' : 'Retry (cost 5 coins)') + '</button>'
-                    : '';
-                var hintBtn = '<button type="button" class="btn btn-outline-warning btn-sm" style="width:auto;" onclick="doDrakoHint(\'' + c.id + '\')">🐉 Hint (2 coins)</button>';
-                var hintArea = runtime.drakoHint ? '<div class="alert alert-warning mt-2 mb-0 small"><strong>🐉 Drako says:</strong> ' + escapeHtml(runtime.drakoHint) + '</div>' : '';
-                return '<div class="challenge-card active-glow">' + header + intro + progressTop + retryHint + feedbackHtml + questionHtml +
-                    '<div class="d-flex gap-2">' + retryBtn + '<button type="button" class="btn btn-primary btn-sm" style="width:auto;" ' + submitDisabled + ' onclick="doSubmitChallenge(\'' + c.id + '\')">' + submitLabel + '</button>' + hintBtn + '</div>' +
-                    hintArea +
-                    '<div class="small text-info mt-2">1st-3rd: 40c · 4th-6th: 20c · 7th-10th: 10c</div>' +
-                    '</div>';
+                var qCount = runtime.questions.length;
+                var estMin = Math.max(1, Math.ceil(qCount * 0.5));
+                return '<div class="challenge-card active-glow">' + header + intro +
+                    '<div class="d-flex justify-content-between align-items-center mt-2">' +
+                    '<span class="small text-muted">' + qCount + ' question' + (qCount !== 1 ? 's' : '') + ' \u00B7 ~' + estMin + ' min</span>' +
+                    '<button type="button" class="btn btn-warning btn-sm" style="width:auto;font-weight:700;" onclick="openChallengeFlow(\'' + c.id + '\')">START \uD83D\uDE80</button>' +
+                    '</div></div>';
             }
 
             var activeCards = [];
@@ -1141,10 +1113,10 @@
 
             activeEl.innerHTML = activeCards.length
                 ? activeCards.join('')
-                : '<div class="text-center py-4"><img src="assets/images/rey-lanzando-monedas.webp" style="width:100px;opacity:0.7;margin-bottom:1rem;" alt="King resting" loading="lazy"><p class="text-muted mb-1" style="font-size:1rem;font-weight:600;">El rey descansa... por ahora.</p><p class="small text-muted">Tu profesor publicará el próximo challenge pronto.<br>Revisa más tarde.</p></div>';
+                : '<div class="text-center py-4"><img src="assets/images/rey-lanzando-monedas.webp" style="width:100px;opacity:0.7;margin-bottom:1rem;" alt="King resting" loading="lazy"><p class="text-muted mb-1" style="font-size:1rem;font-weight:600;">The king rests... for now.</p><p class="small text-muted">Your teacher will publish the next challenge soon.<br>Check back later.</p></div>';
             finishedEl.innerHTML = finishedCards.length
                 ? finishedCards.join('')
-                : '<p class="text-muted small mb-0">Completa tu primer challenge para verlo aquí. 🏆</p>';
+                : '<p class="text-muted small mb-0">Complete your first challenge to see it here. \uD83C\uDFC6</p>';
         }
 
         var challengeSubmitBusyMap = {};
@@ -1193,12 +1165,12 @@
 
         function humanizeError(raw) {
             var msg = String(raw || '').toLowerCase();
-            if (msg.includes('already completed') || msg.includes('already submitted')) return 'Ya completaste este challenge. ¡Bien hecho!';
-            if (msg.includes('retry limit')) return 'Has usado todos tus intentos en este challenge.';
-            if (msg.includes('not enough coins') || msg.includes('could not process retry')) return 'No tienes suficientes monedas para reintentar.';
-            if (msg.includes('max winners')) return 'Este challenge ya tiene todos sus ganadores. ¡Llegaste tarde!';
-            if (msg.includes('no questions')) return 'Este challenge no tiene preguntas. Contacta a tu profesor.';
-            return raw || 'Algo salió mal. Intenta de nuevo.';
+            if (msg.includes('already completed') || msg.includes('already submitted')) return 'You already completed this challenge. Well done!';
+            if (msg.includes('retry limit')) return 'You used all your attempts on this challenge.';
+            if (msg.includes('not enough coins') || msg.includes('could not process retry')) return 'Not enough coins to retry.';
+            if (msg.includes('max winners')) return 'This challenge already has all its winners. You arrived too late!';
+            if (msg.includes('no questions')) return 'This challenge has no questions. Contact your teacher.';
+            return raw || 'Something went wrong. Try again.';
         }
 
         async function doSubmitChallenge(challengeId) {
@@ -1422,6 +1394,344 @@
         }
         window.doDrakoHint = doDrakoHint;
 
+        // ============================================
+        // CHALLENGE FLOW OVERLAY — TikTok-style
+        // ============================================
+        var _flowState = null;
+        var _flowOverlay = null;
+
+        function openChallengeFlow(challengeId) {
+            var runtime = challengeRuntimeMap[challengeId];
+            if (!runtime || !runtime.questions || !runtime.questions.length) {
+                showBidToast('Challenge has no questions.', 'warning');
+                return;
+            }
+            _flowState = {
+                challengeId: challengeId,
+                challenge: runtime._challengeObj || {},
+                questions: runtime.questions,
+                currentIndex: 0,
+                answers: {},
+                correctCount: 0,
+                totalQuestions: runtime.questions.length,
+                started: false,
+                busy: false
+            };
+            _flowOverlay = document.createElement('div');
+            _flowOverlay.className = 'challenge-flow-overlay';
+            _flowOverlay.innerHTML = '<div class="challenge-flow-inner" id="flowInner"></div>';
+            document.body.appendChild(_flowOverlay);
+            renderFlowStartScreen();
+        }
+        window.openChallengeFlow = openChallengeFlow;
+
+        function closeFlowOverlay() {
+            if (_flowOverlay) { try { _flowOverlay.remove(); } catch(_){} }
+            _flowOverlay = null;
+            _flowState = null;
+            loadStudentChallenges();
+        }
+
+        function renderFlowStartScreen() {
+            var inner = document.getElementById('flowInner');
+            if (!inner || !_flowState) return;
+            var c = _flowState.challenge;
+            var qCount = _flowState.totalQuestions;
+            var estMin = Math.max(1, Math.ceil(qCount * 0.5));
+            inner.innerHTML = '<div class="challenge-start-screen">' +
+                '<div style="font-size:48px;">\uD83C\uDFC6</div>' +
+                '<h2>' + escapeHtml(c.title || 'Challenge') + '</h2>' +
+                '<div class="start-subtitle">' + qCount + ' question' + (qCount !== 1 ? 's' : '') + ' \u00B7 ~' + estMin + ' min</div>' +
+                (c.description ? '<p style="color:var(--text-300);font-size:15px;max-width:400px;">' + escapeHtml(c.description) + '</p>' : '') +
+                '<button type="button" class="start-btn" id="flowStartBtn">START CHALLENGE \uD83D\uDE80</button>' +
+                '<button type="button" class="btn btn-link" style="color:var(--text-300);font-size:14px;" id="flowBackBtn">\u2190 Back to challenges</button>' +
+                '</div>';
+            document.getElementById('flowStartBtn').addEventListener('click', function() {
+                _flowState.started = true;
+                renderFlowQuestion();
+            });
+            document.getElementById('flowBackBtn').addEventListener('click', closeFlowOverlay);
+        }
+
+        function renderFlowQuestion() {
+            var inner = document.getElementById('flowInner');
+            if (!inner || !_flowState) return;
+            var idx = _flowState.currentIndex;
+            var q = _flowState.questions[idx];
+            var qType = normalizeQuestionType(q.question_type);
+            var qPayload = q.payload || {};
+            var total = _flowState.totalQuestions;
+            var progressPct = Math.round(((idx) / total) * 100);
+
+            var html = '<div class="challenge-progress-bar"><div class="challenge-progress-fill" style="width:' + progressPct + '%"></div></div>' +
+                '<div class="challenge-q-counter">Question ' + (idx + 1) + ' of ' + total + '</div>' +
+                '<div class="challenge-q-text">' + escapeHtml(q.question_text || 'Question ' + (idx + 1)) + '</div>';
+
+            if (qType === 'multiple_choice') {
+                var optList = parseChallengeOptions(qPayload.options || []);
+                html += '<div id="flowOptions">';
+                optList.forEach(function(opt) {
+                    html += '<div class="challenge-question-card" data-flow-opt="' + escapeAttr(opt.value || '') + '">' + escapeHtml(opt.label || opt.value || '') + '</div>';
+                });
+                html += '</div>';
+            } else if (qType === 'true_false') {
+                html += '<div class="challenge-tf-toggle" id="flowOptions">' +
+                    '<div class="challenge-tf-btn" data-flow-opt="true">\u2705 True</div>' +
+                    '<div class="challenge-tf-btn" data-flow-opt="false">\u274C False</div>' +
+                    '</div>';
+            } else if (qType === 'multiple_select') {
+                var msOpts = parseChallengeOptions(qPayload.options || []);
+                html += '<div id="flowOptions">';
+                msOpts.forEach(function(opt) {
+                    html += '<label class="challenge-ms-check" data-flow-ms="' + escapeAttr(opt.value || '') + '"><input type="checkbox" value="' + escapeAttr(opt.value || '') + '"> ' + escapeHtml(opt.label || opt.value || '') + '</label>';
+                });
+                html += '</div><button type="button" class="challenge-flow-submit mt-2" id="flowSubmitBtn">Submit</button>';
+            } else if (qType === 'matching' && qPayload.pairs && typeof qPayload.pairs === 'object') {
+                var terms = Object.keys(qPayload.pairs);
+                var vals = terms.map(function(k) { return qPayload.pairs[k]; });
+                html += '<div id="flowOptions">';
+                terms.forEach(function(term, pIdx) {
+                    html += '<div class="challenge-matching-row"><span class="term-label">' + escapeHtml(term) + '</span>' +
+                        '<select data-flow-pair="' + pIdx + '"><option value="">Select...</option>' +
+                        vals.map(function(v) { return '<option value="' + escapeAttr(v) + '">' + escapeHtml(v) + '</option>'; }).join('') +
+                        '</select></div>';
+                });
+                html += '</div><button type="button" class="challenge-flow-submit mt-2" id="flowSubmitBtn">Submit</button>';
+            } else if (qType === 'fill_blank') {
+                html += '<input type="text" class="challenge-flow-input" id="flowTextInput" placeholder="Type your answer...">' +
+                    '<button type="button" class="challenge-flow-submit" id="flowSubmitBtn">Submit</button>';
+            } else {
+                html += '<input type="text" class="challenge-flow-input" id="flowTextInput" placeholder="Your answer...">' +
+                    '<button type="button" class="challenge-flow-submit" id="flowSubmitBtn">Submit</button>';
+            }
+
+            html += '<div class="challenge-feedback-msg" id="flowFeedback"></div>';
+            inner.innerHTML = html;
+            bindFlowEvents(qType, qPayload);
+        }
+
+        function bindFlowEvents(qType, qPayload) {
+            if (qType === 'multiple_choice' || qType === 'true_false') {
+                document.querySelectorAll('[data-flow-opt]').forEach(function(card) {
+                    card.addEventListener('click', function() {
+                        if (_flowState.busy) return;
+                        document.querySelectorAll('[data-flow-opt]').forEach(function(c) { c.classList.remove('selected'); });
+                        card.classList.add('selected');
+                        handleFlowAnswer(card.getAttribute('data-flow-opt'));
+                    });
+                });
+            } else if (qType === 'multiple_select') {
+                document.querySelectorAll('[data-flow-ms]').forEach(function(label) {
+                    label.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'INPUT') return;
+                        var cb = label.querySelector('input[type="checkbox"]');
+                        if (cb) cb.checked = !cb.checked;
+                        label.classList.toggle('checked', cb && cb.checked);
+                    });
+                });
+                var submitBtn = document.getElementById('flowSubmitBtn');
+                if (submitBtn) submitBtn.addEventListener('click', function() {
+                    if (_flowState.busy) return;
+                    var vals = Array.from(document.querySelectorAll('[data-flow-ms] input:checked')).map(function(cb) { return cb.value; });
+                    if (!vals.length) { showBidToast('Select at least one option.', 'warning'); return; }
+                    handleFlowAnswer(vals);
+                });
+            } else if (qType === 'matching') {
+                var submitBtn = document.getElementById('flowSubmitBtn');
+                if (submitBtn) submitBtn.addEventListener('click', function() {
+                    if (_flowState.busy) return;
+                    var terms = Object.keys(qPayload.pairs || {});
+                    var out = {};
+                    var missing = false;
+                    terms.forEach(function(term, pIdx) {
+                        var sel = document.querySelector('[data-flow-pair="' + pIdx + '"]');
+                        out[term] = sel ? sel.value : '';
+                        if (!out[term]) missing = true;
+                    });
+                    if (missing) { showBidToast('Match all terms before submitting.', 'warning'); return; }
+                    handleFlowAnswer(JSON.stringify(out));
+                });
+            } else {
+                var submitBtn = document.getElementById('flowSubmitBtn');
+                var textInput = document.getElementById('flowTextInput');
+                if (submitBtn) submitBtn.addEventListener('click', function() {
+                    if (_flowState.busy) return;
+                    var val = textInput ? textInput.value.trim() : '';
+                    if (!val) { showBidToast('Type your answer.', 'warning'); return; }
+                    handleFlowAnswer(val);
+                });
+                if (textInput) textInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') { e.preventDefault(); submitBtn && submitBtn.click(); }
+                });
+            }
+        }
+
+        function handleFlowAnswer(answer) {
+            if (!_flowState || _flowState.busy) return;
+            _flowState.busy = true;
+            var idx = _flowState.currentIndex;
+            var q = _flowState.questions[idx];
+            var qType = normalizeQuestionType(q.question_type);
+
+            var localEval = evaluateChallengeAnswer({
+                challenge_type: q.question_type,
+                correct_answer: q.correct_answer,
+                question_payload: q.payload || {}
+            }, answer);
+
+            var isCorrect = !!localEval.isCorrect;
+            _flowState.answers[q.id || String(idx)] = answer;
+            _flowState.answers[String(idx)] = answer;
+            if (isCorrect) _flowState.correctCount++;
+
+            showFlowFeedback(isCorrect, q, qType, answer);
+        }
+
+        function showFlowFeedback(isCorrect, q, qType, answer) {
+            var feedbackEl = document.getElementById('flowFeedback');
+
+            if (qType === 'multiple_choice' || qType === 'true_false') {
+                var correctVal = q.correct_answer || (q.payload && q.payload.correct_answer) || '';
+                document.querySelectorAll('[data-flow-opt]').forEach(function(card) {
+                    var val = card.getAttribute('data-flow-opt');
+                    if (val === answer && isCorrect) card.classList.add('correct');
+                    else if (val === answer && !isCorrect) card.classList.add('wrong');
+                    if (!isCorrect && (val === correctVal || val.toLowerCase() === correctVal.toLowerCase())) card.classList.add('reveal-correct');
+                });
+            }
+
+            var submitBtn = document.getElementById('flowSubmitBtn');
+            if (submitBtn) submitBtn.disabled = true;
+
+            if (isCorrect) {
+                if (feedbackEl) feedbackEl.innerHTML = '<span style="color:var(--success);">Well done! \uD83C\uDF89</span>';
+                playCorrect();
+                spawnFlowCoinFloat();
+            } else {
+                var correctDisplay = getCorrectAnswerDisplay(q);
+                if (feedbackEl) feedbackEl.innerHTML = '<span style="color:var(--danger);">The answer was: ' + escapeHtml(correctDisplay) + '</span>';
+                playWrong();
+            }
+
+            setTimeout(function() {
+                if (!_flowState) return;
+                _flowState.busy = false;
+                _flowState.currentIndex++;
+                if (_flowState.currentIndex >= _flowState.totalQuestions) {
+                    finalizeFlowChallenge();
+                } else {
+                    renderFlowQuestion();
+                }
+            }, 1500);
+        }
+
+        function getCorrectAnswerDisplay(q) {
+            var correct = q.correct_answer || '';
+            var payload = q.payload || {};
+            if (payload.options && Array.isArray(payload.options)) {
+                var match = payload.options.find(function(o) {
+                    if (typeof o === 'object') return (o.value || '') === correct || (o.label || '') === correct;
+                    return String(o) === correct;
+                });
+                if (match) return typeof match === 'object' ? (match.label || match.value || correct) : String(match);
+            }
+            if (payload.correct_answer) return payload.correct_answer;
+            return correct;
+        }
+
+        function spawnFlowCoinFloat() {
+            if (reduceMotion) return;
+            var el = document.createElement('div');
+            el.className = 'coin-float';
+            el.textContent = '+\uD83E\uDE99';
+            el.style.left = '50%';
+            el.style.top = '50%';
+            el.style.transform = 'translateX(-50%)';
+            document.body.appendChild(el);
+            setTimeout(function() { try { el.remove(); } catch(_){} }, 1300);
+        }
+
+        function spawnConfetti() {
+            if (reduceMotion) return;
+            var container = document.createElement('div');
+            container.className = 'confetti-burst';
+            var colors = ['#fbbf24', '#ef4444', '#10b981', '#3b82f6', '#a855f7', '#f97316'];
+            for (var i = 0; i < 40; i++) {
+                var piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDelay = (Math.random() * 0.8) + 's';
+                piece.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+                piece.style.width = (6 + Math.random() * 8) + 'px';
+                piece.style.height = (6 + Math.random() * 8) + 'px';
+                container.appendChild(piece);
+            }
+            document.body.appendChild(container);
+            setTimeout(function() { try { container.remove(); } catch(_){} }, 3500);
+        }
+
+        async function finalizeFlowChallenge() {
+            var inner = document.getElementById('flowInner');
+            if (!inner || !_flowState) return;
+            inner.innerHTML = '<div class="challenge-complete-screen"><div class="spinner-border text-warning"></div><p class="mt-3" style="color:var(--text-300);">Submitting your answers...</p></div>';
+
+            try {
+                var result = await submitChallenge(_flowState.challengeId, user.documento_id, _flowState.answers);
+                if (!result.ok) {
+                    inner.innerHTML = '<div class="challenge-complete-screen">' +
+                        '<div style="font-size:48px;">\u26A0\uFE0F</div>' +
+                        '<p class="score-label">' + escapeHtml(humanizeError(result.error)) + '</p>' +
+                        '<button type="button" class="start-btn mt-3" id="flowDoneBtn">Back to Challenges</button></div>';
+                    document.getElementById('flowDoneBtn').addEventListener('click', closeFlowOverlay);
+                    return;
+                }
+
+                var scoreCorrect = result.correctCount || _flowState.correctCount;
+                var scoreTotal = result.totalQuestions || _flowState.totalQuestions;
+                var coinsEarned = result.coinsAwarded || 0;
+                var position = result.position || 0;
+
+                // Post-submission: XP, streak, skill progress
+                var challengeObj = _flowState.challenge || {};
+                var scorePercent = scoreTotal > 0 ? Math.round((scoreCorrect / scoreTotal) * 100) : (result.isCorrect ? 100 : 0);
+                var rewards = computeChallengeRewards(scorePercent, Number(user.current_streak) || 0, challengeObj);
+                if (rewards.xpEarned > 0) { try { await awardXPToStudent(user.documento_id, rewards.xpEarned); } catch(_){} }
+                if (result.isCorrect) { try { var sr = await updateStreakEnhanced(user.documento_id); if (sr.ok) user.current_streak = sr.newStreak; } catch(_){} }
+                var skill = challengeObj.skill_type || challengeObj.skill || '';
+                var cefr = challengeObj.cefr_level || '';
+                if (skill) { try { await updateStudentProgress(user.documento_id, skill, cefr, result.isCorrect); } catch(_){} }
+
+                var u = await getProfileById(user.id);
+                if (u) { setCoins(u.monedas); user.monedas = u.monedas; }
+
+                if (result.isCorrect) spawnConfetti();
+                if (coinsEarned > 0) burstCoins(Math.min(Math.ceil(coinsEarned / 5), 8));
+
+                var emoji = result.isCorrect ? '\uD83C\uDFC6' : '\uD83D\uDCAA';
+                var msg = result.isCorrect ? 'Challenge Conquered!' : 'Challenge Complete';
+                inner.innerHTML = '<div class="challenge-complete-screen">' +
+                    '<div style="font-size:64px;">' + emoji + '</div>' +
+                    '<div class="score-label">' + msg + '</div>' +
+                    '<div class="score-big">' + scoreCorrect + '/' + scoreTotal + '</div>' +
+                    '<p style="color:var(--text-300);font-size:16px;">correct answers</p>' +
+                    (coinsEarned > 0 ? '<div class="coins-earned">+' + coinsEarned + ' \uD83E\uDE99</div>' : '') +
+                    (position > 0 ? '<p style="color:var(--text-300);">Position #' + position + '</p>' : '') +
+                    (rewards.xpEarned > 0 ? '<p style="color:var(--text-300);">+' + rewards.xpEarned + ' XP</p>' : '') +
+                    '<button type="button" class="start-btn mt-3" id="flowDoneBtn">Keep going! \uD83D\uDD25</button></div>';
+                document.getElementById('flowDoneBtn').addEventListener('click', closeFlowOverlay);
+
+                delete challengeRuntimeMap[_flowState.challengeId];
+            } catch(e) {
+                console.error('[FLOW_FINALIZE]', e);
+                inner.innerHTML = '<div class="challenge-complete-screen">' +
+                    '<div style="font-size:48px;">\u26A0\uFE0F</div>' +
+                    '<p class="score-label">' + escapeHtml(e.message || 'Something went wrong') + '</p>' +
+                    '<button type="button" class="start-btn mt-3" id="flowDoneBtn">Back to Challenges</button></div>';
+                document.getElementById('flowDoneBtn').addEventListener('click', closeFlowOverlay);
+            }
+        }
+
         // --- Inventory (The Bag) + Billing Claims ---
         async function loadInventory() {
             var el = document.getElementById('inventoryList');
@@ -1521,6 +1831,20 @@
                 var time = h.created_at ? new Date(h.created_at).toLocaleTimeString() : '';
                 return '<div class="attendance-history-item"><span><i class="bi bi-calendar-check"></i> ' + (h.attendance_date || '') + '</span><span class="text-muted small">' + time + '</span></div>';
             }).join('');
+        }
+
+        async function loadAttendanceRiskWarning() {
+            var el = document.getElementById('attendanceRiskWarning');
+            if (!el) return;
+            el.style.display = 'none';
+            if (!user || !user.documento_id || !user.grupo) return;
+            try {
+                var misses = await getStudentConsecutiveSessionAbsences(user.documento_id, user.grupo);
+                if (Number(misses || 0) >= 3) {
+                    el.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> You have missed 3 attendance sessions in a row. Your streak and coins are at risk.';
+                    el.style.display = '';
+                }
+            } catch (_) {}
         }
 
         function toDateOnly(d) {
@@ -1774,6 +2098,7 @@
             renderProgressToTop();
             renderMiniAttendanceWeek();
             renderBadgesGrid();
+            loadAttendanceRiskWarning();
             loadActiveChallengeSpotlight();
             loadStudentActiveChallengeBanner();
 

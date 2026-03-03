@@ -9,305 +9,416 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-dashboard">
-    <div class="decor-overlay" aria-hidden="true"></div>
-    <div class="container-custom page-container" style="max-width: 960px;">
-        <div class="card card-premium" style="padding: 0; overflow: hidden;">
-            <nav class="admin-nav">
-                <span class="greeting">Hello <strong id="adminName"></strong>, welcome back!</span>
-                <a href="#" id="navDashboard" class="active" onclick="return window.showAdminView('dashboard')">Dashboard</a>
-                <a href="#" id="navAdminDashboard" onclick="return window.showAdminView('adminDashboard')">Dashboard</a>
-                <a href="#" id="navInstitutions" onclick="return window.showAdminView('institutions')">Schools</a>
-                <a href="#" id="navTeachers" onclick="return window.showAdminView('teachers')">Teachers</a>
-                <a href="#" id="navUsers" onclick="return window.showAdminView('users')">Users</a>
-                <a href="#" id="navGroups" onclick="return window.showAdminView('groups')">Groups</a>
-                <a href="#" id="navAttendance" onclick="return window.showAdminView('attendance')">Attendance</a>
-                <a href="#" id="navChallenges" onclick="return window.showAdminView('challenges')">Challenges</a>
-                <a href="#" id="navStore" onclick="return window.showAdminView('store')">Store/Auctions</a>
-                <a href="#" id="navCobros" onclick="return window.showAdminView('cobros')">Cobros</a>
-                <a href="#" id="navAnnouncements" onclick="return window.showAdminView('announcements')">Announcements</a>
-                <a href="#" id="navFeedback" onclick="return window.showAdminView('feedback')">Feedback</a>
-                <a href="#" id="navEconomy" onclick="return window.showAdminView('economy')">Economy</a>
-                <a href="#" id="navAiConfig" onclick="return window.showAdminView('aiConfig')">AI Config</a>
-                <a href="#" id="navPolicies" onclick="return window.showAdminView('policies')">Policies</a>
-                <a href="#" id="navAdmins" onclick="return window.showAdminView('admins')">Admins</a>
-                <button type="button" class="nav-btn" id="btnLogout">Logout</button>
+<body class="admin-body">
+    <!-- Super Admin: Linear-style sidebar layout -->
+    <div class="admin-shell" id="adminShell">
+
+        <!-- Sidebar (Linear.app style - super_admin) -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-brand">
+                <img src="assets/images/icono-moneda.webp" alt="Lingo-Coins" class="sidebar-brand-icon">
+                <span class="sidebar-brand-text">Lingo-Coins</span>
+            </div>
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar"><i class="bi bi-person-circle"></i></div>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name" id="adminName"></span>
+                    <span class="sidebar-user-role" id="adminRoleBadge"></span>
+                </div>
+            </div>
+            <nav class="admin-nav sidebar-nav" id="sidebarNav">
+                <div class="sidebar-nav-section">
+                    <span class="sidebar-nav-label">Overview</span>
+                    <a href="#" id="navDashboard" class="sidebar-nav-item active" onclick="return window.showAdminView('dashboard')">
+                        <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+                    </a>
+                    <a href="#" id="navAdminDashboard" class="sidebar-nav-item" onclick="return window.showAdminView('adminDashboard')">
+                        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+                    </a>
+                </div>
+                <div class="sidebar-nav-section">
+                    <span class="sidebar-nav-label">Manage</span>
+                    <a href="#" id="navInstitutions" class="sidebar-nav-item" onclick="return window.showAdminView('institutions')">
+                        <i class="bi bi-building"></i><span>Schools</span>
+                    </a>
+                    <a href="#" id="navTeachers" class="sidebar-nav-item" onclick="return window.showAdminView('teachers')">
+                        <i class="bi bi-person-badge"></i><span>Teachers</span>
+                    </a>
+                    <a href="#" id="navUsers" class="sidebar-nav-item" onclick="return window.showAdminView('users')">
+                        <i class="bi bi-people"></i><span>Users</span>
+                    </a>
+                    <a href="#" id="navGroups" class="sidebar-nav-item" onclick="return window.showAdminView('groups')">
+                        <i class="bi bi-collection"></i><span>Groups</span>
+                    </a>
+                </div>
+                <div class="sidebar-nav-section">
+                    <span class="sidebar-nav-label">School</span>
+                    <a href="#" id="navAttendance" class="sidebar-nav-item" onclick="return window.showAdminView('attendance')">
+                        <i class="bi bi-calendar-check"></i><span>Attendance</span>
+                    </a>
+                    <a href="#" id="navChallenges" class="sidebar-nav-item" onclick="return window.showAdminView('challenges')">
+                        <i class="bi bi-lightning"></i><span>Challenges</span>
+                    </a>
+                    <a href="#" id="navStore" class="sidebar-nav-item" onclick="return window.showAdminView('store')">
+                        <i class="bi bi-shop"></i><span>Store/Auctions</span>
+                    </a>
+                    <a href="#" id="navCobros" class="sidebar-nav-item" onclick="return window.showAdminView('cobros')">
+                        <i class="bi bi-receipt"></i><span>Cobros</span>
+                    </a>
+                    <a href="#" id="navAnnouncements" class="sidebar-nav-item" onclick="return window.showAdminView('announcements')">
+                        <i class="bi bi-megaphone"></i><span>Announcements</span>
+                    </a>
+                    <a href="#" id="navFeedback" class="sidebar-nav-item" onclick="return window.showAdminView('feedback')">
+                        <i class="bi bi-chat-dots"></i><span>Feedback</span>
+                    </a>
+                </div>
+                <div class="sidebar-nav-section">
+                    <span class="sidebar-nav-label">System</span>
+                    <a href="#" id="navEconomy" class="sidebar-nav-item" onclick="return window.showAdminView('economy')">
+                        <i class="bi bi-coin"></i><span>Economy</span>
+                    </a>
+                    <a href="#" id="navAiConfig" class="sidebar-nav-item" onclick="return window.showAdminView('aiConfig')">
+                        <i class="bi bi-cpu"></i><span>AI Config</span>
+                    </a>
+                    <a href="#" id="navPolicies" class="sidebar-nav-item" onclick="return window.showAdminView('policies')">
+                        <i class="bi bi-shield-check"></i><span>Policies</span>
+                    </a>
+                    <a href="#" id="navAdmins" class="sidebar-nav-item" onclick="return window.showAdminView('admins')">
+                        <i class="bi bi-person-gear"></i><span>Admins</span>
+                    </a>
+                </div>
             </nav>
-
-            <div id="viewDashboard" class="admin-view active">
-                <h5 class="mb-2 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Dashboard">Super Admin Dashboard</h5>
-                <div id="dashboardAlert"></div>
-                <div id="dashboardCards"><p class="text-muted small">Loading dashboard...</p></div>
+            <div class="sidebar-footer">
+                <button type="button" class="sidebar-logout-btn nav-btn" id="btnLogout">
+                    <i class="bi bi-box-arrow-left"></i><span>Logout</span>
+                </button>
             </div>
+        </aside>
 
-            <!-- School Admin Dashboard (admin role) -->
-            <div id="viewAdminDashboard" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Dashboard">School Dashboard</h5>
-                <div id="adminDashboardCards" class="row g-3 mb-3">
-                    <p class="text-muted small">Loading...</p>
-                </div>
-                <div id="adminDashboardActivity"></div>
+        <!-- Mobile topbar toggle -->
+        <div class="admin-mobile-topbar" id="adminMobileTopbar">
+            <button class="admin-mobile-toggle" id="adminMobileToggle" type="button" aria-label="Toggle menu">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="admin-mobile-brand">
+                <img src="assets/images/icono-moneda.webp" alt="Lingo-Coins" class="admin-mobile-brand-icon">
+                <span>Lingo-Coins</span>
             </div>
+            <span class="greeting admin-mobile-greeting">Hello <strong class="admin-name-mirror"></strong></span>
+        </div>
 
-            <div id="viewInstitutions" class="admin-view">
-                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
-                    <h5 class="mb-0 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Schools">Schools</h5>
-                    <button type="button" class="btn btn-primary btn-sm" id="btnCreateSchool">Create New School</button>
-                </div>
-                <div id="institutionsList"><p class="text-muted small">Loading schools...</p></div>
-            </div>
+        <!-- Main content area -->
+        <main class="admin-main" id="adminMain">
+            <div class="admin-content-inner">
 
-            <div id="viewTeachers" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Teachers">Teachers</h5>
-                <p class="small text-muted">Teachers in your institution. Assign groups, view students, and manage teacher PIN/credits.</p>
-                <div id="teachersList"><p class="text-muted small">Loading...</p></div>
-            </div>
-
-            <div id="viewUsers" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Users">Users</h5>
-                <div class="glass-panel mb-3" style="padding:1rem;">
-                    <div class="row g-2">
-                        <div class="col-md-4"><label class="form-label small">Step 1: School</label><select id="usersSchoolSelect" class="form-select"><option value="">Select school</option></select></div>
-                        <div class="col-md-3"><label class="form-label small">Step 2: Group</label><select id="adminGroupFilter" class="form-select"><option value="">All groups</option></select></div>
-                        <div class="col-md-3"><label class="form-label small">Step 3: Role</label><select id="usersRoleFilter" class="form-select"><option value="">All roles</option><option value="admin">admin</option><option value="teacher">teacher</option><option value="student">student</option></select></div>
-                        <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-primary w-100" id="btnLoadUsersBySchool">Load Users</button></div>
+                <div id="viewDashboard" class="admin-view active">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-grid-1x2"></i> Super Admin Dashboard</h5>
                     </div>
-                    <div class="small mt-2" id="usersSchoolStats">X admins | X teachers | X students</div>
-                    <div class="d-flex gap-2 mt-2 flex-wrap">
-                        <input type="text" id="studentSearch" class="form-control" style="max-width:280px;" placeholder="Search name or doc">
-                        <input type="text" id="usersDocExact" class="form-control" style="max-width:220px;" placeholder="Exact document ID">
-                        <button type="button" class="btn btn-outline-primary" id="btnRefreshUsers">Refresh</button>
-                    </div>
+                    <div id="dashboardAlert"></div>
+                    <div id="dashboardCards"><p class="text-muted small">Loading dashboard...</p></div>
                 </div>
-                <div id="contentUsers"><p class="text-muted small">Select school and load users.</p></div>
-                <div id="usersPagination" class="mt-2"></div>
-            </div>
 
-            <div id="viewGroups" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Groups">Groups</h5>
-                <div class="glass-panel mb-3" style="padding:1rem;">
-                    <div class="row g-2 align-items-end">
-                        <div class="col-md-5"><label class="form-label small">Step 1: School</label><select id="groupsSchoolSelect" class="form-select"><option value="">Select school</option></select></div>
-                        <div class="col-md-3"><button type="button" class="btn btn-primary w-100" id="btnLoadGroupsBySchool">Load Groups</button></div>
+                <!-- School Admin Dashboard (admin role) -->
+                <div id="viewAdminDashboard" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-speedometer2"></i> School Dashboard</h5>
                     </div>
+                    <div id="adminDashboardCards" class="row g-3 mb-3">
+                        <p class="text-muted small">Loading...</p>
+                    </div>
+                    <div id="adminDashboardActivity"></div>
                 </div>
-                <div id="groupsList"><p class="text-muted small">Select a school to load groups.</p></div>
-            </div>
 
-            <div id="viewAttendance" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-asistencia.webp" class="ui-icon" loading="lazy" alt="Attendance">Attendance</h5>
-                <p class="small text-muted">View attendance by date for your school. Export CSV.</p>
-                <div class="d-flex flex-wrap gap-2 align-items-end mb-3">
-                    <div>
-                        <label class="form-label small mb-1">Date</label>
-                        <input type="date" id="adminAttendanceDate" class="form-control" style="max-width:200px;">
-                    </div>
-                    <button type="button" class="btn btn-primary" id="btnLoadAdminAttendance">Load</button>
-                    <button type="button" class="btn btn-outline-success" id="btnExportAdminAttendanceCsv">Export CSV</button>
-                </div>
-                <div id="adminAttendanceList"><p class="text-muted small">Select a date and click Load.</p></div>
-            </div>
-
-            <div id="viewChallenges" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-challenge.webp" class="ui-icon" loading="lazy" alt="Challenges">Challenges</h5>
-                <p class="small text-muted">View and manage challenges for your school. Teachers create challenges; you can close or reopen them.</p>
-
-                <!-- AI GENERATOR PLACEHOLDER — plug future AI module here -->
-                <div id="adminAiGeneratorPlaceholder" class="glass-panel mb-3" style="padding:1rem;border:1px dashed rgba(255,215,0,0.35);">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span style="font-size:1.5rem;">🤖</span>
-                        <span class="fw-bold" style="color:var(--gold-500,#FFD700);">AI Challenge Generator</span>
-                        <span class="badge bg-secondary ms-1">Coming soon</span>
-                    </div>
-                    <p class="small text-muted mb-2">The AI generator will appear here once enabled for your institution. It will use CEFR level, skill, role, context and topic to auto-build challenges.</p>
-                    <!-- Hook point: AI generator will inject its UI into #adminAiGeneratorMount -->
-                    <div id="adminAiGeneratorMount"></div>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <select id="adminAiCefrLevel" class="form-select form-select-sm" style="max-width:100px;" disabled>
-                            <option>A1</option><option>A2</option><option selected>B1</option><option>B2</option><option>C1</option>
-                        </select>
-                        <select id="adminAiSkill" class="form-select form-select-sm" style="max-width:140px;" disabled>
-                            <option>Grammar</option><option>Vocabulary</option><option>Reading</option><option>Listening</option>
-                        </select>
-                        <input type="text" id="adminAiTopic" class="form-control form-control-sm" style="max-width:200px;" placeholder="Topic (e.g. Past Perfect)" disabled>
-                        <button type="button" class="btn btn-sm btn-warning" id="btnAdminRunAI" disabled title="AI generation not yet enabled for this institution">
-                            <i class="bi bi-stars"></i> Generate with AI
+                <div id="viewInstitutions" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-building"></i> Schools</h5>
+                        <button type="button" class="btn btn-admin-primary btn-sm" id="btnCreateSchool">
+                            <i class="bi bi-plus-lg"></i> Create New School
                         </button>
                     </div>
-                    <div id="adminAiStatus" class="small mt-2 text-muted"></div>
+                    <div id="institutionsList"><p class="text-muted small">Loading schools...</p></div>
                 </div>
-                <!-- END AI PLACEHOLDER -->
 
-                <div id="adminChallengesList"><p class="text-muted small">Loading...</p></div>
-            </div>
-
-            <div id="viewStore" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-tienda.webp" class="ui-icon" loading="lazy" alt="Store">Store & Auctions</h5>
-                <p class="small text-muted">Manage active items for your school and close auctions.</p>
-                <div class="glass-panel mb-3" style="padding:1rem;">
-                    <div class="row g-2">
-                        <div class="col-md-3"><label class="form-label small mb-1">Mode</label><select id="adminAuctionItemType" class="form-select"><option value="auction">Auction</option><option value="shop">Store item</option></select></div>
-                        <div class="col-md-4"><label class="form-label small mb-1">Item Name</label><input type="text" id="adminAuctionItemName" class="form-control" placeholder="Virtual reward"></div>
-                        <div class="col-md-2"><label class="form-label small mb-1">Price</label><input type="number" id="adminAuctionBasePrice" class="form-control" min="0"></div>
-                        <div class="col-md-3"><label class="form-label small mb-1">Group Target</label><select id="adminAuctionGroup" class="form-select"><option value="">All groups</option></select></div>
-                        <div class="col-md-4"><label class="form-label small mb-1">Description</label><input type="text" id="adminAuctionDescription" class="form-control" placeholder="What student receives"></div>
-                        <div class="col-md-2"><label class="form-label small mb-1">Stock</label><input type="number" id="adminAuctionStock" class="form-control" min="1" value="1"></div>
-                        <div class="col-md-2"><label class="form-label small mb-1">Duration (sec)</label><input type="number" id="adminAuctionDuration" class="form-control" min="30" value="120"></div>
-                        <div class="col-md-4 d-flex align-items-end"><button type="button" class="btn btn-primary w-100" id="btnAdminCreateAuction">Publish Item</button></div>
+                <div id="viewTeachers" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-person-badge"></i> Teachers</h5>
                     </div>
-                    <div id="adminAuctionStatus" class="small mt-2"></div>
+                    <p class="small text-muted">Teachers in your institution. Assign groups, view students, and manage teacher PIN/credits.</p>
+                    <div id="teachersList"><p class="text-muted small">Loading...</p></div>
                 </div>
-                <div id="adminAuctionList"><p class="text-muted small">Loading...</p></div>
-            </div>
 
-            <div id="viewCobros" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Cobros">Cobros</h5>
-                <p class="small text-muted">Pending deliveries for your school. Confirm delivered.</p>
-                <div id="adminBillingClaimsList"><p class="text-muted small">Loading...</p></div>
-            </div>
-
-            <div id="viewAnnouncements" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Announcements">Announcements</h5>
-                <p class="small text-muted">Create announcements for all school or per group.</p>
-                <div class="glass-panel mb-3" style="padding:1rem;">
-                    <input type="hidden" id="announcementEditId">
-                    <div class="row g-2">
-                        <div class="col-md-4"><label class="form-label small mb-1">Title</label><input type="text" id="announcementTitle" class="form-control"></div>
-                        <div class="col-md-3"><label class="form-label small mb-1">Type</label><select id="announcementType" class="form-select"><option value="info">Info</option><option value="success">Success</option><option value="warning">Warning</option><option value="danger">Danger</option></select></div>
-                        <div class="col-md-3"><label class="form-label small mb-1">Target Group</label><select id="announcementGroup" class="form-select"><option value="">All groups</option></select></div>
-                        <div class="col-md-2"><label class="form-label small mb-1">Expiry</label><input type="date" id="announcementExpiry" class="form-control"></div>
-                        <div class="col-12"><label class="form-label small mb-1">Message</label><textarea id="announcementMessage" class="form-control" rows="3"></textarea></div>
-                        <div class="col-12"><label class="form-label small mb-1">Links (one per line: Label|https://url)</label><textarea id="announcementLinks" class="form-control" rows="2"></textarea></div>
-                        <div class="col-md-4"><button type="button" class="btn btn-primary w-100" id="btnCreateAnnouncement">Save Announcement</button></div>
+                <div id="viewUsers" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-people"></i> Users</h5>
                     </div>
-                    <div id="adminAnnouncementStatus" class="small mt-2"></div>
+                    <div class="admin-filter-panel mb-3">
+                        <div class="row g-2">
+                            <div class="col-md-4"><label class="form-label small">Step 1: School</label><select id="usersSchoolSelect" class="form-select"><option value="">Select school</option></select></div>
+                            <div class="col-md-3"><label class="form-label small">Step 2: Group</label><select id="adminGroupFilter" class="form-select"><option value="">All groups</option></select></div>
+                            <div class="col-md-3"><label class="form-label small">Step 3: Role</label><select id="usersRoleFilter" class="form-select"><option value="">All roles</option><option value="admin">admin</option><option value="teacher">teacher</option><option value="student">student</option></select></div>
+                            <div class="col-md-2 d-flex align-items-end"><button type="button" class="btn btn-admin-primary w-100" id="btnLoadUsersBySchool">Load Users</button></div>
+                        </div>
+                        <div class="small mt-2" id="usersSchoolStats">X admins | X teachers | X students</div>
+                        <div class="d-flex gap-2 mt-2 flex-wrap">
+                            <input type="text" id="studentSearch" class="form-control" style="max-width:280px;" placeholder="Search name or doc">
+                            <input type="text" id="usersDocExact" class="form-control" style="max-width:220px;" placeholder="Exact document ID">
+                            <button type="button" class="btn btn-admin-outline" id="btnRefreshUsers">Refresh</button>
+                        </div>
+                    </div>
+                    <div id="contentUsers"><p class="text-muted small">Select school and load users.</p></div>
+                    <div id="usersPagination" class="mt-2"></div>
                 </div>
-                <div id="adminAnnouncementsList"><p class="text-muted small">Loading...</p></div>
+
+                <div id="viewGroups" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-collection"></i> Groups</h5>
+                    </div>
+                    <div class="admin-filter-panel mb-3">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-5"><label class="form-label small">Step 1: School</label><select id="groupsSchoolSelect" class="form-select"><option value="">Select school</option></select></div>
+                            <div class="col-md-3"><button type="button" class="btn btn-admin-primary w-100" id="btnLoadGroupsBySchool">Load Groups</button></div>
+                        </div>
+                    </div>
+                    <div id="groupsList"><p class="text-muted small">Select a school to load groups.</p></div>
+                </div>
+
+                <div id="viewAttendance" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-calendar-check"></i> Attendance</h5>
+                    </div>
+                    <p class="small text-muted">View attendance by date for your school. Export CSV.</p>
+                    <div class="d-flex flex-wrap gap-2 align-items-end mb-3">
+                        <div>
+                            <label class="form-label small mb-1">Date</label>
+                            <input type="date" id="adminAttendanceDate" class="form-control" style="max-width:200px;">
+                        </div>
+                        <button type="button" class="btn btn-admin-primary" id="btnLoadAdminAttendance">Load</button>
+                        <button type="button" class="btn btn-admin-outline-success" id="btnExportAdminAttendanceCsv">Export CSV</button>
+                    </div>
+                    <div id="adminAttendanceList"><p class="text-muted small">Select a date and click Load.</p></div>
+                </div>
+
+                <div id="viewChallenges" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-lightning"></i> Challenges</h5>
+                    </div>
+                    <p class="small text-muted">View and manage challenges for your school. Teachers create challenges; you can close or reopen them.</p>
+
+                    <!-- AI GENERATOR PLACEHOLDER — plug future AI module here -->
+                    <div id="adminAiGeneratorPlaceholder" class="admin-placeholder-card mb-3">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-robot" style="font-size:1.3rem;color:var(--admin-accent);"></i>
+                            <span class="fw-bold" style="color:var(--admin-accent);">AI Challenge Generator</span>
+                            <span class="badge admin-badge-muted ms-1">Coming soon</span>
+                        </div>
+                        <p class="small text-muted mb-2">The AI generator will appear here once enabled for your institution. It will use CEFR level, skill, role, context and topic to auto-build challenges.</p>
+                        <!-- Hook point: AI generator will inject its UI into #adminAiGeneratorMount -->
+                        <div id="adminAiGeneratorMount"></div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <select id="adminAiCefrLevel" class="form-select form-select-sm" style="max-width:100px;" disabled>
+                                <option>A1</option><option>A2</option><option selected>B1</option><option>B2</option><option>C1</option>
+                            </select>
+                            <select id="adminAiSkill" class="form-select form-select-sm" style="max-width:140px;" disabled>
+                                <option>Grammar</option><option>Vocabulary</option><option>Reading</option><option>Listening</option>
+                            </select>
+                            <input type="text" id="adminAiTopic" class="form-control form-control-sm" style="max-width:200px;" placeholder="Topic (e.g. Past Perfect)" disabled>
+                            <button type="button" class="btn btn-sm btn-warning" id="btnAdminRunAI" disabled title="AI generation not yet enabled for this institution">
+                                <i class="bi bi-stars"></i> Generate with AI
+                            </button>
+                        </div>
+                        <div id="adminAiStatus" class="small mt-2 text-muted"></div>
+                    </div>
+                    <!-- END AI PLACEHOLDER -->
+
+                    <div id="adminChallengesList"><p class="text-muted small">Loading...</p></div>
+                </div>
+
+                <div id="viewStore" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-shop"></i> Store & Auctions</h5>
+                    </div>
+                    <p class="small text-muted">Manage active items for your school and close auctions.</p>
+                    <div class="admin-filter-panel mb-3">
+                        <div class="row g-2">
+                            <div class="col-md-3"><label class="form-label small mb-1">Mode</label><select id="adminAuctionItemType" class="form-select"><option value="auction">Auction</option><option value="shop">Store item</option></select></div>
+                            <div class="col-md-4"><label class="form-label small mb-1">Item Name</label><input type="text" id="adminAuctionItemName" class="form-control" placeholder="Virtual reward"></div>
+                            <div class="col-md-2"><label class="form-label small mb-1">Price</label><input type="number" id="adminAuctionBasePrice" class="form-control" min="0"></div>
+                            <div class="col-md-3"><label class="form-label small mb-1">Group Target</label><select id="adminAuctionGroup" class="form-select"><option value="">All groups</option></select></div>
+                            <div class="col-md-4"><label class="form-label small mb-1">Description</label><input type="text" id="adminAuctionDescription" class="form-control" placeholder="What student receives"></div>
+                            <div class="col-md-2"><label class="form-label small mb-1">Stock</label><input type="number" id="adminAuctionStock" class="form-control" min="1" value="1"></div>
+                            <div class="col-md-2"><label class="form-label small mb-1">Duration (sec)</label><input type="number" id="adminAuctionDuration" class="form-control" min="30" value="120"></div>
+                            <div class="col-md-4 d-flex align-items-end"><button type="button" class="btn btn-admin-primary w-100" id="btnAdminCreateAuction">Publish Item</button></div>
+                        </div>
+                        <div id="adminAuctionStatus" class="small mt-2"></div>
+                    </div>
+                    <div id="adminAuctionList"><p class="text-muted small">Loading...</p></div>
+                </div>
+
+                <div id="viewCobros" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-receipt"></i> Cobros</h5>
+                    </div>
+                    <p class="small text-muted">Pending deliveries for your school. Confirm delivered.</p>
+                    <div id="adminBillingClaimsList"><p class="text-muted small">Loading...</p></div>
+                </div>
+
+                <div id="viewAnnouncements" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-megaphone"></i> Announcements</h5>
+                    </div>
+                    <p class="small text-muted">Create announcements for all school or per group.</p>
+                    <div class="admin-filter-panel mb-3">
+                        <input type="hidden" id="announcementEditId">
+                        <div class="row g-2">
+                            <div class="col-md-4"><label class="form-label small mb-1">Title</label><input type="text" id="announcementTitle" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label small mb-1">Type</label><select id="announcementType" class="form-select"><option value="info">Info</option><option value="success">Success</option><option value="warning">Warning</option><option value="danger">Danger</option></select></div>
+                            <div class="col-md-3"><label class="form-label small mb-1">Target Group</label><select id="announcementGroup" class="form-select"><option value="">All groups</option></select></div>
+                            <div class="col-md-2"><label class="form-label small mb-1">Expiry</label><input type="date" id="announcementExpiry" class="form-control"></div>
+                            <div class="col-12"><label class="form-label small mb-1">Message</label><textarea id="announcementMessage" class="form-control" rows="3"></textarea></div>
+                            <div class="col-12"><label class="form-label small mb-1">Links (one per line: Label|https://url)</label><textarea id="announcementLinks" class="form-control" rows="2"></textarea></div>
+                            <div class="col-md-4"><button type="button" class="btn btn-admin-primary w-100" id="btnCreateAnnouncement">Save Announcement</button></div>
+                        </div>
+                        <div id="adminAnnouncementStatus" class="small mt-2"></div>
+                    </div>
+                    <div id="adminAnnouncementsList"><p class="text-muted small">Loading...</p></div>
+                </div>
+
+                <div id="viewFeedback" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-chat-dots"></i> Feedback</h5>
+                    </div>
+                    <p class="small text-muted">Messages from your students.</p>
+                    <div id="adminFeedbackList"><p class="text-muted small">Loading...</p></div>
+                </div>
+
+                <div id="viewEconomy" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-coin"></i> Economy</h5>
+                    </div>
+                    <h6 class="mb-2">Coin Economy</h6>
+                    <div id="economyCoinTable"><p class="text-muted small">Loading...</p></div>
+                    <h6 class="mb-2 mt-3">AI Credits</h6>
+                    <div id="economyAiTable"><p class="text-muted small">Loading...</p></div>
+                    <button type="button" class="btn btn-admin-outline btn-sm mt-2" id="btnExportCreditReport">Export Credit Report CSV</button>
+                </div>
+
+                <div id="viewAiConfig" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-cpu"></i> AI Config</h5>
+                    </div>
+                    <div class="admin-filter-panel mb-3">
+                        <h6>API Keys Globales</h6>
+                        <div class="row g-2">
+                            <div class="col-md-4"><label class="form-label small">OpenAI</label><input id="apiKeyOpenai" type="password" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label small">Anthropic</label><input id="apiKeyAnthropic" type="password" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label small">Google</label><input id="apiKeyGoogle" type="password" class="form-control"></div>
+                        </div>
+                        <button class="btn btn-admin-primary btn-sm mt-2" id="btnSaveApiKeys">Save Keys</button>
+                    </div>
+                    <div class="admin-filter-panel mb-3">
+                        <h6>Modelos por Slot</h6>
+                        <div id="aiModelsForm"></div>
+                        <button class="btn btn-admin-primary btn-sm mt-2" id="btnSaveAiModels">Save Models</button>
+                    </div>
+                    <div class="admin-filter-panel">
+                        <h6>Limites Diarios por Estudiante</h6>
+                        <div class="row g-2">
+                            <div class="col-md-4"><label class="form-label small">Daily</label><input id="limitDaily" type="number" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label small">Exam</label><input id="limitExam" type="number" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label small">ESP</label><input id="limitEsp" type="number" class="form-control"></div>
+                            <div class="col-md-6"><label class="form-label small">Coins/day Challenges</label><input id="limitCoinsChallenges" type="number" class="form-control"></div>
+                            <div class="col-md-6"><label class="form-label small">Coins/day Attendance</label><input id="limitCoinsAttendance" type="number" class="form-control"></div>
+                        </div>
+                        <button class="btn btn-admin-primary btn-sm mt-2" id="btnSaveDailyLimits">Save Limits</button>
+                    </div>
+                </div>
+
+                <div id="viewAdmins" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-person-gear"></i> Admins</h5>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <label class="small mb-0">School:</label>
+                        <select id="adminsSchoolFilter" class="form-select" style="max-width:280px;"><option value="">All schools</option></select>
+                    </div>
+                    <div id="adminUsersList"><p class="text-muted small">Loading...</p></div>
+                    <div class="admin-filter-panel mt-3">
+                        <div class="row g-2">
+                            <div class="col-md-3"><input type="text" id="newAdminName" class="form-control" placeholder="Full name"></div>
+                            <div class="col-md-2"><input type="text" id="newAdminDoc" class="form-control" placeholder="Document"></div>
+                            <div class="col-md-2"><input type="password" id="newAdminPin" class="form-control" placeholder="PIN"></div>
+                            <div class="col-md-2"><select id="newAdminRole" class="form-select"><option value="admin">admin</option><option value="teacher">teacher</option></select></div>
+                            <div class="col-md-3"><select id="newAdminInstitution" class="form-select"><option value="">School</option></select></div>
+                        </div>
+                        <button type="button" class="btn btn-admin-primary btn-sm mt-2" id="btnCreateAdminUser">Create Admin/Teacher</button>
+                    </div>
+                </div>
+
+                <div id="viewPolicies" class="admin-view">
+                    <div class="admin-view-header">
+                        <h5 class="admin-view-title"><i class="bi bi-shield-check"></i> Data Policies</h5>
+                    </div>
+
+                    <div class="admin-filter-panel mb-3">
+                        <h6 class="mb-1">Data Retention</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead><tr><th>Data type</th><th>Retention (days)</th><th>Action on expiry</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Attendance records</td><td><input id="policyAttendanceDays" class="form-control" type="number" min="1"></td><td>Auto-archive</td></tr>
+                                    <tr><td>Challenge results</td><td><input id="policyChallengeDays" class="form-control" type="number" min="1"></td><td>Auto-archive</td></tr>
+                                    <tr><td>Feedback messages</td><td><input id="policyFeedbackDays" class="form-control" type="number" min="1"></td><td>Auto-delete</td></tr>
+                                    <tr><td>Audit logs</td><td><input id="policyAuditDays" class="form-control" type="number" min="1"></td><td>Auto-archive</td></tr>
+                                    <tr><td>Coin transactions</td><td><input id="policyCoinDays" class="form-control" type="number" min="1"></td><td>Keep forever</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-admin-primary btn-sm" id="btnSaveDataPolicies">Save Policies</button>
+                    </div>
+
+                    <div class="admin-filter-panel mb-3">
+                        <h6 class="mb-2">Student Data Privacy</h6>
+                        <div class="form-check form-switch"><input id="privacyOwnHistory" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyOwnHistory">Students can see their own coin history</label></div>
+                        <div class="form-check form-switch"><input id="privacyLeaderboard" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyLeaderboard">Students can see leaderboard rankings</label></div>
+                        <div class="form-check form-switch"><input id="privacyOthersCoins" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyOthersCoins">Students can see other students' coins</label></div>
+                        <div class="form-check form-switch"><input id="privacyTeacherLogin" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyTeacherLogin">Teachers can see student login timestamps</label></div>
+                        <div class="form-check form-switch"><input id="privacyTeacherExport" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyTeacherExport">Teachers can export student personal data</label></div>
+                        <div class="form-check form-switch"><input id="privacyAdminAttendance" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyAdminAttendance">Admins can export attendance data</label></div>
+                        <div class="form-check form-switch"><input id="privacyDailyDigest" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyDailyDigest">System sends daily digest to admins</label></div>
+                        <button class="btn btn-admin-primary btn-sm mt-2" id="btnSavePrivacyPolicies">Save Privacy Settings</button>
+                    </div>
+
+                    <div class="admin-filter-panel mb-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <h6 class="mb-0">Audit Log (last 50)</h6>
+                            <button class="btn btn-sm btn-admin-outline" id="btnExportAuditCsv">Export CSV</button>
+                        </div>
+                        <div class="row g-2 mt-2">
+                            <div class="col-md-4"><input id="auditUserFilter" class="form-control" placeholder="Filter by user"></div>
+                            <div class="col-md-4"><input id="auditActionFilter" class="form-control" placeholder="Filter by action"></div>
+                            <div class="col-md-3"><input id="auditDateFilter" type="date" class="form-control"></div>
+                            <div class="col-md-1"><button class="btn btn-admin-outline w-100" id="btnRefreshAuditLog">Go</button></div>
+                        </div>
+                        <div id="policiesAuditTable" class="mt-2"><p class="text-muted small">Loading...</p></div>
+                    </div>
+
+                    <div class="admin-filter-panel">
+                        <h6 class="mb-2">Data Export & Compliance</h6>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-admin-outline-success btn-sm" id="btnExportAllStudents">Export All Students CSV</button>
+                            <button class="btn btn-admin-outline-success btn-sm" id="btnExportAllTransactions">Export All Transactions CSV</button>
+                            <button class="btn btn-admin-outline-success btn-sm" id="btnExportAllAttendance">Export All Attendance CSV</button>
+                            <button class="btn btn-admin-outline-success btn-sm" id="btnExportAllAudit">Export Audit Log CSV</button>
+                        </div>
+                        <div class="small text-muted mt-2">All exports are logged in the audit trail.</div>
+                    </div>
+                </div>
+
             </div>
-
-            <div id="viewFeedback" class="admin-view">
-                <h5 class="mb-3 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Feedback">Feedback</h5>
-                <p class="small text-muted">Messages from your students.</p>
-                <div id="adminFeedbackList"><p class="text-muted small">Loading...</p></div>
-            </div>
-
-            <div id="viewEconomy" class="admin-view">
-                <h5 class="mb-2 section-title">Economy</h5>
-                <h6 class="mb-2">Coin Economy</h6>
-                <div id="economyCoinTable"><p class="text-muted small">Loading...</p></div>
-                <h6 class="mb-2 mt-3">AI Credits</h6>
-                <div id="economyAiTable"><p class="text-muted small">Loading...</p></div>
-                <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="btnExportCreditReport">Export Credit Report CSV</button>
-            </div>
-
-            <div id="viewAiConfig" class="admin-view">
-                <h5 class="mb-2 section-title">AI Config</h5>
-                <div class="glass-panel mb-3" style="padding:1rem;">
-                    <h6>API Keys Globales</h6>
-                    <div class="row g-2">
-                        <div class="col-md-4"><label class="form-label small">OpenAI</label><input id="apiKeyOpenai" type="password" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label small">Anthropic</label><input id="apiKeyAnthropic" type="password" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label small">Google</label><input id="apiKeyGoogle" type="password" class="form-control"></div>
-                    </div>
-                    <button class="btn btn-primary btn-sm mt-2" id="btnSaveApiKeys">Save Keys</button>
-                </div>
-                <div class="glass-panel mb-3" style="padding:1rem;">
-                    <h6>Modelos por Slot</h6>
-                    <div id="aiModelsForm"></div>
-                    <button class="btn btn-primary btn-sm mt-2" id="btnSaveAiModels">Save Models</button>
-                </div>
-                <div class="glass-panel" style="padding:1rem;">
-                    <h6>Límites Diarios por Estudiante</h6>
-                    <div class="row g-2">
-                        <div class="col-md-4"><label class="form-label small">Daily</label><input id="limitDaily" type="number" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label small">Exam</label><input id="limitExam" type="number" class="form-control"></div>
-                        <div class="col-md-4"><label class="form-label small">ESP</label><input id="limitEsp" type="number" class="form-control"></div>
-                        <div class="col-md-6"><label class="form-label small">Coins/day Challenges</label><input id="limitCoinsChallenges" type="number" class="form-control"></div>
-                        <div class="col-md-6"><label class="form-label small">Coins/day Attendance</label><input id="limitCoinsAttendance" type="number" class="form-control"></div>
-                    </div>
-                    <button class="btn btn-primary btn-sm mt-2" id="btnSaveDailyLimits">Save Limits</button>
-                </div>
-            </div>
-
-            <div id="viewAdmins" class="admin-view">
-                <h5 class="mb-3 section-title">Admins</h5>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <label class="small mb-0">School:</label>
-                    <select id="adminsSchoolFilter" class="form-select" style="max-width:280px;"><option value="">All schools</option></select>
-                </div>
-                <div id="adminUsersList"><p class="text-muted small">Loading...</p></div>
-                <div class="glass-panel mt-3" style="padding:1rem;">
-                    <div class="row g-2">
-                        <div class="col-md-3"><input type="text" id="newAdminName" class="form-control" placeholder="Full name"></div>
-                        <div class="col-md-2"><input type="text" id="newAdminDoc" class="form-control" placeholder="Document"></div>
-                        <div class="col-md-2"><input type="password" id="newAdminPin" class="form-control" placeholder="PIN"></div>
-                        <div class="col-md-2"><select id="newAdminRole" class="form-select"><option value="admin">admin</option><option value="teacher">teacher</option></select></div>
-                        <div class="col-md-3"><select id="newAdminInstitution" class="form-select"><option value="">School</option></select></div>
-                    </div>
-                    <button type="button" class="btn btn-primary btn-sm mt-2" id="btnCreateAdminUser">Create Admin/Teacher</button>
-                </div>
-            </div>
-
-            <div id="viewPolicies" class="admin-view">
-                <h5 class="mb-3 section-title">Data Policies</h5>
-
-                <div class="glass-panel mb-3" style="padding:1rem;">
-                    <h6 class="mb-1">Data Retention</h6>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead><tr><th>Data type</th><th>Retention (days)</th><th>Action on expiry</th></tr></thead>
-                            <tbody>
-                                <tr><td>Attendance records</td><td><input id="policyAttendanceDays" class="form-control" type="number" min="1"></td><td>Auto-archive</td></tr>
-                                <tr><td>Challenge results</td><td><input id="policyChallengeDays" class="form-control" type="number" min="1"></td><td>Auto-archive</td></tr>
-                                <tr><td>Feedback messages</td><td><input id="policyFeedbackDays" class="form-control" type="number" min="1"></td><td>Auto-delete</td></tr>
-                                <tr><td>Audit logs</td><td><input id="policyAuditDays" class="form-control" type="number" min="1"></td><td>Auto-archive</td></tr>
-                                <tr><td>Coin transactions</td><td><input id="policyCoinDays" class="form-control" type="number" min="1"></td><td>Keep forever</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <button class="btn btn-primary btn-sm" id="btnSaveDataPolicies">Save Policies</button>
-                </div>
-
-                <div class="glass-panel mb-3" style="padding:1rem;">
-                    <h6 class="mb-2">Student Data Privacy</h6>
-                    <div class="form-check form-switch"><input id="privacyOwnHistory" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyOwnHistory">Students can see their own coin history</label></div>
-                    <div class="form-check form-switch"><input id="privacyLeaderboard" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyLeaderboard">Students can see leaderboard rankings</label></div>
-                    <div class="form-check form-switch"><input id="privacyOthersCoins" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyOthersCoins">Students can see other students' coins</label></div>
-                    <div class="form-check form-switch"><input id="privacyTeacherLogin" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyTeacherLogin">Teachers can see student login timestamps</label></div>
-                    <div class="form-check form-switch"><input id="privacyTeacherExport" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyTeacherExport">Teachers can export student personal data</label></div>
-                    <div class="form-check form-switch"><input id="privacyAdminAttendance" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyAdminAttendance">Admins can export attendance data</label></div>
-                    <div class="form-check form-switch"><input id="privacyDailyDigest" class="form-check-input" type="checkbox"><label class="form-check-label" for="privacyDailyDigest">System sends daily digest to admins</label></div>
-                    <button class="btn btn-primary btn-sm mt-2" id="btnSavePrivacyPolicies">Save Privacy Settings</button>
-                </div>
-
-                <div class="glass-panel mb-3" style="padding:1rem;">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <h6 class="mb-0">Audit Log (last 50)</h6>
-                        <button class="btn btn-sm btn-outline-primary" id="btnExportAuditCsv">Export CSV</button>
-                    </div>
-                    <div class="row g-2 mt-2">
-                        <div class="col-md-4"><input id="auditUserFilter" class="form-control" placeholder="Filter by user"></div>
-                        <div class="col-md-4"><input id="auditActionFilter" class="form-control" placeholder="Filter by action"></div>
-                        <div class="col-md-3"><input id="auditDateFilter" type="date" class="form-control"></div>
-                        <div class="col-md-1"><button class="btn btn-outline-secondary w-100" id="btnRefreshAuditLog">Go</button></div>
-                    </div>
-                    <div id="policiesAuditTable" class="mt-2"><p class="text-muted small">Loading...</p></div>
-                </div>
-
-                <div class="glass-panel" style="padding:1rem;">
-                    <h6 class="mb-2">Data Export & Compliance</h6>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <button class="btn btn-outline-success btn-sm" id="btnExportAllStudents">Export All Students CSV</button>
-                        <button class="btn btn-outline-success btn-sm" id="btnExportAllTransactions">Export All Transactions CSV</button>
-                        <button class="btn btn-outline-success btn-sm" id="btnExportAllAttendance">Export All Attendance CSV</button>
-                        <button class="btn btn-outline-success btn-sm" id="btnExportAllAudit">Export Audit Log CSV</button>
-                    </div>
-                    <div class="small text-muted mt-2">All exports are logged in the audit trail.</div>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
-    <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
+    <div class="text-center small text-muted mt-2 mb-3 admin-footer-version">v1.0-MVP-STABLE</div>
 
     <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index:1080;"></div>
 
@@ -347,7 +458,7 @@
     <div class="modal fade" id="modalImprovementPlan" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">🎯 Assign Improvement Plan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header"><h5 class="modal-title">Assign Improvement Plan</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <input type="hidden" id="improvementStudentId">
                     <div class="mb-3"><label class="form-label">Student</label><input type="text" id="improvementStudentName" class="form-control" readonly></div>
@@ -442,6 +553,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (document.getElementById('adminName')) {
         document.getElementById('adminName').textContent = user.nombre_completo || (user.rol === 'admin' ? 'School Admin' : 'Super Admin');
     }
+    // Mirror name in mobile topbar
+    document.querySelectorAll('.admin-name-mirror').forEach(function(el) {
+        el.textContent = user.nombre_completo || (user.rol === 'admin' ? 'School Admin' : 'Super Admin');
+    });
+    // Set role badge
+    var roleBadge = document.getElementById('adminRoleBadge');
+    if (roleBadge) roleBadge.textContent = user.rol === 'super_admin' ? 'Super Admin' : 'School Admin';
 
     var roleNavVisibility = {
         super_admin: ['navDashboard', 'navInstitutions', 'navUsers', 'navGroups', 'navEconomy', 'navAiConfig', 'navPolicies', 'navAdmins'],
@@ -454,6 +572,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         var navEl = document.getElementById(navId);
         if (!navEl) return;
         navEl.style.display = visibleNavIds.indexOf(navId) !== -1 ? '' : 'none';
+    });
+
+    // Hide sidebar section labels that have no visible children
+    document.querySelectorAll('.sidebar-nav-section').forEach(function(section) {
+        var links = section.querySelectorAll('.sidebar-nav-item');
+        var anyVisible = false;
+        links.forEach(function(link) { if (link.style.display !== 'none') anyVisible = true; });
+        if (!anyVisible) section.style.display = 'none';
     });
 
     var roleAllowedViews = {
@@ -765,7 +891,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             var barColor = pct >= 80 ? 'bg-success' : (pct >= 50 ? 'bg-warning' : 'bg-danger');
 
             var attendedHtml = attended.length
-                ? '<div class="mb-1 fw-semibold small text-success">✅ Attended (' + attended.length + ')</div>' +
+                ? '<div class="mb-1 fw-semibold small text-success">Attended (' + attended.length + ')</div>' +
                   '<ul class="small mb-2">' + attended.map(function(r) {
                       var nm = nameMap[String(r.student_id || '')] || r.student_id;
                       var t = r.created_at ? new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
@@ -775,7 +901,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 : '<div class="small text-muted mb-2">No check-ins recorded.</div>';
 
             var absentHtml = absent.length
-                ? '<div class="mb-1 fw-semibold small text-danger">❌ Absent (' + absent.length + ')</div>' +
+                ? '<div class="mb-1 fw-semibold small text-danger">Absent (' + absent.length + ')</div>' +
                   '<ul class="small mb-0 text-muted">' + absent.map(function(p) {
                       return '<li>' + escapeHtml(p.nombre_completo || p.documento_id) + '</li>';
                   }).join('') + '</ul>'
@@ -874,25 +1000,23 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!host) return;
         host.innerHTML = (window.UI && UI.renderSpinner) ? UI.renderSpinner('Loading auctions...') : '<p class="text-muted small">Loading...</p>';
         var groups = await getAdminSchoolGroupCodes();
-        var list = await getActiveAuctions();
+        await autoCloseExpiredAuctions();
+        var list = await getAuctions();
         var rows = (list || []).filter(function(a) {
-            if (!a.group_code) return true;
-            return groups.indexOf(String(a.group_code).trim()) !== -1;
+            var gc = String(a.group_code || '').trim();
+            if (!gc) return true;
+            return groups.indexOf(gc) !== -1;
         });
         if (!rows.length) {
-            host.innerHTML = '<div class="empty-state">No active items.</div>';
+            host.innerHTML = '<div class="empty-state">No items published yet.</div>';
             return;
         }
         host.innerHTML = '<div class="list-group">' + rows.map(function(a) {
-            var tg = a.group_code ? ('Group: ' + escapeHtml(a.group_code)) : 'All groups';
-            var type = String(a.item_type || 'auction');
-            var label = type === 'shop' ? 'Store item' : 'Auction';
+            var statusBadge = a.status === 'active' ? '<span class="badge bg-success ms-2">Active</span>' : '<span class="badge bg-secondary ms-2">' + escapeHtml(a.status || 'unknown') + '</span>';
+            var closeBtn = a.status === 'active' ? '<button class="btn btn-sm btn-outline-warning" onclick="window.adminCloseAuction(\'' + escapeHtml(a.id) + '\')">Close</button>' : '';
             return '<div class="list-group-item d-flex justify-content-between align-items-start">' +
-                '<div><strong>' + escapeHtml(a.item_name || '') + '</strong> <span class="badge bg-dark ms-2">' + escapeHtml(label) + '</span><br>' +
-                '<small class="text-muted">' + tg + ' · Current: ' + Number(a.current_bid || a.base_price || 0) + '</small></div>' +
-                '<div class="d-flex gap-1">' +
-                    '<button class="btn btn-sm btn-outline-danger" onclick="window.adminCloseAuction(\'' + escapeHtml(a.id) + '\')">Close</button>' +
-                '</div>' +
+                '<div><strong>' + escapeHtml(a.item_name || '') + '</strong>' + statusBadge + '<br><small class="text-muted">' + escapeHtml(a.description || '') + ' | Base: ' + (a.base_price || 0) + ' coins | Group: ' + escapeHtml(a.group_code || 'all') + '</small></div>' +
+                '<div>' + closeBtn + '</div>' +
                 '</div>';
         }).join('') + '</div>';
     }
@@ -1065,9 +1189,24 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     document.getElementById('btnLogout').addEventListener('click', window.logout);
 
+    // Mobile sidebar toggle
+    var mobileToggle = document.getElementById('adminMobileToggle');
+    var sidebar = document.getElementById('adminSidebar');
+    if (mobileToggle && sidebar) {
+        mobileToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+        });
+        // Close sidebar when clicking a nav item (mobile)
+        sidebar.querySelectorAll('.sidebar-nav-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                if (window.innerWidth < 992) sidebar.classList.remove('open');
+            });
+        });
+    }
+
     function activateView(viewId) {
         document.querySelectorAll('.admin-view').forEach(function(el) { el.classList.remove('active'); });
-        document.querySelectorAll('.admin-nav a').forEach(function(el) { el.classList.remove('active'); });
+        document.querySelectorAll('.admin-nav a, .sidebar-nav-item').forEach(function(el) { el.classList.remove('active'); });
         var viewEl = document.getElementById('view' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
         var navEl = document.getElementById('nav' + viewId.charAt(0).toUpperCase() + viewId.slice(1));
         if (viewEl) viewEl.classList.add('active');

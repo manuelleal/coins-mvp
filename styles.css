@@ -1332,16 +1332,19 @@ textarea::placeholder {
     --admin-radius: 8px;
 }
 
-/* Admin body override — no background image */
+/* Admin body override — no background image, no padding */
 body.admin-body {
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     background: var(--admin-surface) !important;
+    background-image: none !important;
     min-height: 100vh;
+    position: static;
 }
 
 body.admin-body::before {
-    display: none;
+    display: none !important;
+    content: none !important;
 }
 
 body.admin-body .decor-overlay {

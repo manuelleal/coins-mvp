@@ -3056,6 +3056,7 @@ async function checkAiLimit(institutionId) {
     if (institutionId) {
         var r = await supabaseClient.from(CONFIG.tables.institutions).select('*').eq('id', institutionId).maybeSingle();
         inst = r.data ? normalizeInstitution(r.data) : null;
+        if (!inst) return { allowed: true, used: 0, limit: 9999, plan: 'STANDARD', provider: 'anthropic', institution: { id: institutionId } };
     } else {
         inst = await getOrCreateInstitution();
     }

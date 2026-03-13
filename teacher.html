@@ -4038,7 +4038,10 @@ document.addEventListener('DOMContentLoaded', function() {
             var fallbackKey = await getCentralApiKey(fallbackProvider);
             return { provider: fallbackProvider, apiKey: fallbackKey };
         }
-        if (cfg.error) throw cfg.error;
+        if (cfg.error) {
+            var fallbackKey2 = await getCentralApiKey('anthropic');
+            return { provider: 'anthropic', apiKey: fallbackKey2 };
+        }
         var provider = String((cfg.data && cfg.data.active_ai_provider) || 'anthropic').toLowerCase();
         var apiKey = String((cfg.data && cfg.data.active_ai_key) || '').trim();
         if (!apiKey) {

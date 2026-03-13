@@ -3051,8 +3051,14 @@ function normalizeInstitution(row) {
     return row;
 }
 
-async function checkAiLimit() {
-    var inst = await getOrCreateInstitution();
+async function checkAiLimit(institutionId) {
+    var inst;
+    if (institutionId) {
+        var r = await supabaseClient.from(CONFIG.tables.institutions).select('*').eq('id', institutionId).maybeSingle();
+        inst = r.data ? normalizeInstitution(r.data) : null;
+    } else {
+        inst = await getOrCreateInstitution();
+    }
     if (!inst) return { allowed: false, error: 'No institution found' };
     var used = Number(inst.ai_credits_used) || 0;
     var limit = Number(inst.ai_credit_pool) || 10;
@@ -3079,7 +3085,7 @@ async function incrementAiUsage(institutionId) {
     var current = Number(read.data[colName]) || 0;
     var patch = {}; patch[colName] = current + 1;
     var upd = await supabaseClient.from(CONFIG.tables.institutions).update(patch).eq('id', institutionId);
-    if (upd.error) throw upd.error;
+    if (upd.error) { console.warn('[AI_USAGE] Could not increment institution usage (RLS):', upd.error.message); }
     return current + 1;
 }
 

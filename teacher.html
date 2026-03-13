@@ -3994,7 +3994,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var credits = await getTeacherCredits(user.id);
             user.teacher_credits = credits;
             try { localStorage.setItem('lingoCoins_user', JSON.stringify(user)); } catch (_) {}
-            var limitInfo = await checkAiLimit();
+            var limitInfo = await checkAiLimit(user.institution_id || null);
             var usageEl = document.getElementById('aiUsageInfo');
             if (usageEl) usageEl.textContent = 'Plan: ' + limitInfo.plan + ' | Pool: ' + limitInfo.used + '/' + limitInfo.limit + ' | Provider: ' + (limitInfo.provider || 'anthropic');
             updateDrako('Listo para generar. Elige los parametros y haz clic en <b>Generar Reto</b>.', credits);
@@ -4090,7 +4090,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            var limitCheck = await checkAiLimit();
+            var limitCheck = await checkAiLimit(user.institution_id || null);
             var usageEl = document.getElementById('aiUsageInfo');
             if (usageEl) usageEl.textContent = 'Plan: ' + limitCheck.plan + ' | Pool: ' + limitCheck.used + '/' + limitCheck.limit;
 

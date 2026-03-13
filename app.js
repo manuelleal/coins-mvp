@@ -3154,7 +3154,7 @@ async function callAIProvider(provider, apiKey, systemPrompt, userPrompt) {
     } else if (prov === 'claude' || prov === 'anthropic') {
         aiUrl = 'https://api.anthropic.com/v1/messages';
         aiBody = JSON.stringify({
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-haiku-4-5-20251001',
             max_tokens: 3000,
             system: systemPrompt,
             messages: [{ role: 'user', content: userPrompt }]
@@ -3421,7 +3421,6 @@ function validatePlanFeature(plan, feature) {
     var tier = tiers[p] != null ? tiers[p] : 0;
 
     if (f === 'ai_generation') {
-        if (tier < 1) return { allowed: false, reason: 'Plan BASIC does not include AI generation. Upgrade to STANDARD or higher.' };
         return { allowed: true };
     }
     if (f === 'multi_provider') {
@@ -3460,13 +3459,7 @@ async function routeAIRequest(provider, apiKey, systemPrompt, userPrompt, contex
         throw new Error(planCheck.reason);
     }
 
-    var prov = String(provider || 'chatgpt').toLowerCase();
-    if (prov !== 'chatgpt' && prov !== 'openai') {
-        var multiCheck = validatePlanFeature(plan, 'multi_provider');
-        if (!multiCheck.allowed) {
-            prov = 'chatgpt';
-        }
-    }
+    var prov = String(provider || 'anthropic').toLowerCase();
 
     var rawContent = await callAIProvider(prov, apiKey, systemPrompt, userPrompt);
 

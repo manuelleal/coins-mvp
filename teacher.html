@@ -4011,7 +4011,7 @@ document.addEventListener('DOMContentLoaded', function() {
         async function getCentralApiKey(providerName) {
             try {
                 if (typeof getSystemConfig !== 'function') return '';
-                var keyPack = await getSystemConfig('api_keys');
+                var keyPack = await getSystemConfig('ai_credentials');
                 var parsed = keyPack;
                 if (typeof keyPack === 'string') {
                     try { parsed = JSON.parse(keyPack); } catch (_) { parsed = null; }

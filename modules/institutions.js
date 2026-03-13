@@ -339,18 +339,19 @@
       coins_per_day_challenges: 50,
       coins_per_day_attendance: 10
     });
-    var instKeyRes = await supabaseClient
-      .from(CONFIG.tables.institutions)
-      .select('active_ai_key,active_ai_provider')
-      .not('active_ai_key', 'is', null)
-      .limit(1)
+    var keysRes = await supabaseClient
+      .from(CONFIG.tables.system_configs)
+      .select('key_value')
+      .eq('key_name', 'ai_credentials')
       .maybeSingle();
     var keys = { openai: '', anthropic: '', google: '' };
-    if (instKeyRes.data && instKeyRes.data.active_ai_key) {
-      var prov = String(instKeyRes.data.active_ai_provider || 'anthropic').toLowerCase();
-      if (prov === 'openai' || prov === 'chatgpt') keys.openai = instKeyRes.data.active_ai_key;
-      else if (prov === 'google' || prov === 'gemini') keys.google = instKeyRes.data.active_ai_key;
-      else keys.anthropic = instKeyRes.data.active_ai_key;
+    if (keysRes.data && keysRes.data.key_value) {
+      try {
+        var parsed = typeof keysRes.data.key_value === 'string'
+          ? JSON.parse(keysRes.data.key_value)
+          : keysRes.data.key_value;
+        if (parsed && typeof parsed === 'object') keys = parsed;
+      } catch (_) {}
     }
     state.aiKeys = {
       openai: String(keys.openai || ''),
@@ -444,15 +445,16 @@
     if (!primaryKey) return toast('Enter at least one API key', 'warning');
     var primaryProvider = anthKey ? 'anthropic' : (openaiKey ? 'openai' : 'google');
 
-    // Write key to ALL institutions so every teacher can use it
-    var r = await supabaseClient.from(CONFIG.tables.institutions)
-      .update({ active_ai_key: primaryKey, active_ai_provider: primaryProvider })
-      .not('id', 'is', null);
+    // Save to system_configs (super_admin has write access here)
+    var payload = { openai: openaiKey, anthropic: anthKey, google: googleKey };
+    var r = await supabaseClient.from(CONFIG.tables.system_configs)
+      .upsert([{ key_name: 'ai_credentials', key_value: JSON.stringify(payload), updated_at: new Date().toISOString() }],
+        { onConflict: 'key_name' });
     if (r.error) return toast('Error saving key: ' + r.error.message, 'danger');
 
     state.aiKeys = { openai: openaiKey, anthropic: anthKey, google: googleKey };
     await logAudit('SAVE_AI_KEYS', 'system', 'ai_config', { provider: primaryProvider });
-    toast('API key saved to all institutions ✓', 'success');
+    toast('API key saved ✓', 'success');
   }
 
   async function saveAiModels() {

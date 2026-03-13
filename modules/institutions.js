@@ -339,7 +339,19 @@
       coins_per_day_challenges: 50,
       coins_per_day_attendance: 10
     });
+    var instKeyRes = await supabaseClient
+      .from(CONFIG.tables.institutions)
+      .select('active_ai_key,active_ai_provider')
+      .not('active_ai_key', 'is', null)
+      .limit(1)
+      .maybeSingle();
     var keys = { openai: '', anthropic: '', google: '' };
+    if (instKeyRes.data && instKeyRes.data.active_ai_key) {
+      var prov = String(instKeyRes.data.active_ai_provider || 'anthropic').toLowerCase();
+      if (prov === 'openai' || prov === 'chatgpt') keys.openai = instKeyRes.data.active_ai_key;
+      else if (prov === 'google' || prov === 'gemini') keys.google = instKeyRes.data.active_ai_key;
+      else keys.anthropic = instKeyRes.data.active_ai_key;
+    }
     state.aiKeys = {
       openai: String(keys.openai || ''),
       anthropic: String(keys.anthropic || ''),
@@ -415,7 +427,32 @@
   }
 
   async function saveApiKeys() {
-    toast('Blocked: API keys can no longer be saved from frontend. Configure secrets in backend.', 'warning');
+    if (!isSuperAdmin()) return;
+    var ok = await requestAiConfigAccess();
+    if (!ok) return;
+
+    var rawAnth = ((document.getElementById('apiKeyAnthropic') || {}).value || '').trim();
+    var rawOpenai = ((document.getElementById('apiKeyOpenai') || {}).value || '').trim();
+    var rawGoogle = ((document.getElementById('apiKeyGoogle') || {}).value || '').trim();
+
+    // Only update if user entered a new value (not the masked placeholder)
+    var anthKey = (rawAnth && rawAnth !== maskApiKey(state.aiKeys.anthropic)) ? rawAnth : state.aiKeys.anthropic;
+    var openaiKey = (rawOpenai && rawOpenai !== maskApiKey(state.aiKeys.openai)) ? rawOpenai : state.aiKeys.openai;
+    var googleKey = (rawGoogle && rawGoogle !== maskApiKey(state.aiKeys.google)) ? rawGoogle : state.aiKeys.google;
+
+    var primaryKey = anthKey || openaiKey || googleKey;
+    if (!primaryKey) return toast('Enter at least one API key', 'warning');
+    var primaryProvider = anthKey ? 'anthropic' : (openaiKey ? 'openai' : 'google');
+
+    // Write key to ALL institutions so every teacher can use it
+    var r = await supabaseClient.from(CONFIG.tables.institutions)
+      .update({ active_ai_key: primaryKey, active_ai_provider: primaryProvider })
+      .not('id', 'is', null);
+    if (r.error) return toast('Error saving key: ' + r.error.message, 'danger');
+
+    state.aiKeys = { openai: openaiKey, anthropic: anthKey, google: googleKey };
+    await logAudit('SAVE_AI_KEYS', 'system', 'ai_config', { provider: primaryProvider });
+    toast('API key saved to all institutions ✓', 'success');
   }
 
   async function saveAiModels() {

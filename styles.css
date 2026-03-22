@@ -139,16 +139,18 @@ body.bg-auctions {
 .card,
 .card-premium,
 .glass-panel,
+.glass-card,
+.panel,
 .gold-card,
 .auction-card,
 .question-builder-card,
 .marketplace-card,
 .challenge-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
+    background: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    border-radius: 12px;
     color: var(--text-primary);
-    box-shadow: var(--shadow-soft);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .card {
@@ -192,7 +194,8 @@ body.bg-auctions {
 }
 
 .section-title.with-banner {
-    background: url("assets/images/banner-azul-dorado.webp") center/cover no-repeat;
+    background-image: none;
+    background-color: #F8F9FA;
     border-radius: var(--radius);
     padding: 0.55rem 0.8rem;
 }
@@ -247,6 +250,7 @@ body.bg-auctions {
 }
 
 .mascot-fixed {
+    display: none;
     position: fixed;
     right: 18px;
     bottom: 14px;
@@ -259,8 +263,9 @@ body.bg-auctions {
 .decor-overlay {
     position: fixed;
     inset: 0;
-    background: url("assets/images/particulas-overlay.webp") center/cover no-repeat;
-    opacity: 0.14;
+    background-image: none;
+    background-color: transparent;
+    opacity: 0;
     pointer-events: none;
     z-index: 0;
 }
@@ -747,6 +752,7 @@ textarea::placeholder {
 }
 
 .leaderboard-dragon {
+    display: none;
     position: absolute;
     right: 8px;
     top: 8px;
@@ -773,7 +779,8 @@ textarea::placeholder {
 }
 
 .auction-banner {
-    background: url("assets/images/banner-azul-dorado.webp") center/cover no-repeat;
+    background-image: none;
+    background-color: #F8F9FA;
     border-radius: 10px;
     padding: 0.45rem 0.75rem;
 }

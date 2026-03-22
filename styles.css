@@ -1,25 +1,55 @@
 /* ========================================
-   LINGO-COINS - PREMIUM THEME (FINAL PHASE)
-   Dark + Gold visual layer (no business logic changes)
+   ENGRAMA BRAND THEME
+   Clean light + navy + gold palette
    ======================================== */
 
 :root {
-    --bg-900: #081020;
-    --bg-850: #0a1326;
-    --bg-800: #111d34;
-    --bg-700: #1a2945;
-    --gold-500: #fbbf24;
-    --gold-400: #fcd34d;
-    --gold-600: #d4a111;
-    --text-100: #f8fafc;
-    --text-200: #dbe5f6;
-    --text-300: #9fb0cf;
-    --danger: #ef4444;
-    --success: #10b981;
-    --shadow-soft: 0 10px 35px rgba(2, 8, 23, 0.38);
-    --shadow-gold: 0 0 22px rgba(251, 191, 36, 0.28);
-    --glass: rgba(11, 24, 46, 0.68);
-    --glass-border: rgba(159, 176, 207, 0.25);
+    /* Backgrounds */
+    --bg-color: #F8F9FA;
+    --card-bg: #FFFFFF;
+    --sidebar-bg: #003366;
+
+    /* Brand colors */
+    --primary: #003366;
+    --primary-dark: #002244;
+    --accent: #FFD700;
+
+    /* Text */
+    --text-primary: #003366;
+    --text-secondary: #666666;
+    --text-white: #FFFFFF;
+
+    /* Status */
+    --success: #4CAF50;
+    --error: #F44336;
+    --warning: #FF9800;
+    --info: #3399CC;
+
+    /* Borders */
+    --border-color: #E0E0E0;
+    --border-light: #F0F0F0;
+
+    /* Secondary palette */
+    --blue-light: #3399CC;
+    --olive: #A4A870;
+    --gray-medium: #CCCCCC;
+
+    /* Legacy aliases for existing rules */
+    --bg-900: #F8F9FA;
+    --bg-850: #F0F2F5;
+    --bg-800: #FFFFFF;
+    --bg-700: #F0F2F5;
+    --gold-500: #FFD700;
+    --gold-400: #FFD700;
+    --gold-600: #CCA800;
+    --text-100: #003366;
+    --text-200: #334D80;
+    --text-300: #666666;
+    --danger: #F44336;
+    --shadow-soft: 0 2px 12px rgba(0, 51, 102, 0.10);
+    --shadow-gold: 0 0 12px rgba(255, 215, 0, 0.30);
+    --glass: #FFFFFF;
+    --glass-border: #E0E0E0;
     --radius: 12px;
     --radius-lg: 18px;
     --radius-xl: 22px;
@@ -37,8 +67,8 @@ body {
 body {
     margin: 0;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--text-100);
-    background: radial-gradient(circle at 10% 10%, #16294c 0%, var(--bg-900) 55%, #070d1c 100%);
+    color: var(--text-primary);
+    background: var(--bg-color);
     position: relative;
     padding: 1rem;
 }
@@ -47,7 +77,7 @@ body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: linear-gradient(160deg, rgba(2, 6, 23, 0.68), rgba(4, 10, 26, 0.78));
+    background: transparent;
 }
 
 /* Mobile-responsive tables */
@@ -81,20 +111,11 @@ body::before {
     z-index: -1;
 }
 
-body.bg-dashboard {
-    background: url("assets/images/fondo-dashboard.webp") center/cover no-repeat fixed;
-}
-
-body.bg-challenges {
-    background: url("assets/images/fondo-challenges.webp") center/cover no-repeat fixed;
-}
-
-body.bg-store {
-    background: url("assets/images/fondo-store.webp") center/cover no-repeat fixed;
-}
-
+body.bg-dashboard,
+body.bg-challenges,
+body.bg-store,
 body.bg-auctions {
-    background: url("assets/images/fondo-subastas.webp") center/cover no-repeat fixed;
+    background: var(--bg-color);
 }
 
 .page-container,
@@ -123,13 +144,11 @@ body.bg-auctions {
 .question-builder-card,
 .marketplace-card,
 .challenge-card {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    color: var(--text-100);
+    color: var(--text-primary);
     box-shadow: var(--shadow-soft);
-    backdrop-filter: blur(9px);
-    -webkit-backdrop-filter: blur(9px);
 }
 
 .card {
@@ -167,7 +186,7 @@ body.bg-auctions {
     align-items: center;
     gap: 0.65rem;
     margin-bottom: 0.75rem;
-    color: var(--gold-400);
+    color: var(--primary);
     font-weight: 800;
     letter-spacing: 0.01em;
 }
@@ -268,12 +287,12 @@ body.bg-auctions {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: var(--text-100);
+    color: var(--primary);
 }
 
 .text-muted,
 .small.text-muted {
-    color: var(--text-300) !important;
+    color: var(--text-secondary) !important;
 }
 
 .form-control,
@@ -285,30 +304,30 @@ h1, h2, h3, h4, h5, h6 {
 .table td,
 .table th,
 .input-group-text {
-    background-color: rgba(8, 19, 38, 0.82) !important;
-    color: var(--text-100) !important;
-    border-color: rgba(159, 176, 207, 0.34) !important;
+    background-color: #FFFFFF !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
 }
 
 .form-control::placeholder,
 textarea::placeholder {
-    color: rgba(159, 176, 207, 0.72) !important;
+    color: var(--text-secondary) !important;
 }
 
 .form-control:focus,
 .form-select:focus {
-    border-color: rgba(251, 191, 36, 0.55) !important;
-    box-shadow: 0 0 0 0.2rem rgba(251, 191, 36, 0.18) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 51, 102, 0.15) !important;
 }
 
 #registerForm .form-control,
 #registerForm .form-select {
-    background-color: rgba(20, 33, 56, 0.72) !important;
-    border-color: rgba(186, 205, 233, 0.42) !important;
+    background-color: #FFFFFF !important;
+    border-color: var(--border-color) !important;
 }
 
 #registerForm .form-control::placeholder {
-    color: rgba(205, 220, 243, 0.88) !important;
+    color: var(--text-secondary) !important;
 }
 
 .modal-content .form-label,
@@ -335,32 +354,32 @@ textarea::placeholder {
 
 .btn-dorado,
 .btn-primary {
-    color: #111827 !important;
-    background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
-    border: 1px solid rgba(251, 191, 36, 0.65);
-    box-shadow: var(--shadow-gold);
+    color: #FFFFFF !important;
+    background: var(--primary);
+    border: 1px solid var(--primary-dark);
+    box-shadow: var(--shadow-soft);
 }
 
 .btn-dorado:hover,
 .btn-primary:hover {
-    color: #111827 !important;
+    color: #FFFFFF !important;
+    background: var(--primary-dark);
     transform: translateY(-1px);
-    filter: brightness(1.04);
 }
 
 .btn-outline-dorado,
 .btn-outline-primary,
 .btn-outline-secondary {
-    color: var(--gold-400) !important;
-    border-color: rgba(251, 191, 36, 0.55) !important;
-    background: rgba(251, 191, 36, 0.08) !important;
+    color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    background: transparent !important;
 }
 
 .btn-outline-dorado:hover,
 .btn-outline-primary:hover,
 .btn-outline-secondary:hover {
-    background: rgba(251, 191, 36, 0.2) !important;
-    color: #111827 !important;
+    background: var(--primary) !important;
+    color: #FFFFFF !important;
 }
 
 .btn-success {
@@ -391,8 +410,8 @@ textarea::placeholder {
 .student-nav,
 .admin-nav,
 .nav-tabs {
-    background: linear-gradient(120deg, rgba(9, 20, 41, 0.95), rgba(23, 38, 68, 0.95));
-    border: 1px solid rgba(159, 176, 207, 0.25);
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
     border-radius: 14px 14px 0 0;
 }
 
@@ -426,14 +445,16 @@ textarea::placeholder {
 .admin-nav a,
 .admin-nav .nav-btn,
 .nav-tab {
-    color: var(--text-100) !important;
+    color: var(--text-primary) !important;
 }
 
 .student-nav a.active,
 .admin-nav a.active,
 .nav-tab.active {
-    background: rgba(251, 191, 36, 0.2) !important;
-    color: var(--gold-400) !important;
+    background: rgba(0, 51, 102, 0.08) !important;
+    color: var(--primary) !important;
+    border-left: 3px solid #FFD700 !important;
+    font-weight: 700 !important;
 }
 
 .student-view,
@@ -458,16 +479,75 @@ textarea::placeholder {
 
 .student-nav .nav-btn,
 .admin-nav .nav-btn {
-    border: 1px solid rgba(159, 176, 207, 0.4);
+    border: 1px solid var(--border-color);
     background: transparent;
     cursor: pointer;
     border-radius: 8px;
     padding: 0.34rem 0.72rem;
 }
 
+/* ---- Super Admin: Sidebar layout (Linear.app style) ---- */
+.layout-sidebar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch;
+}
+
+.layout-sidebar .admin-nav {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 210px;
+    min-width: 180px;
+    flex-shrink: 0;
+    border-radius: 0 !important;
+    background: #003366 !important;
+    border-right: none;
+    border-bottom: none;
+    padding: 1.25rem 0.65rem !important;
+    gap: 0.2rem !important;
+    min-height: 100%;
+}
+
+.layout-sidebar .admin-nav .greeting {
+    width: 100%;
+    margin-right: 0 !important;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #FFFFFF !important;
+}
+
+.layout-sidebar .admin-nav a,
+.layout-sidebar .admin-nav .nav-btn {
+    width: 100%;
+    text-align: left;
+    padding: 0.45rem 0.75rem !important;
+    color: rgba(255,255,255,0.88) !important;
+}
+
+.layout-sidebar .admin-nav a.active,
+.layout-sidebar .admin-nav .nav-btn.active {
+    background: rgba(255,255,255,0.12) !important;
+    color: #FFFFFF !important;
+    border-left: 3px solid #FFD700 !important;
+    font-weight: 700 !important;
+}
+
+.layout-sidebar .admin-nav .nav-btn#btnLogout {
+    margin-top: 1rem;
+}
+
+.admin-content {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+}
+
 .gold-card {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.16));
-    border: 1px solid rgba(251, 191, 36, 0.34);
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.35);
     border-radius: 14px;
     padding: 1.1rem;
     margin-bottom: 1rem;
@@ -529,7 +609,8 @@ textarea::placeholder {
     padding: 0.6rem 0.8rem;
     border-radius: 10px;
     margin-bottom: 0.45rem;
-    background: rgba(8, 19, 38, 0.55);
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
 }
 
 .leaderboard-list li.top {
@@ -595,11 +676,25 @@ textarea::placeholder {
     min-width: 74px;
 }
 
-.student-table th,
+.student-table th {
+    padding: 0.72rem;
+    text-align: left;
+    background-color: #003366;
+    color: #FFFFFF;
+    border-bottom: 1px solid var(--border-color);
+}
+
 .student-table td {
     padding: 0.72rem;
     text-align: left;
-    border-bottom: 1px solid rgba(159, 176, 207, 0.28);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table thead th,
+.table > thead > tr > th {
+    background-color: #003366 !important;
+    color: #FFFFFF !important;
+    border-color: #002244 !important;
 }
 
 .coin-cell {
@@ -857,9 +952,9 @@ textarea::placeholder {
     border-radius: 10px;
     font-size: 14px;
     font-weight: 600;
-    color: #fff;
-    background: var(--bg-800);
-    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-soft);
     opacity: 0;
     transform: translateX(30px);
@@ -871,26 +966,24 @@ textarea::placeholder {
     opacity: 1;
     transform: translateX(0);
 }
-.bid-toast-success { border-left: 4px solid var(--success); }
-.bid-toast-warning { border-left: 4px solid #f59e0b; }
-.bid-toast-danger  { border-left: 4px solid var(--danger); }
-.bid-toast-info    { border-left: 4px solid #3b82f6; }
+.bid-toast-success { border-left: 4px solid #4CAF50; }
+.bid-toast-warning { border-left: 4px solid #FF9800; }
+.bid-toast-danger  { border-left: 4px solid #F44336; }
+.bid-toast-info    { border-left: 4px solid #3399CC; }
 
 /* ========================================
    CHALLENGE BUILDER — Teacher Accordion Cards
    ======================================== */
 .question-accordion-card {
-    border-left: 4px solid var(--gold-500);
+    border-left: 4px solid #FFD700;
     border-radius: 12px;
-    background: var(--glass);
-    border-top: 1px solid var(--glass-border);
-    border-right: 1px solid var(--glass-border);
-    border-bottom: 1px solid var(--glass-border);
+    background: #FFFFFF;
+    border-top: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 12px;
     overflow: hidden;
     box-shadow: var(--shadow-soft);
-    backdrop-filter: blur(9px);
-    -webkit-backdrop-filter: blur(9px);
 }
 .question-accordion-header {
     padding: 14px 18px;
@@ -975,15 +1068,15 @@ textarea::placeholder {
 }
 .question-accordion-card .form-control,
 .question-accordion-card .form-select {
-    background-color: rgba(8, 19, 38, 0.82) !important;
-    color: var(--text-100) !important;
-    border: 1px solid rgba(159, 176, 207, 0.34) !important;
+    background-color: #FFFFFF !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 8px;
 }
 .question-accordion-card .form-control:focus,
 .question-accordion-card .form-select:focus {
-    border-color: rgba(251, 191, 36, 0.55) !important;
-    box-shadow: 0 0 0 0.15rem rgba(251, 191, 36, 0.12) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 0.15rem rgba(0, 51, 102, 0.12) !important;
 }
 .qa-type-badge {
     font-size: 12px;
@@ -1051,20 +1144,20 @@ textarea::placeholder {
 .challenge-start-screen h2 {
     font-size: 26px;
     font-weight: 800;
-    color: var(--text-100);
+    color: var(--primary);
     margin: 0;
 }
 .challenge-start-screen .start-subtitle {
     font-size: 16px;
-    color: var(--text-300);
+    color: var(--text-secondary);
 }
 .challenge-start-screen .start-btn {
     font-size: 18px;
     font-weight: 700;
     padding: 14px 40px;
     border-radius: 14px;
-    background: var(--gold-500);
-    color: #000;
+    background: var(--primary);
+    color: #FFFFFF;
     border: none;
     cursor: pointer;
     transition: transform 0.1s ease, box-shadow 0.2s ease;
@@ -1101,37 +1194,38 @@ textarea::placeholder {
 }
 .challenge-question-card {
     cursor: pointer;
-    border: 2px solid rgba(255,255,255,0.1);
+    border: 2px solid var(--border-color);
     border-radius: 14px;
     padding: 18px 20px;
     margin-bottom: 10px;
     font-size: 17px;
     transition: all 0.15s ease;
-    background: rgba(255,255,255,0.04);
+    background: #FFFFFF;
+    color: var(--text-primary);
     user-select: none;
 }
 .challenge-question-card:hover {
-    border-color: var(--gold-500);
-    background: rgba(212,160,23,0.08);
+    border-color: #FFD700;
+    background: rgba(255,215,0,0.06);
     transform: translateX(4px);
 }
 .challenge-question-card.selected {
-    border-color: var(--gold-500);
-    background: rgba(212,160,23,0.15);
+    border-color: #FFD700;
+    background: rgba(255,215,0,0.10);
 }
 .challenge-question-card.correct {
-    border-color: var(--success);
-    background: rgba(16,185,129,0.15);
+    border-color: #4CAF50;
+    background: rgba(76,175,80,0.12);
     pointer-events: none;
 }
 .challenge-question-card.wrong {
-    border-color: var(--danger);
-    background: rgba(239,68,68,0.12);
+    border-color: #F44336;
+    background: rgba(244,67,54,0.10);
     pointer-events: none;
 }
 .challenge-question-card.reveal-correct {
-    border-color: var(--success);
-    background: rgba(16,185,129,0.1);
+    border-color: #4CAF50;
+    background: rgba(76,175,80,0.08);
     pointer-events: none;
 }
 .challenge-feedback-msg {
@@ -1202,25 +1296,25 @@ textarea::placeholder {
     font-size: 17px;
     min-height: 48px;
     border-radius: 12px;
-    border: 2px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.04);
-    color: var(--text-100);
+    border: 2px solid var(--border-color);
+    background: #FFFFFF;
+    color: var(--text-primary);
     padding: 12px 16px;
     width: 100%;
     margin-bottom: 12px;
 }
 .challenge-flow-input:focus {
-    border-color: var(--gold-500);
+    border-color: var(--primary);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(251,191,36,0.15);
+    box-shadow: 0 0 0 3px rgba(0,51,102,0.12);
 }
 .challenge-flow-submit {
     font-size: 17px;
     font-weight: 700;
     padding: 14px 32px;
     border-radius: 12px;
-    background: var(--gold-500);
-    color: #000;
+    background: var(--primary);
+    color: #FFFFFF;
     border: none;
     cursor: pointer;
     width: 100%;
@@ -1250,9 +1344,9 @@ textarea::placeholder {
     font-size: 16px;
     min-height: 44px;
     border-radius: 10px;
-    border: 2px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.04);
-    color: var(--text-100);
+    border: 2px solid var(--border-color);
+    background: #FFFFFF;
+    color: var(--text-primary);
     padding: 8px 12px;
 }
 .challenge-tf-toggle {
@@ -1266,42 +1360,43 @@ textarea::placeholder {
     font-size: 18px;
     font-weight: 700;
     border-radius: 14px;
-    border: 2px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.04);
-    color: var(--text-100);
+    border: 2px solid var(--border-color);
+    background: #FFFFFF;
+    color: var(--text-primary);
     cursor: pointer;
     text-align: center;
     transition: all 0.15s ease;
 }
 .challenge-tf-btn:hover {
-    border-color: var(--gold-500);
-    background: rgba(212,160,23,0.08);
+    border-color: #FFD700;
+    background: rgba(255,215,0,0.06);
 }
 .challenge-tf-btn.selected {
-    border-color: var(--gold-500);
-    background: rgba(212,160,23,0.15);
+    border-color: #FFD700;
+    background: rgba(255,215,0,0.10);
 }
 .challenge-ms-check {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 14px 18px;
-    border: 2px solid rgba(255,255,255,0.1);
+    border: 2px solid var(--border-color);
     border-radius: 14px;
     margin-bottom: 8px;
     font-size: 17px;
     cursor: pointer;
     transition: all 0.15s ease;
-    background: rgba(255,255,255,0.04);
+    background: #FFFFFF;
+    color: var(--text-primary);
     user-select: none;
 }
 .challenge-ms-check:hover {
-    border-color: var(--gold-500);
-    background: rgba(212,160,23,0.08);
+    border-color: #FFD700;
+    background: rgba(255,215,0,0.06);
 }
 .challenge-ms-check.checked {
-    border-color: var(--gold-500);
-    background: rgba(212,160,23,0.15);
+    border-color: #FFD700;
+    background: rgba(255,215,0,0.10);
 }
 .challenge-ms-check input[type="checkbox"] {
     width: 20px;

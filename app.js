@@ -603,7 +603,7 @@ async function createChallengeWithQuestions(challengePayload, questions) {
     var basePayload = Object.assign({}, challengePayload || {});
     if (basePayload.title != null) basePayload.title = String(basePayload.title).trim();
     if (basePayload.description != null) basePayload.description = String(basePayload.description).trim();
-    var optionalColumns = ['scope', 'target_group', 'group_code', 'target_groups', 'status', 'question_text', 'question_payload', 'options'];
+    var optionalColumns = ['scope', 'target_group', 'group_code', 'target_groups', 'status', 'question_text', 'question_payload', 'options', 'cefr_level', 'skill', 'topic', 'specific_instructions', 'created_by', 'institution_id'];
 
     async function insertChallengeCompat() {
         var tryPayload = Object.assign({}, basePayload);
@@ -809,25 +809,39 @@ async function loadRegisterInstitutions() {
     });
 
     try {
-        var res = await supabaseClient
-            .from(CONFIG.tables.institutions)
-            .select('id,name')
-            .order('name', { ascending: true });
-        if (res.error && typeof isMissingColumnError === 'function' && isMissingColumnError(res.error, 'name', CONFIG.tables.institutions)) {
-            res = await supabaseClient
+        var rows = [];
+        var safeResolved = false;
+
+        // Prefer RPC path to avoid noisy 401s for anon/public contexts.
+        try {
+            var safeList = await supabaseClient.rpc('list_institutions_safe');
+            if (!safeList.error && Array.isArray(safeList.data)) {
+                rows = safeList.data;
+                safeResolved = true;
+            }
+        } catch (_) {}
+
+        if (!safeResolved) {
+            var res = await supabaseClient
                 .from(CONFIG.tables.institutions)
-                .select('id')
-                .order('id', { ascending: true });
-        }
-        if (res.error) {
-            // Legacy environments: allow registration to continue without institution scoping.
-            instSel.innerHTML = '<option value="__legacy__">Default</option>';
-            instSel.value = '__legacy__';
-            instSel.disabled = true;
-            return loadGroups('__legacy__');
+                .select('id,name')
+                .order('name', { ascending: true });
+            if (res.error && typeof isMissingColumnError === 'function' && isMissingColumnError(res.error, 'name', CONFIG.tables.institutions)) {
+                res = await supabaseClient
+                    .from(CONFIG.tables.institutions)
+                    .select('id')
+                    .order('id', { ascending: true });
+            }
+            if (res.error) {
+                // Legacy environments: allow registration to continue without institution scoping.
+                instSel.innerHTML = '<option value="__legacy__">Default</option>';
+                instSel.value = '__legacy__';
+                instSel.disabled = true;
+                return loadGroups('__legacy__');
+            }
+            rows = res.data || [];
         }
 
-        var rows = res.data || [];
         if (!rows.length) {
             instSel.innerHTML = '<option value="__legacy__">Default</option>';
             instSel.value = '__legacy__';
@@ -2860,7 +2874,7 @@ async function submitChallenge(challengeId, documentoId, answer) {
 
         let coinsAwarded = 0;
         if (isCorrect) {
-            coinsAwarded = Math.floor(Math.random() * 26) + 5; // random 5–30
+            coinsAwarded = Math.floor(Math.random() * 15) + 1; // random 1–15
         }
 
         const submissionPayload = {
@@ -3054,8 +3068,17 @@ function normalizeInstitution(row) {
 async function checkAiLimit(institutionId) {
     var inst;
     if (institutionId) {
-        var r = await supabaseClient.from(CONFIG.tables.institutions).select('*').eq('id', institutionId).maybeSingle();
-        inst = r.data ? normalizeInstitution(r.data) : null;
+        try {
+            var safe = await supabaseClient.rpc('list_institutions_safe');
+            if (!safe.error && Array.isArray(safe.data)) {
+                var safeRow = safe.data.find(function(row) { return String((row && row.id) || '') === String(institutionId); }) || null;
+                if (safeRow) inst = normalizeInstitution(safeRow);
+            }
+        } catch (_) {}
+        if (!inst) {
+            var r = await supabaseClient.from(CONFIG.tables.institutions).select('*').eq('id', institutionId).maybeSingle();
+            inst = r.data ? normalizeInstitution(r.data) : null;
+        }
         if (!inst) return { allowed: true, used: 0, limit: 9999, plan: 'STANDARD', provider: 'anthropic', institution: { id: institutionId } };
     } else {
         inst = await getOrCreateInstitution();
@@ -3072,6 +3095,10 @@ async function checkAiLimit(institutionId) {
 }
 
 async function incrementAiUsage(institutionId) {
+    var actor = _getCurrentUser();
+    var role = String((actor && actor.rol) || '').toLowerCase();
+    if (role && role !== 'admin' && role !== 'super_admin') return 0;
+
     var read = await supabaseClient
         .from(CONFIG.tables.institutions)
         .select('ai_credits_used')
@@ -3308,6 +3335,10 @@ async function createImprovementPlan(studentId, teacherId, focusTopic, entryCost
 
 // ========== AUDIT LOGGING ==========
 async function insertAuditLog(userId, institutionId, actionType, result, metadata) {
+    var actor = _getCurrentUser();
+    var role = String((actor && actor.rol) || '').toLowerCase();
+    if (role && role !== 'admin' && role !== 'super_admin') return;
+
     try {
         var payload = {
             user_id: userId || null,
@@ -3319,10 +3350,14 @@ async function insertAuditLog(userId, institutionId, actionType, result, metadat
         };
         var res = await supabaseClient.from(CONFIG.tables.audit_logs).insert([payload]);
         if (res.error) {
+            var msg = String(res.error.message || '').toLowerCase();
+            if (String(res.error.code || '') === '42501' || msg.indexOf('permission denied') !== -1 || msg.indexOf('row-level security') !== -1) return;
             if (isMissingRelationError(res.error, CONFIG.tables.audit_logs)) return;
             console.warn('[AUDIT_LOG] Insert failed:', res.error.message);
         }
     } catch (e) {
+        var emsg = String((e && e.message) || '').toLowerCase();
+        if (String((e && e.code) || '') === '42501' || emsg.indexOf('permission denied') !== -1 || emsg.indexOf('row-level security') !== -1) return;
         if (!isMissingRelationError(e, CONFIG.tables.audit_logs)) {
             console.warn('[AUDIT_LOG] Error:', e.message);
         }
@@ -3470,20 +3505,24 @@ async function routeAIRequest(provider, apiKey, systemPrompt, userPrompt, contex
 
     var rawContent = await callAIProvider(prov, apiKey, systemPrompt, userPrompt);
 
-    try {
-        await supabaseClient.from(CONFIG.tables.ai_usage_logs).insert([{
-            user_id: userId,
-            institution_id: institutionId,
-            provider: prov,
-            cefr_level: cefrLevel,
-            skill: skill,
-            topic: topic,
-            credits_charged: creditsToCharge,
-            created_at: new Date().toISOString()
-        }]);
-    } catch (e) {
-        if (!isMissingRelationError(e, CONFIG.tables.ai_usage_logs)) {
-            console.warn('[AI_USAGE_LOG]', e.message);
+    var actor = _getCurrentUser();
+    var role = String((actor && actor.rol) || '').toLowerCase();
+    if (!role || role === 'admin' || role === 'super_admin') {
+        try {
+            await supabaseClient.from(CONFIG.tables.ai_usage_logs).insert([{
+                user_id: userId,
+                institution_id: institutionId,
+                provider: prov,
+                cefr_level: cefrLevel,
+                skill: skill,
+                topic: topic,
+                credits_charged: creditsToCharge,
+                created_at: new Date().toISOString()
+            }]);
+        } catch (e) {
+            if (!isMissingRelationError(e, CONFIG.tables.ai_usage_logs)) {
+                console.warn('[AI_USAGE_LOG]', e.message);
+            }
         }
     }
 

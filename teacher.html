@@ -3795,7 +3795,13 @@ document.addEventListener('DOMContentLoaded', function() {
             options: firstQuestion && firstQuestion.payload && firstQuestion.payload.options ? firstQuestion.payload.options : null,
             status: 'active',
             max_winners: 10,
-            current_winners: 0
+            current_winners: 0,
+            cefr_level: ((document.getElementById('aiCefrLevel') || {}).value || null),
+            skill: ((document.getElementById('aiSkill') || {}).value || null),
+            topic: ((document.getElementById('aiTopic') || {}).value || '').trim() || null,
+            specific_instructions: ((document.getElementById('aiSpecificInstructions') || {}).value || '').trim() || null,
+            created_by: (user && user.id) ? user.id : null,
+            institution_id: (user && user.institution_id) ? user.institution_id : null
         };
         if (scope === 'group') {
             payload.scope = 'group';

@@ -1215,7 +1215,10 @@
                     if (qIdx < questions.length - 1) {
                         runtime.currentQuestionIndex = qIdx + 1;
                         console.debug('[CHALLENGE_FLOW] advance to Q' + (runtime.currentQuestionIndex + 1) + '; challenge=' + challengeId);
-                        showBidToast('Correct! Moving to next question.', 'success');
+                        var midCoins = Math.floor(Math.random() * 15) + 1;
+                        runtime.earnedCoinsPreview = (runtime.earnedCoinsPreview || 0) + midCoins;
+                        burstCoins(Math.min(Math.ceil(midCoins / 5), 4));
+                        showBidToast('✅ Correct! +' + midCoins + ' coins earned. Moving to next question.', 'success');
                         runtime.currentSubmitBusy = false;
                         loadStudentChallenges();
                         return;

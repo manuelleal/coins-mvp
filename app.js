@@ -4499,20 +4499,9 @@ async function getTeacherCoinBudget(teacherProfileId) {
     try {
         var res = await supabaseClient
             .from(CONFIG.tables.profiles)
-            .select('id,coin_budget,coin_pocket,monedas,rol')
+            .select('*')
             .eq('id', teacherProfileId)
             .maybeSingle();
-
-        // Some schemas don't have coin_budget/coin_pocket. Retry with monedas only.
-        if (res.error && typeof isMissingColumnError === 'function' &&
-            (isMissingColumnError(res.error, 'coin_budget', CONFIG.tables.profiles) ||
-             isMissingColumnError(res.error, 'coin_pocket', CONFIG.tables.profiles))) {
-            res = await supabaseClient
-                .from(CONFIG.tables.profiles)
-                .select('id,monedas,rol')
-                .eq('id', teacherProfileId)
-                .maybeSingle();
-        }
 
         if (res.error || !res.data) return { ok: false, error: (res.error && res.error.message) || 'Teacher not found', budget: 0 };
         var d = res.data;

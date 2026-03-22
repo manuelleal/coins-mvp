@@ -1429,28 +1429,13 @@ document.addEventListener('DOMContentLoaded', function() {
     async function loadTeacherPocket() {
         if (!isTeacherRole) return;
         try {
-            // Read coin_budget (hierarchical) first, fallback to coin_pocket, fallback to monedas.
+            // Read full row to avoid hard-failing when optional budget columns are absent.
             var res = await supabaseClient
                 .from(CONFIG.tables.profiles)
-                .select('coin_budget,coin_pocket,monedas')
+                .select('*')
                 .eq('id', user.id)
                 .maybeSingle();
-
-            if (res.error) {
-                // Some schemas don't have coin_budget/coin_pocket. In that case, read monedas.
-                if (isMissingColumnError(res.error, 'coin_budget', CONFIG.tables.profiles) ||
-                    isMissingColumnError(res.error, 'coin_pocket', CONFIG.tables.profiles)) {
-                    var res2 = await supabaseClient
-                        .from(CONFIG.tables.profiles)
-                        .select('monedas')
-                        .eq('id', user.id)
-                        .maybeSingle();
-                    if (res2.error) throw res2.error;
-                    setTeacherPocketDisplay(Number((res2.data || {}).monedas || 0));
-                    return;
-                }
-                throw res.error;
-            }
+            if (res.error) throw res.error;
 
             var d = res.data || {};
             var balance = d.coin_budget != null ? Number(d.coin_budget)
@@ -3994,7 +3979,8 @@ document.addEventListener('DOMContentLoaded', function() {
             var credits = await getTeacherCredits(user.id);
             user.teacher_credits = credits;
             try { localStorage.setItem('lingoCoins_user', JSON.stringify(user)); } catch (_) {}
-            var limitInfo = await checkAiLimit(user.institution_id || null);
+            var currentInstitutionId = await resolveCurrentInstitutionId();
+            var limitInfo = await checkAiLimit(currentInstitutionId || null);
             var usageEl = document.getElementById('aiUsageInfo');
             if (usageEl) usageEl.textContent = 'Plan: ' + limitInfo.plan + ' | Pool: ' + limitInfo.used + '/' + limitInfo.limit + ' | Provider: ' + (limitInfo.provider || 'anthropic');
             updateDrako('Listo para generar. Elige los parametros y haz clic en <b>Generar Reto</b>.', credits);
@@ -4003,8 +3989,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function normalizeAiProviderName(providerName) {
+        var prov = String(providerName || '').trim().toLowerCase();
+        if (prov === 'chatgpt') return 'openai';
+        if (prov === 'claude') return 'anthropic';
+        if (prov === 'gemini') return 'google';
+        return prov || 'anthropic';
+    }
+
+    async function resolveCurrentInstitutionId() {
+        var instId = String((user && user.institution_id) || '').trim();
+        if (instId) return instId;
+        try {
+            var prof = await supabaseClient
+                .from(CONFIG.tables.profiles)
+                .select('institution_id')
+                .eq('id', user.id)
+                .maybeSingle();
+            var liveInst = String((prof.data && prof.data.institution_id) || '').trim();
+            if (liveInst) {
+                user.institution_id = liveInst;
+                try { localStorage.setItem('lingoCoins_user', JSON.stringify(user)); } catch (_) {}
+                return liveInst;
+            }
+        } catch (_) {}
+        return '';
+    }
+
     async function fetchInstitutionAIConfig(institutionId) {
-        if (!institutionId) {
+        var targetInstitutionId = String(institutionId || '').trim();
+        if (!targetInstitutionId) {
+            targetInstitutionId = await resolveCurrentInstitutionId();
+        }
+        if (!targetInstitutionId) {
             return { provider: 'anthropic', apiKey: '' };
         }
 
@@ -4017,33 +4034,46 @@ document.addEventListener('DOMContentLoaded', function() {
                     try { parsed = JSON.parse(keyPack); } catch (_) { parsed = null; }
                 }
                 if (!parsed || typeof parsed !== 'object') return '';
-                var prov = String(providerName || '').toLowerCase();
-                if (prov === 'chatgpt') prov = 'openai';
-                if (prov === 'claude') prov = 'anthropic';
-                if (prov === 'gemini') prov = 'google';
+                var prov = normalizeAiProviderName(providerName);
                 return String(parsed[prov] || '').trim();
             } catch (_) {
                 return '';
             }
         }
 
+        var provider = 'anthropic';
+        var apiKey = '';
+
         var cfg = await supabaseClient
             .from(CONFIG.tables.institutions)
             .select('active_ai_provider,active_ai_key')
-            .eq('id', institutionId)
+            .eq('id', targetInstitutionId)
             .maybeSingle();
-        if (cfg.error && (isMissingColumnError(cfg.error, 'active_ai_provider', CONFIG.tables.institutions)
-            || isMissingColumnError(cfg.error, 'active_ai_key', CONFIG.tables.institutions))) {
-            var fallbackProvider = 'anthropic';
-            var fallbackKey = await getCentralApiKey(fallbackProvider);
-            return { provider: fallbackProvider, apiKey: fallbackKey };
+
+        if (!cfg.error && cfg.data) {
+            provider = normalizeAiProviderName(cfg.data.active_ai_provider || 'anthropic');
+            apiKey = String(cfg.data.active_ai_key || '').trim();
+        } else {
+            // RLS-safe fallback path if direct row select fails for teacher role.
+            try {
+                var safeList = await supabaseClient.rpc('list_institutions_safe');
+                if (!safeList.error && Array.isArray(safeList.data)) {
+                    var safeRow = safeList.data.find(function(r) {
+                        return String((r && r.id) || '') === targetInstitutionId;
+                    });
+                    if (safeRow) {
+                        provider = normalizeAiProviderName(safeRow.active_ai_provider || provider);
+                        apiKey = String(safeRow.active_ai_key || safeRow.api_key || '').trim();
+                    }
+                }
+            } catch (_) {}
+
+            if (cfg.error && (isMissingColumnError(cfg.error, 'active_ai_provider', CONFIG.tables.institutions)
+                || isMissingColumnError(cfg.error, 'active_ai_key', CONFIG.tables.institutions))) {
+                provider = 'anthropic';
+            }
         }
-        if (cfg.error) {
-            var fallbackKey2 = await getCentralApiKey('anthropic');
-            return { provider: 'anthropic', apiKey: fallbackKey2 };
-        }
-        var provider = String((cfg.data && cfg.data.active_ai_provider) || 'anthropic').toLowerCase();
-        var apiKey = String((cfg.data && cfg.data.active_ai_key) || '').trim();
+
         if (!apiKey) {
             apiKey = await getCentralApiKey(provider);
         }
@@ -4093,7 +4123,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            var limitCheck = await checkAiLimit(user.institution_id || null);
+            var currentInstitutionId = await resolveCurrentInstitutionId();
+            var limitCheck = await checkAiLimit(currentInstitutionId || null);
             var usageEl = document.getElementById('aiUsageInfo');
             if (usageEl) usageEl.textContent = 'Plan: ' + limitCheck.plan + ' | Pool: ' + limitCheck.used + '/' + limitCheck.limit;
 
@@ -4103,7 +4134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            var instId = limitCheck.institution ? limitCheck.institution.id : null;
+            var instId = currentInstitutionId || (limitCheck.institution ? limitCheck.institution.id : null);
             var aiCfg = await fetchInstitutionAIConfig(instId);
             var selectedProvider = aiCfg.provider || (limitCheck.provider || 'anthropic');
             var apiKey = aiCfg.apiKey;
@@ -4132,7 +4163,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             var rawContent = await routeAIRequest(selectedProvider, apiKey, systemPrompt, userPrompt, {
                 userId: user.id,
-                institutionId: limitCheck.institution ? limitCheck.institution.id : null,
+                institutionId: instId || null,
                 plan: limitCheck.plan,
                 cefrLevel: cefrLevel,
                 skill: skill,
@@ -4155,7 +4186,9 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             renderChallengeBuilder();
 
-            await incrementAiUsage(limitCheck.institution.id);
+            if (instId) {
+                await incrementAiUsage(instId);
+            }
             var newCredits = await deductTeacherCredits(user.id, 3);
             user.teacher_credits = newCredits;
             try { localStorage.setItem('lingoCoins_user', JSON.stringify(user)); } catch (_) {}

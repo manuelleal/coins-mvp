@@ -242,6 +242,7 @@
                             <option value="all">For all groups</option>
                             <option value="group">For one specific group</option>
                         </select>
+                        <div id="challengeAudienceHint" class="form-text mt-1">Audience: all groups (all students will see this challenge).</div>
                     </div>
                     <div class="mb-2">
                         <label class="form-label">Target Group</label>
@@ -300,6 +301,10 @@
                                     <label class="form-label">Topic</label>
                                     <input type="text" id="aiTopic" class="form-control" placeholder="e.g. Past Perfect, Conditionals, Job Interview">
                                 </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Specific Instructions (optional)</label>
+                                    <input type="text" id="aiSpecificInstructions" class="form-control" placeholder="e.g. Use engineering examples, my students work in healthcare, focus on job interviews">
+                                </div>
                                 <div class="d-flex gap-2 mb-2">
                                     <div style="flex:1;">
                                         <label class="form-label">Questions</label>
@@ -311,7 +316,8 @@
                                     <label class="form-label">AI Credentials</label>
                                     <div class="form-text">AI provider and API key are managed centrally by super_admin per institution.</div>
                                 </div>
-                                <button type="button" class="btn btn-warning" id="btnRunStructuredAI"><i class="bi bi-stars"></i> Generar Reto (Costo: 3 Creditos)</button>
+                                <button type="button" class="btn btn-warning" id="btnRunStructuredAI"><i class="bi bi-stars"></i> Generar Borrador IA (Costo: 3 Creditos)</button>
+                                <div class="form-text mt-2" style="font-size:12px;">La IA <strong>NO publica</strong> automaticamente. Primero revisa/edita preguntas abajo y luego presiona <strong>Create Challenge</strong>.</div>
                                 <button type="button" class="btn btn-outline-secondary btn-sm ms-2" onclick="document.getElementById('aiGeneratePanel').style.display='none'">Cancel</button>
                                 <div id="aiGenerateStatus" class="mt-2"></div>
                             </div>
@@ -3722,12 +3728,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     };
 
-    document.getElementById('challengeScope').addEventListener('change', function() {
-        var scope = this.value;
+    function updateChallengeAudienceHint() {
+        var scopeSel = document.getElementById('challengeScope');
         var targetSel = document.getElementById('challengeTargetGroup');
-        if (!targetSel) return;
-        targetSel.style.display = scope === 'group' ? '' : 'none';
-    });
+        var hintEl = document.getElementById('challengeAudienceHint');
+        if (!scopeSel || !targetSel || !hintEl) return;
+        var scope = String(scopeSel.value || 'all');
+        if (scope === 'group') {
+            targetSel.style.display = '';
+            var g = String(targetSel.value || '').trim();
+            hintEl.textContent = g
+                ? ('Audience: only group "' + g + '" (only those students will see this challenge).')
+                : 'Audience: one specific group. Select Target Group before publishing.';
+            return;
+        }
+        targetSel.style.display = 'none';
+        hintEl.textContent = 'Audience: all groups (all students will see this challenge).';
+    }
+
+    document.getElementById('challengeScope').addEventListener('change', updateChallengeAudienceHint);
+    document.getElementById('challengeTargetGroup').addEventListener('change', updateChallengeAudienceHint);
+    updateChallengeAudienceHint();
     document.getElementById('btnAddChallengeQuestion').addEventListener('click', function() {
         addChallengeQuestion('multiple_choice');
     });
@@ -3980,8 +4001,13 @@ document.addEventListener('DOMContentLoaded', function() {
             user.teacher_credits = credits;
             try { localStorage.setItem('lingoCoins_user', JSON.stringify(user)); } catch (_) {}
             var currentInstitutionId = await resolveCurrentInstitutionId();
-            var limitInfo = await checkAiLimit(currentInstitutionId || null);
             var usageEl = document.getElementById('aiUsageInfo');
+            if (!currentInstitutionId) {
+                if (usageEl) usageEl.textContent = 'Plan: N/A | Pool: N/A | Provider: N/A';
+                updateDrako('🔒 Tu usuario no tiene institucion asignada. Pide al admin vincular institution_id o grupo institucional.', credits);
+                return;
+            }
+            var limitInfo = await checkAiLimit(currentInstitutionId);
             if (usageEl) usageEl.textContent = 'Plan: ' + limitInfo.plan + ' | Pool: ' + limitInfo.used + '/' + limitInfo.limit + ' | Provider: ' + (limitInfo.provider || 'anthropic');
             updateDrako('Listo para generar. Elige los parametros y haz clic en <b>Generar Reto</b>.', credits);
         } catch (e) {
@@ -4013,13 +4039,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 return liveInst;
             }
         } catch (_) {}
+
+        var groupCode = String((user && user.grupo) || '').trim();
+        if (!groupCode && CONFIG.tables.teacher_groups) {
+            try {
+                var tg = await supabaseClient
+                    .from(CONFIG.tables.teacher_groups)
+                    .select('group_code')
+                    .eq('teacher_id', user.id)
+                    .limit(1)
+                    .maybeSingle();
+                groupCode = String((tg.data && tg.data.group_code) || '').trim();
+            } catch (_) {}
+        }
+
+        if (groupCode) {
+            try {
+                var grp = await supabaseClient
+                    .from(CONFIG.tables.groups)
+                    .select('institution_id')
+                    .eq('group_code', groupCode)
+                    .maybeSingle();
+                var groupInst = String((grp.data && grp.data.institution_id) || '').trim();
+                if (groupInst) {
+                    user.institution_id = groupInst;
+                    if (!user.grupo) user.grupo = groupCode;
+                    try { localStorage.setItem('lingoCoins_user', JSON.stringify(user)); } catch (_) {}
+                    return groupInst;
+                }
+            } catch (_) {}
+        }
         return '';
     }
 
     async function fetchInstitutionAIConfig(institutionId) {
         var targetInstitutionId = String(institutionId || '').trim();
+        var sessionInstitutionId = await resolveCurrentInstitutionId();
+        if (sessionInstitutionId) {
+            targetInstitutionId = sessionInstitutionId;
+        }
         if (!targetInstitutionId) {
-            targetInstitutionId = await resolveCurrentInstitutionId();
+            targetInstitutionId = sessionInstitutionId || '';
         }
         if (!targetInstitutionId) {
             return { provider: 'anthropic', apiKey: '' };
@@ -4044,17 +4104,53 @@ document.addEventListener('DOMContentLoaded', function() {
         var provider = 'anthropic';
         var apiKey = '';
 
-        var cfg = await supabaseClient
-            .from(CONFIG.tables.institutions)
-            .select('active_ai_provider,active_ai_key')
-            .eq('id', targetInstitutionId)
-            .maybeSingle();
+        // Preferred secure path: backend function can return key without exposing table-wide read.
+        try {
+            var secureCfg = await supabaseClient.rpc('get_institution_ai_config_safe', {
+                p_institution_id: targetInstitutionId,
+                p_profile_id: user && user.id ? user.id : null
+            });
+            var secureRow = null;
+            if (!secureCfg.error) {
+                if (Array.isArray(secureCfg.data)) secureRow = secureCfg.data[0] || null;
+                else secureRow = secureCfg.data || null;
+            }
+            if (secureRow) {
+                provider = normalizeAiProviderName(secureRow.active_ai_provider || secureRow.provider || provider);
+                apiKey = String(secureRow.active_ai_key || secureRow.api_key || secureRow.apiKey || '').trim();
+            }
+        } catch (_) {}
+
+        var cfg = { error: null, data: null };
+        if (!apiKey) {
+            cfg = await supabaseClient
+                .from(CONFIG.tables.institutions)
+                .select('active_ai_provider,active_ai_key')
+                .eq('id', targetInstitutionId)
+                .maybeSingle();
+        }
 
         if (!cfg.error && cfg.data) {
             provider = normalizeAiProviderName(cfg.data.active_ai_provider || 'anthropic');
             apiKey = String(cfg.data.active_ai_key || '').trim();
-        } else {
-            // RLS-safe fallback path if direct row select fails for teacher role.
+        }
+
+        if (!apiKey) {
+            try {
+                var legacyCfg = await supabaseClient
+                    .from(CONFIG.tables.institutions)
+                    .select('api_key,active_ai_provider')
+                    .eq('id', targetInstitutionId)
+                    .maybeSingle();
+                if (!legacyCfg.error && legacyCfg.data) {
+                    provider = normalizeAiProviderName(legacyCfg.data.active_ai_provider || provider);
+                    apiKey = String(legacyCfg.data.api_key || '').trim();
+                }
+            } catch (_) {}
+        }
+
+        if (!apiKey) {
+            // RLS-safe fallback path when direct row select fails or returns no visible row.
             try {
                 var safeList = await supabaseClient.rpc('list_institutions_safe');
                 if (!safeList.error && Array.isArray(safeList.data)) {
@@ -4101,6 +4197,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var context = (document.getElementById('aiContext').value || '').trim();
         var topic = (document.getElementById('aiTopic').value || '').trim();
         var count = parseInt(document.getElementById('aiQuestionCount').value) || 5;
+        var specificInstructions = (document.getElementById('aiSpecificInstructions').value || '').trim();
         var statusEl = document.getElementById('aiGenerateStatus');
 
         if (!topic) { showToast('Ingresa un tema (Topic)', 'danger'); return; }
@@ -4124,7 +4221,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             var currentInstitutionId = await resolveCurrentInstitutionId();
-            var limitCheck = await checkAiLimit(currentInstitutionId || null);
+            if (!currentInstitutionId) {
+                updateDrako('🔒 Tu usuario no tiene institucion asignada. Contacta al admin para vincular tu cuenta.', credits);
+                if (statusEl) statusEl.innerHTML = '<span class="text-danger">Teacher without institution_id / institutional group.</span>';
+                return;
+            }
+            var limitCheck = await checkAiLimit(currentInstitutionId);
             var usageEl = document.getElementById('aiUsageInfo');
             if (usageEl) usageEl.textContent = 'Plan: ' + limitCheck.plan + ' | Pool: ' + limitCheck.used + '/' + limitCheck.limit;
 
@@ -4153,13 +4255,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 '- Skill Focus: ' + skill + '\n' +
                 (role ? '- Student Role: ' + role + '\n' : '') +
                 (context ? '- Situational Context: ' + context + '\n' : '') +
-                '- Topic: ' + topic + '\n\n' +
-                'Return a JSON array where each object has:\n' +
+                '- Topic: ' + topic + '\n' +
+                (specificInstructions ? '- Additional context from teacher: ' + specificInstructions + '\n' : '') +
+                '\nReturn a JSON array where each object has:\n' +
                 '- "question_text": the question string\n' +
-                '- "question_type": one of "multiple_choice", "true_false", or "open"\n' +
-                '- "options": array of 4 option strings (for multiple_choice), ["True","False"] (for true_false), or [] (for open)\n' +
-                '- "correct_answer": the correct answer string (must match one option exactly for MC/TF)\n\n' +
-                'Mix question types. Ensure difficulty matches CEFR ' + cefrLevel + '. Return ONLY the JSON array.';
+                '- "question_type": one of "multiple_choice", "true_false", or "fill_blank"\n' +
+                '- "options": array of 4 option strings (for multiple_choice), ["True","False"] (for true_false), or [] (for fill_blank)\n' +
+                '- "correct_answer": the correct answer string (must match one option exactly for MC/TF; the correct word or phrase for fill_blank)\n\n' +
+                'IMPORTANT RULES:\n' +
+                '- Every question must directly relate to the topic: ' + topic + '\n' +
+                '- Use real-world, practical examples — not generic or abstract ones\n' +
+                '- Vary difficulty within CEFR ' + cefrLevel + ' (some easier, some harder within the same level)\n' +
+                '- Every question must be clearly different from the others\n' +
+                '- Do NOT generate open-ended or essay questions\n' +
+                'Return ONLY the JSON array.';
 
             var rawContent = await routeAIRequest(selectedProvider, apiKey, systemPrompt, userPrompt, {
                 userId: user.id,
@@ -4187,7 +4296,11 @@ document.addEventListener('DOMContentLoaded', function() {
             renderChallengeBuilder();
 
             if (instId) {
-                await incrementAiUsage(instId);
+                try {
+                    await incrementAiUsage(instId);
+                } catch (e) {
+                    console.warn('[AI_USAGE_INCREMENT]', e && e.message ? e.message : e);
+                }
             }
             var newCredits = await deductTeacherCredits(user.id, 3);
             user.teacher_credits = newCredits;
@@ -4195,8 +4308,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             updateDrako('✅ ¡Listo! Genere ' + questions.length + ' preguntas CEFR ' + cefrLevel + '. Revisalas arriba y publica el reto.', newCredits);
             if (usageEl) usageEl.textContent = 'Plan: ' + limitCheck.plan + ' | Pool: ' + (limitCheck.used + 1) + '/' + limitCheck.limit;
-            if (statusEl) statusEl.innerHTML = '<span class="text-success">✅ ' + questions.length + ' preguntas generadas. Revisa y crea el reto.</span>';
-            showToast('Drako genero ' + questions.length + ' preguntas. Revisalas arriba.', 'success');
+            if (statusEl) statusEl.innerHTML = '<span class="text-success">✅ ' + questions.length + ' preguntas generadas. Revisa/edita, define Scope y luego crea el reto.</span>';
+            showToast('Drako genero ' + questions.length + ' preguntas. Revisa/edita y luego publica con Create Challenge.', 'success');
 
             if (!document.getElementById('challengeTitle').value.trim()) {
                 document.getElementById('challengeTitle').value = topic + ' (CEFR ' + cefrLevel + ' - ' + skill + ')';

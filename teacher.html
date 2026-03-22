@@ -61,6 +61,7 @@
                 <button type="button" class="nav-btn" id="btnMute" title="Mute sounds"><i class="bi bi-volume-up"></i></button>
                 <button type="button" class="nav-btn" id="btnLogout">Logout</button>
             </nav>
+            <div id="absenceAlertBanner" aria-live="polite"></div>
 
             <!-- VIEW: Dashboard (teacher/admin) -->
             <div id="viewDashboard" class="admin-view">
@@ -2427,6 +2428,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .order('created_at', { ascending: false });
             if (sesRes.error && isMissingColumnError(sesRes.error, 'group_code', CONFIG.tables.attendance_sessions)) {
                 window._teacherAbsenceMap = nextMap;
+                renderAbsenceBanner([]);
                 return;
             }
             if (sesRes.error) throw sesRes.error;
@@ -2441,6 +2443,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (!totalSessions || !students.length) {
                 window._teacherAbsenceMap = nextMap;
+                renderAbsenceBanner([]);
                 return;
             }
 
@@ -2462,23 +2465,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 attendedByStudent[sid][day] = true;
             });
 
-            var alerted = window._teacherAbsenceNotified || {};
+            var absentStudents = [];
             students.forEach(function(s) {
                 var sid = String(s.documento_id || '');
                 var attendedCount = attendedByStudent[sid] ? Object.keys(attendedByStudent[sid]).length : 0;
                 var absences = Math.max(0, totalSessions - attendedCount);
                 nextMap[sid] = absences;
-                if (!silentToast && absences >= 3 && !alerted[sid]) {
-                    alerted[sid] = true;
-                    showToast('⚠️ ' + (s.nombre_completo || 'Student') + ' has missed 3+ classes', 'danger');
+                if (absences >= 3) {
+                    absentStudents.push({ name: s.nombre_completo || 'Student', absences: absences });
                 }
             });
-            window._teacherAbsenceNotified = alerted;
             window._teacherAbsenceMap = nextMap;
+            renderAbsenceBanner(absentStudents);
         } catch (e) {
             console.error('[ABSENCE_ALERTS]', e);
         }
     }
+
+    function renderAbsenceBanner(absentStudents) {
+        var banner = document.getElementById('absenceAlertBanner');
+        if (!banner) return;
+        if (!absentStudents || absentStudents.length === 0) {
+            banner.style.display = 'none';
+            banner.innerHTML = '';
+            return;
+        }
+        var count = absentStudents.length;
+        var listHtml = absentStudents.map(function(s) {
+            return '<li>' + escapeHtml(s.name) + ' <span class="absence-badge">' + s.absences + ' absences</span></li>';
+        }).join('');
+        banner.style.display = 'block';
+        banner.innerHTML =
+            '<div class="absence-summary-banner">' +
+            '<button type="button" class="absence-summary-toggle" onclick="window.toggleAbsenceBanner()" aria-expanded="false">' +
+            '⚠️ <strong>' + count + ' student' + (count !== 1 ? 's' : '') + ' with 3+ absences</strong>' +
+            ' — <span class="absence-view-details">View details ▾</span>' +
+            '</button>' +
+            '<ul class="absence-detail-list" id="absenceDetailList" style="display:none;">' + listHtml + '</ul>' +
+            '</div>';
+    }
+
+    window.toggleAbsenceBanner = function() {
+        var list = document.getElementById('absenceDetailList');
+        var toggle = document.querySelector('.absence-summary-toggle');
+        if (!list) return;
+        var isOpen = list.style.display !== 'none';
+        list.style.display = isOpen ? 'none' : 'block';
+        var span = toggle ? toggle.querySelector('.absence-view-details') : null;
+        if (span) span.textContent = isOpen ? 'View details ▾' : 'Hide details ▴';
+        if (toggle) toggle.setAttribute('aria-expanded', String(!isOpen));
+    };
 
     async function loadAttendanceSessionSummary(groupCode) {
         var el = document.getElementById('attendanceSessionSummary');

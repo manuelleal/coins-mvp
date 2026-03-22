@@ -1410,3 +1410,240 @@ textarea::placeholder {
     height: 20px;
     accent-color: var(--gold-500);
 }
+
+/* ========================================
+   TEACHER UI POLISH — v2.0
+   Modern education dashboard feel.
+   Inspired by Google Classroom, Duolingo
+   for Schools, and Notion.
+   ======================================== */
+
+/* ---- Base typography ---- */
+body {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* ---- Admin view: generous breathing room ---- */
+.admin-view {
+    padding: 1.75rem !important;
+}
+
+/* ---- Nav items: readable size + spacing ---- */
+.admin-nav a,
+.admin-nav .nav-btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.95rem;
+    border-radius: 8px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* ---- Nav active: solid fill (not a faint tint) ---- */
+.admin-nav a.active {
+    background: var(--primary) !important;
+    color: #FFFFFF !important;
+    border-left: none !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 8px rgba(0, 51, 102, 0.25) !important;
+}
+
+.admin-nav a:hover:not(.active),
+.admin-nav .nav-btn:hover:not(.active) {
+    background: rgba(0, 51, 102, 0.07) !important;
+}
+
+/* ---- Cards: more comfortable padding + stronger lift ---- */
+.card {
+    padding: 1.75rem;
+    box-shadow: 0 2px 14px rgba(0, 51, 102, 0.09);
+}
+
+.glass-panel {
+    padding: 1.25rem !important;
+    box-shadow: 0 2px 12px rgba(0, 51, 102, 0.07) !important;
+}
+
+/* ---- Section titles: more visual weight ---- */
+.section-title {
+    font-size: 1.1rem;
+    margin-bottom: 1.25rem !important;
+    gap: 0.75rem;
+}
+
+/* ---- Buttons: solid min-height, readable font ---- */
+.btn {
+    min-height: 2.375rem;
+    padding: 0.48rem 1.1rem;
+    font-size: 0.92rem;
+    transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+}
+
+.btn-sm {
+    min-height: 2rem;
+    padding: 0.32rem 0.75rem;
+    font-size: 0.82rem;
+}
+
+/* Primary: vivid navy, clearly clickable */
+.btn-primary {
+    background: #0057B8 !important;
+    border-color: #0048A0 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 8px rgba(0, 87, 184, 0.28) !important;
+}
+
+.btn-primary:hover {
+    background: #004A9F !important;
+    border-color: #003D87 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(0, 87, 184, 0.38) !important;
+}
+
+/* Success: vivid green */
+.btn-success {
+    background: #16A34A !important;
+    border-color: #15803D !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.28) !important;
+}
+
+.btn-success:hover {
+    background: #15803D !important;
+    border-color: #166534 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.38) !important;
+}
+
+/* Warning: vivid amber, white text for legibility */
+.btn-warning {
+    background: #D97706 !important;
+    border-color: #B45309 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.28) !important;
+}
+
+.btn-warning:hover {
+    background: #B45309 !important;
+    border-color: #92400E !important;
+    color: #FFFFFF !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.38) !important;
+}
+
+/* Outline buttons: thicker border, more legible */
+.btn-outline-primary {
+    border-width: 2px !important;
+    font-weight: 600 !important;
+}
+
+.btn-outline-secondary {
+    border-width: 1.5px !important;
+}
+
+.btn-outline-success {
+    border-width: 2px !important;
+    font-weight: 600 !important;
+}
+
+/* ---- Form controls: comfortable height + font ---- */
+.form-control,
+.form-select {
+    min-height: 2.5rem !important;
+    font-size: 0.95rem !important;
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+}
+
+/* ---- Tables: generous row padding ---- */
+.student-table th,
+.student-table td {
+    padding: 0.85rem 0.9rem;
+    font-size: 0.92rem;
+    vertical-align: middle;
+}
+
+.table th,
+.table td {
+    padding: 0.8rem 0.9rem !important;
+    font-size: 0.92rem;
+    vertical-align: middle !important;
+}
+
+/* ---- Quick stats: bold, scannable numbers ---- */
+#adminQuickStats .glass-panel {
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem !important;
+}
+
+#adminQuickStats .stat-number {
+    font-size: 2rem !important;
+    line-height: 1.2;
+}
+
+/* ---- Absence summary banner ---- */
+#absenceAlertBanner {
+    display: none;
+}
+
+.absence-summary-banner {
+    background: #FEF2F2;
+    border: 1.5px solid #FECACA;
+    border-radius: 10px;
+    padding: 0.75rem 1.1rem;
+    margin: 0.75rem 1.5rem 0;
+}
+
+.absence-summary-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #B91C1C;
+    padding: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    text-align: left;
+    line-height: 1.5;
+}
+
+.absence-summary-toggle:hover .absence-view-details {
+    text-decoration: underline;
+}
+
+.absence-view-details {
+    color: #B91C1C;
+    font-weight: 400;
+    font-size: 0.88rem;
+}
+
+.absence-detail-list {
+    margin: 0.65rem 0 0.25rem 0;
+    padding-left: 1.25rem;
+    list-style: disc;
+}
+
+.absence-detail-list li {
+    font-size: 0.88rem;
+    color: #374151;
+    padding: 0.2rem 0;
+}
+
+/* ---- Responsive adjustments ---- */
+@media (max-width: 767px) {
+    .admin-view {
+        padding: 1rem !important;
+    }
+
+    .absence-summary-banner {
+        margin: 0.5rem 0.75rem 0;
+    }
+}

@@ -4302,7 +4302,53 @@ document.addEventListener('DOMContentLoaded', function() {
             if (statusEl) statusEl.innerHTML = '<div class="spinner-border spinner-border-sm text-warning" role="status"></div> Llamando a ' + selectedProvider + '...';
             updateDrako('🐉 Contactando a ' + selectedProvider.toUpperCase() + '... esto toma unos segundos.', credits);
 
-            var systemPrompt = 'You are an expert English language teacher. Create quiz questions strictly following the parameters given. Return ONLY valid JSON array, no markdown, no explanation.';
+            var skillUpper = skill.toUpperCase();
+            var skillGuide = '';
+            if (skillUpper === 'GRAMMAR') {
+                skillGuide =
+                    'GRAMMAR \u2014 mix these styles (at least 3 different styles, never repeat same style twice in a row):\n' +
+                    '\u2022 Scrambled sentence: present jumbled words, ask student to choose the correctly ordered sentence [use multiple_choice]\n' +
+                    '\u2022 Error finder: show a sentence with a grammar mistake, ask student to identify or correct it [use multiple_choice]\n' +
+                    '\u2022 Tense identifier: show a sentence, ask what verb tense is used [use multiple_choice]\n' +
+                    '\u2022 Preposition choice: sentence with a blank, student chooses the correct preposition [use fill_blank or multiple_choice]\n' +
+                    '\u2022 Grammar rule True/False: state a grammar rule, student says if it is correct [use true_false]\n' +
+                    '\u2022 Fill in blank verb form or connector: sentence with blank, student fills correct verb form or linker [use fill_blank]';
+            } else if (skillUpper === 'VOCABULARY') {
+                skillGuide =
+                    'VOCABULARY \u2014 mix these styles (at least 3 different styles, never repeat same style twice in a row):\n' +
+                    '\u2022 Synonym or antonym choice: show a word, student picks synonym or antonym [use multiple_choice]\n' +
+                    '\u2022 Definition match: show a definition, student picks the matching word [use multiple_choice]\n' +
+                    '\u2022 False friend detector: show a false cognate used incorrectly, student picks correct meaning [use multiple_choice]\n' +
+                    '\u2022 Odd one out: show 4 words, student picks the one that does not belong [use multiple_choice]\n' +
+                    '\u2022 Narrative gap: short sentence with a blank that fits the story context [use fill_blank or multiple_choice]\n' +
+                    '\u2022 Collocation fill in blank: e.g. make or do inside a sentence [use fill_blank]';
+            } else if (skillUpper === 'READING' || skillUpper === 'COMPREHENSION') {
+                skillGuide =
+                    'READING/COMPREHENSION \u2014 mix these styles (at least 3 different styles, never repeat same style twice in a row):\n' +
+                    '\u2022 Narrative gap: 2-3 sentence paragraph with a blank, student chooses the word that fits [use multiple_choice or fill_blank]\n' +
+                    '\u2022 Chat simulator: short dialogue with a missing reply, student chooses best response [use multiple_choice]\n' +
+                    '\u2022 Situation matching: describe a real-life situation, student picks the matching expression [use multiple_choice]\n' +
+                    '\u2022 Formal vs Informal: show two versions of a message, student picks the appropriate register [use multiple_choice or true_false]\n' +
+                    '\u2022 True/False meaning check: include a short text inside question_text, ask a comprehension question about it [use true_false]';
+            } else if (skillUpper === 'CONVERSATION' || skillUpper === 'SPEAKING' || skillUpper === 'PRAGMATICS') {
+                skillGuide =
+                    'CONVERSATION/SPEAKING/PRAGMATICS \u2014 mix these styles (at least 3 different styles, never repeat same style twice in a row):\n' +
+                    '\u2022 Chat simulator: short dialogue with a missing line, student picks the most natural reply [use multiple_choice]\n' +
+                    '\u2022 Situation matching: real-life situation described, student picks the matching expression or phrase [use multiple_choice]\n' +
+                    '\u2022 Formal vs Informal: context given (e.g. email to boss vs friend), student picks correct register [use multiple_choice]\n' +
+                    '\u2022 Cultural fact True/False: state a cultural or pragmatic fact about English use, student says true or false [use true_false]';
+            } else if (skillUpper === 'WRITING') {
+                skillGuide =
+                    'WRITING \u2014 mix these styles (at least 3 different styles, never repeat same style twice in a row):\n' +
+                    '\u2022 Error finder: show a sentence with a writing or punctuation mistake, student identifies it [use multiple_choice]\n' +
+                    '\u2022 Scrambled sentence: present jumbled words, student picks the correctly structured sentence [use multiple_choice]\n' +
+                    '\u2022 Fill in blank phrasal verb: sentence with a blank, student fills the correct phrasal verb [use fill_blank]\n' +
+                    '\u2022 Article choice: sentence with a blank for a/an/the/nothing, student chooses correct article [use fill_blank or multiple_choice]';
+            } else {
+                skillGuide =
+                    'Mix question styles appropriate for ' + skill + ': include multiple_choice, true_false and fill_blank questions. Vary the cognitive level and phrasing of each question.';
+            }
+            var systemPrompt = 'You are an expert English language teacher who creates adaptive quiz questions. You select question styles intelligently based on the skill being assessed. Return ONLY a valid JSON array, no markdown, no explanation.';
             var userPrompt = 'Generate ' + count + ' English language quiz questions with these parameters:\n' +
                 '- CEFR Level: ' + cefrLevel + '\n' +
                 '- Skill Focus: ' + skill + '\n' +
@@ -4310,14 +4356,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 (context ? '- Situational Context: ' + context + '\n' : '') +
                 '- Topic: ' + topic + '\n' +
                 (specificInstructions ? '- Additional context from teacher: ' + specificInstructions + '\n' : '') +
-                '\nReturn a JSON array where each object has:\n' +
-                '- "question_text": the question string\n' +
+                '\nQUESTION STYLE GUIDE FOR ' + skillUpper + ':\n' +
+                skillGuide + '\n\n' +
+                'Return a JSON array where each object has:\n' +
+                '- "question_text": the full question string (include a short context sentence or mini-paragraph inside question_text when the style requires it)\n' +
                 '- "question_type": one of "multiple_choice", "true_false", or "fill_blank"\n' +
                 '- "options": array of 4 option strings (for multiple_choice), ["True","False"] (for true_false), or [] (for fill_blank)\n' +
                 '- "correct_answer": the correct answer string (must match one option exactly for MC/TF; the correct word or phrase for fill_blank)\n\n' +
                 'IMPORTANT RULES:\n' +
+                '- Only use question styles listed in the guide above \u2014 never use a style that does not match the skill\n' +
+                '- Mix at least 3 different question styles across the ' + count + ' questions\n' +
+                '- Never place the same style twice in a row\n' +
                 '- Every question must directly relate to the topic: ' + topic + '\n' +
-                '- Use real-world, practical examples — not generic or abstract ones\n' +
+                '- Use real-world, practical examples \u2014 not generic or abstract textbook sentences\n' +
                 '- Vary difficulty within CEFR ' + cefrLevel + ' (some easier, some harder within the same level)\n' +
                 '- Every question must be clearly different from the others\n' +
                 '- Do NOT generate open-ended or essay questions\n' +

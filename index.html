@@ -4,23 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lingo-Coins | Gamified Rewards</title>
-    <link rel="icon" type="image/webp" href="assets/images/icono-moneda.webp">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🪙</text></svg>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-dashboard">
+<body class="bg-login">
     <div class="decor-overlay" aria-hidden="true"></div>
     <div class="container-custom page-container">
         <div class="text-center mb-4">
-            <h1 class="mb-2 section-title" style="justify-content:center;"><img src="assets/images/icono-moneda.webp" class="ui-icon coin-pulse" loading="lazy" alt="Coins">Lingo-Coins</h1>
+            <span class="login-coin coin-pulse">🪙</span>
+            <h1 class="mb-2 section-title" style="justify-content:center;">Lingo-Coins</h1>
             <h2 class="fw-bold mb-1">English Coins Arena</h2>
             <p class="text-muted">Level up your English, earn rewards!</p>
         </div>
         
         <div class="card card-premium">
             <div class="section-title with-banner mb-3" style="justify-content:center;">Welcome Back</div>
-            <img src="assets/images/escudo-decorativo.webp" class="decor-emblem" alt="Decor emblem" loading="lazy">
             <div class="nav-tabs">
                 <button id="tabLogin" class="nav-tab active" onclick="showTab('login')">
                     <i class="bi bi-box-arrow-in-right"></i> Log in
@@ -126,7 +126,6 @@
         </div>
         <div class="text-center small text-muted mt-3">v1.0-MVP-STABLE</div>
     </div>
-    <img src="assets/images/rey-lanzando-monedas.webp" class="mascot-fixed mascot-float" loading="lazy" alt="King mascot">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // Store attendance code from URL if present

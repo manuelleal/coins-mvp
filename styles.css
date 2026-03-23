@@ -118,6 +118,19 @@ body.bg-auctions {
     background: var(--bg-color);
 }
 
+body.bg-login {
+    background: linear-gradient(-45deg, #003366, #1a56db, #0a3d82, #002244);
+    background-size: 400% 400%;
+    animation: loginBgShift 10s ease infinite;
+    min-height: 100vh;
+}
+
+@keyframes loginBgShift {
+    0%   { background-position: 0%   50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0%   50%; }
+}
+
 .page-container,
 .container-custom {
     width: 100%;
@@ -220,15 +233,17 @@ body.bg-auctions {
 }
 
 .ui-icon {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
     flex: 0 0 auto;
+    font-size: 1.3rem;
+    line-height: 1;
     border-radius: 10px;
-    padding: 2px;
-    background: linear-gradient(145deg, rgba(9, 21, 43, 0.86), rgba(19, 34, 60, 0.75));
-    border: 1px solid rgba(251, 191, 36, 0.28);
-    box-shadow: 0 4px 14px rgba(2, 8, 23, 0.42);
+    background: rgba(0, 51, 102, 0.08);
+    border: 1px solid rgba(0, 51, 102, 0.15);
 }
 
 .coin-pulse {
@@ -271,17 +286,7 @@ body.bg-auctions {
 }
 
 .decor-emblem {
-    width: 66px;
-    height: 66px;
-    object-fit: contain;
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    opacity: 0.88;
-    border-radius: 14px;
-    padding: 4px;
-    background: linear-gradient(145deg, rgba(8, 19, 38, 0.94), rgba(26, 42, 72, 0.82));
-    border: 1px solid rgba(251, 191, 36, 0.35);
+    display: none;
 }
 
 .decor-crown {
@@ -551,17 +556,21 @@ textarea::placeholder {
 }
 
 .gold-card {
-    background: rgba(255, 215, 0, 0.08);
-    border: 1px solid rgba(255, 215, 0, 0.35);
+    background: linear-gradient(135deg, #fffdf0 0%, #fff9d0 45%, #fffef7 75%, #fff9d0 100%);
+    background-size: 300% 100%;
+    animation: walletShimmer 4s ease-in-out infinite;
+    border: 2px solid rgba(255, 215, 0, 0.55);
     border-radius: 14px;
     padding: 1.1rem;
     margin-bottom: 1rem;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.18);
 }
 
 .coins-num {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: var(--gold-500);
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: #003366;
+    text-shadow: 0 0 18px rgba(255, 215, 0, 0.7), 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .level-badge,
@@ -576,12 +585,14 @@ textarea::placeholder {
     background: rgba(251, 191, 36, 0.18);
     border: 1px solid rgba(251, 191, 36, 0.4);
     color: var(--gold-400);
+    animation: levelPulse 2.5s ease-in-out infinite;
 }
 
 .streak-badge {
     background: rgba(239, 68, 68, 0.10);
     border: 1px solid rgba(239, 68, 68, 0.3);
     color: #b91c1c;
+    animation: streakGlow 2s ease-in-out infinite;
 }
 
 .badge-group {
@@ -599,7 +610,9 @@ textarea::placeholder {
 
 .xp-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #fbbf24, #fde68a);
+    background: linear-gradient(90deg, #FFD700, #FFE835, #FFA500, #FFD700);
+    background-size: 300% 100%;
+    animation: xpBarMove 2.5s linear infinite;
 }
 
 .leaderboard-list {
@@ -768,14 +781,7 @@ textarea::placeholder {
 }
 
 .store-decor img {
-    width: clamp(48px, 8vw, 80px);
-    object-fit: contain;
-    opacity: 0.9;
-    border-radius: 16px;
-    padding: 5px;
-    background: linear-gradient(145deg, rgba(7, 16, 33, 0.95), rgba(24, 40, 69, 0.82));
-    border: 1px solid rgba(251, 191, 36, 0.34);
-    box-shadow: 0 6px 18px rgba(2, 8, 23, 0.45);
+    display: none;
 }
 
 .auction-banner {
@@ -1224,11 +1230,14 @@ textarea::placeholder {
     border-color: #4CAF50;
     background: rgba(76,175,80,0.12);
     pointer-events: none;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.25);
 }
 .challenge-question-card.wrong {
     border-color: #F44336;
     background: rgba(244,67,54,0.10);
     pointer-events: none;
+    animation: shakeWrong 0.45s ease;
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
 }
 .challenge-question-card.reveal-correct {
     border-color: #4CAF50;
@@ -1409,6 +1418,153 @@ textarea::placeholder {
     width: 20px;
     height: 20px;
     accent-color: var(--gold-500);
+}
+
+/* ========================================
+   CSS-ONLY VISUALS — Duolingo Energy
+   No images. Emojis + gradients + motion.
+   ======================================== */
+
+@keyframes walletShimmer {
+    0%   { background-position: 100% 0; }
+    50%  { background-position: 0%   0; }
+    100% { background-position: 100% 0; }
+}
+
+@keyframes xpBarMove {
+    0%   { background-position: 100% 0; }
+    100% { background-position: 0%   0; }
+}
+
+@keyframes levelPulse {
+    0%,  100% { box-shadow: 0 0 0 0   rgba(251, 191, 36, 0);    }
+    50%        { box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.28); }
+}
+
+@keyframes streakGlow {
+    0%,  100% { box-shadow: 0 0 0 0   rgba(239, 68, 68, 0);    }
+    50%        { box-shadow: 0 0 8px 2px rgba(239, 68, 68, 0.32); }
+}
+
+@keyframes shakeWrong {
+    0%,  100% { transform: translateX(0);   }
+    20%        { transform: translateX(-8px); }
+    40%        { transform: translateX(8px);  }
+    60%        { transform: translateX(-5px); }
+    80%        { transform: translateX(5px);  }
+}
+
+/* Emoji icon used in section titles instead of <img> */
+.ui-icon-emoji {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    font-size: 1.3rem;
+    line-height: 1;
+    border-radius: 10px;
+    background: rgba(0, 51, 102, 0.07);
+    border: 1px solid rgba(0, 51, 102, 0.12);
+}
+
+/* Large login coin with glow */
+.login-coin {
+    font-size: 5rem;
+    display: block;
+    line-height: 1.2;
+    text-align: center;
+    margin-bottom: 0.25rem;
+    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+    animation: loginCoinGlow 2.2s ease-in-out infinite;
+}
+
+@keyframes loginCoinGlow {
+    0%,  100% { filter: drop-shadow(0 0 6px  rgba(255, 215, 0, 0.45)); transform: scale(1);    }
+    50%        { filter: drop-shadow(0 0 22px rgba(255, 215, 0, 0.90)); transform: scale(1.07); }
+}
+
+/* Login card: clean white, centered, readable on dark gradient bg */
+body.bg-login .card-premium {
+    background: #FFFFFF;
+    border: none;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+    border-radius: 20px;
+}
+
+body.bg-login h1,
+body.bg-login h2 {
+    color: #FFFFFF;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.bg-login p.text-muted {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Store emoji decorations */
+.store-decor-emoji {
+    font-size: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+}
+
+.store-decor-emoji:hover {
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 6px 18px rgba(255, 215, 0, 0.38);
+}
+
+/* Attendance colored dots */
+.attendance-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+.attendance-dot:hover { transform: scale(1.35); }
+
+.dot-present  { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,  197, 94,  0.22); }
+.dot-absent   { background: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68,  68,  0.22); }
+.dot-noclass  { background: #cbd5e1; box-shadow: 0 0 0 3px rgba(203, 213, 225, 0.22); }
+
+/* Achievement badge items */
+.badge-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px;
+    cursor: default;
+}
+
+.badge-item:hover {
+    transform: translateY(-3px) scale(1.06);
+    box-shadow: 0 6px 22px rgba(255, 215, 0, 0.38);
+}
+
+/* Challenge question text: left accent bar */
+.challenge-q-text {
+    border-left: 4px solid var(--primary);
+    padding-left: 14px !important;
+    border-radius: 0 6px 6px 0;
+}
+
+/* Option cards: slightly stronger hover scale */
+.challenge-question-card:hover {
+    border-color: #FFD700;
+    background: rgba(255, 215, 0, 0.07);
+    transform: translateX(4px) scale(1.01);
+    transition: all 0.15s ease;
 }
 
 .fill-blank-hint {

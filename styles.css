@@ -1552,6 +1552,37 @@ body.bg-login p.text-muted {
     box-shadow: 0 6px 22px rgba(255, 215, 0, 0.38);
 }
 
+/* Challenge Arena card — energetic gold feel */
+.arena-card {
+    background: linear-gradient(135deg, #fffdf0 0%, #fff9d0 45%, #fffef7 100%);
+    background-size: 200% 100%;
+    animation: walletShimmer 5s ease-in-out infinite;
+    border-left: 4px solid #FFD700 !important;
+    border-top: 2px solid rgba(255, 215, 0, 0.55) !important;
+    border-right: 1px solid rgba(255, 215, 0, 0.25) !important;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.25) !important;
+    box-shadow: 0 4px 18px rgba(255, 215, 0, 0.18), inset 0 0 40px rgba(255, 215, 0, 0.04);
+}
+
+/* Badge states — unlocked: gold gradient glow / locked: faded gray */
+.badge-unlocked {
+    background: linear-gradient(135deg, #fffbeb 0%, #ffe066 60%, #ffd700 100%) !important;
+    border: 1px solid rgba(255, 215, 0, 0.65) !important;
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.42), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+.badge-locked {
+    opacity: 0.4 !important;
+    filter: grayscale(1) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Attendance mini week dot alignment */
+#attendanceMiniWeek {
+    align-items: center;
+    min-height: 24px;
+}
+
 /* Challenge question text: left accent bar */
 .challenge-q-text {
     border-left: 4px solid var(--primary);

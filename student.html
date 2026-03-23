@@ -94,7 +94,7 @@
                         <button type="button" class="btn btn-sm btn-warning" id="btnGoToChallengesBanner">Go to Challenges →</button>
                     </div>
                 </div>
-                <div class="glass-panel card-premium mb-3 leaderboard-wrap" style="background:#FFFFFF;border:1px solid #E0E0E0;border-top:3px solid #FFD700;">
+                <div class="glass-panel card-premium mb-3 leaderboard-wrap arena-card">
                     <h4 class="mb-1 section-title with-banner">Challenge Arena</h4>
                     <p class="small mb-0 text-muted">Compete • Earn • Win</p>
                 </div>
@@ -1911,14 +1911,14 @@
                     var key = toDateOnly(d);
                     var pastOrToday = d <= today;
                     if (!pastOrToday) {
-                        marks.push('⏳');
+                        marks.push('<span class="attendance-dot dot-noclass"></span>');
                     } else {
                         total += 1;
-                        if (attendedSet[key]) { marks.push('✅'); done += 1; }
-                        else marks.push('❌');
+                        if (attendedSet[key]) { marks.push('<span class="attendance-dot dot-present"></span>'); done += 1; }
+                        else marks.push('<span class="attendance-dot dot-absent"></span>');
                     }
                 }
-                weekEl.innerHTML = marks.map(function(m) { return '<span>' + m + '</span>'; }).join('');
+                weekEl.innerHTML = marks.join('');
                 summaryEl.textContent = 'You attended ' + done + '/' + Math.max(1, total) + ' days this week 🔥';
             } catch (_) {
                 weekEl.innerHTML = '<span>⏳</span><span>⏳</span><span>⏳</span><span>⏳</span><span>⏳</span>';
@@ -1968,9 +1968,9 @@
                 { icon: '⭐', label: 'Perfect week', unlocked: perfectWeek }
             ];
             el.innerHTML = badges.map(function(b) {
-                var style = b.unlocked ? 'background:rgba(255,215,0,0.16);border:1px solid rgba(255,215,0,0.45);' : 'opacity:0.55;filter:grayscale(0.9);border:1px solid rgba(255,255,255,0.12);';
+                var cls = b.unlocked ? 'badge-item badge-unlocked' : 'badge-item badge-locked';
                 var lock = b.unlocked ? '' : ' 🔒';
-                return '<div class="col-6"><div class="glass-panel p-2 small" style="' + style + '"><div style="font-size:1.1rem">' + b.icon + lock + '</div><div>' + b.label + '</div></div></div>';
+                return '<div class="col-6"><div class="glass-panel p-2 small ' + cls + '"><div style="font-size:1.1rem">' + b.icon + lock + '</div><div>' + b.label + '</div></div></div>';
             }).join('');
         }
 

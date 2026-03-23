@@ -1065,7 +1065,10 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (qType === 'fill_blank') {
                 bodyHtml += '<div class="mb-3"><label class="form-label">Accepted Answers</label>' +
                     '<input type="text" class="form-control" value="' + escapeAttr(q.correct_answer || '') + '" placeholder="Type correct answer(s), separated by comma" data-qa-correct="' + idx + '"></div>' +
-                    '<div class="form-text" style="font-size:13px;">e.g. is, Is, IS — all are accepted</div>';
+                    '<div class="form-text" style="font-size:13px;">e.g. is, Is, IS — all are accepted</div>' +
+                    '<div class="mb-3"><label class="form-label">Hint for students (optional — verb in infinitive form)</label>' +
+                    '<input type="text" class="form-control" value="' + escapeAttr(q.hint_text || '') + '" placeholder="e.g. to eat" data-qa-hint="' + idx + '"></div>' +
+                    '<div class="form-text" style="font-size:13px;">Students will see: Hint: (to eat)</div>';
             } else {
                 bodyHtml += '<div class="mb-3"><label class="form-label">Accepted Answers</label>' +
                     '<input type="text" class="form-control" value="' + escapeAttr(q.correct_answer || '') + '" placeholder="Type correct answer(s), separated by comma" data-qa-correct="' + idx + '"></div>';
@@ -1200,6 +1203,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 var oIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
                 challengeBuilderState[idx].options.splice(oIdx, 1);
                 renderChallengeBuilder();
+            });
+        });
+        // Hint text (fill_blank)
+        wrap.querySelectorAll('[data-qa-hint]').forEach(function(el) {
+            el.addEventListener('input', function() {
+                var idx = parseInt(el.getAttribute('data-qa-hint'), 10);
+                challengeBuilderState[idx].hint_text = String(el.value == null ? '' : el.value);
             });
         });
         // Correct answer (select or input)
@@ -1347,6 +1357,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var blanks = parseChallengeOptions(q.correct_answer || '');
                 if (!blanks.length) throw new Error('Question ' + (i + 1) + ': add accepted blank answers');
                 model.payload = { answers: blanks };
+                if (q.hint_text && String(q.hint_text).trim()) model.payload.hint = String(q.hint_text).trim();
                 model.correct_answer = blanks.join(',');
             } else {
                 var accepted = parseChallengeOptions(q.correct_answer || '');

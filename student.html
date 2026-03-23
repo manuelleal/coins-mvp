@@ -94,7 +94,7 @@
                         <button type="button" class="btn btn-sm btn-warning" id="btnGoToChallengesBanner">Go to Challenges →</button>
                     </div>
                 </div>
-                <div class="glass-panel card-premium mb-3 leaderboard-wrap" style="background:linear-gradient(135deg, rgba(16,185,129,0.22), rgba(30,58,95,0.18));">
+                <div class="glass-panel card-premium mb-3 leaderboard-wrap" style="background:#FFFFFF;border:1px solid #E0E0E0;border-top:3px solid #FFD700;">
                     <img src="assets/images/escudo-decorativo.webp" class="decor-emblem" alt="Decor emblem" loading="lazy">
                     <h4 class="mb-1 section-title with-banner">Challenge Arena</h4>
                     <p class="small mb-0 text-muted">Compete • Earn • Win</p>
@@ -200,7 +200,7 @@
                         <h5 class="mb-2 section-title with-banner"><img src="assets/images/icono-challenge.webp" class="ui-icon" loading="lazy" alt="Challenges">Mission Center</h5>
                         <p class="small text-muted mb-3">Complete English challenges to earn coins!</p>
                     </div>
-                    <img src="assets/images/princesa-guardiana.webp" class="mascot-float" loading="lazy" alt="Guardian princess" style="width:clamp(160px,18vw,200px);object-fit:contain;">
+                    <span style="font-size:2.8rem;line-height:1;" aria-hidden="true">🏆</span>
                 </div>
                 <div id="drakoFeedbackPanel" style="display:none;"></div>
                 <div id="studentChallengeActiveList"><p class="text-muted small">Loading...</p></div>
@@ -244,7 +244,6 @@
             </div>
         </div>
     </div>
-    <img src="assets/images/rey-principal.webp" class="mascot-fixed mascot-float" loading="lazy" alt="Main king mascot">
     <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1074,6 +1073,7 @@
                 runtime.answerMap = runtime.answerMap && typeof runtime.answerMap === 'object' ? runtime.answerMap : {};
                 challengeRuntimeMap[c.id] = runtime;
                 runtime._challengeObj = c;
+                runtime._done = !!done;
                 var winnersInfo = (c.current_winners || 0) + '/' + (c.max_winners || 10);
                 var header = '<div class="d-flex justify-content-between align-items-start mb-1">' +
                     '<strong>' + escapeHtml(c.title || '') + '</strong>' +
@@ -1083,10 +1083,14 @@
                 if (done) {
                     var coinsTxt = sub && sub.coins_awarded ? ' \u00B7 +' + sub.coins_awarded + ' coins' : '';
                     var isWin = !(sub && sub.is_correct === false);
-                    var doneHtml = isWin
-                        ? '<div class="d-flex align-items-center gap-2 mt-2"><span style="font-size:1.5rem;">\uD83C\uDFC6</span><div><div class="text-success" style="font-weight:700;">Completed!' + coinsTxt + '</div><div class="small text-muted">Challenge conquered</div></div></div>'
-                        : '<div class="d-flex align-items-center gap-2 mt-2"><span style="font-size:1.5rem;">\uD83D\uDC80</span><div><div class="text-danger" style="font-weight:700;">Incorrect' + coinsTxt + '</div><div class="small text-muted">All retries used</div></div></div>';
-                    return '<div class="challenge-card completed" style="opacity:0.82;">' + header + intro + doneHtml + '</div>';
+                    var completedLabel = isWin ? 'Completed \u2713' + coinsTxt : 'Attempted \u2713' + coinsTxt;
+                    var qCount2 = runtime.questions.length;
+                    var estMin2 = Math.max(1, Math.ceil(qCount2 * 0.5));
+                    return '<div class="challenge-card completed" style="opacity:0.82;">' + header + intro +
+                        '<div class="d-flex justify-content-between align-items-center mt-2">' +
+                        '<span class="small text-muted">' + qCount2 + ' question' + (qCount2 !== 1 ? 's' : '') + ' \u00B7 ~' + estMin2 + ' min</span>' +
+                        '<button type="button" class="btn btn-sm btn-success" style="width:auto;font-weight:700;" disabled>' + completedLabel + '</button>' +
+                        '</div></div>';
                 }
 
                 var qCount = runtime.questions.length;
@@ -1409,6 +1413,10 @@
                 showBidToast('Challenge has no questions.', 'warning');
                 return;
             }
+            if (runtime._done) {
+                showBidToast('You already completed this challenge! ✓', 'info');
+                return;
+            }
             _flowState = {
                 challengeId: challengeId,
                 challenge: runtime._challengeObj || {},
@@ -1501,7 +1509,9 @@
                 });
                 html += '</div><button type="button" class="challenge-flow-submit mt-2" id="flowSubmitBtn">Submit</button>';
             } else if (qType === 'fill_blank') {
+                var hintHtml = qPayload.hint ? '<p class="fill-blank-hint">Hint: (' + escapeHtml(qPayload.hint) + ')</p>' : '';
                 html += '<input type="text" class="challenge-flow-input" id="flowTextInput" placeholder="Type your answer...">' +
+                    hintHtml +
                     '<button type="button" class="challenge-flow-submit" id="flowSubmitBtn">Submit</button>';
             } else {
                 html += '<input type="text" class="challenge-flow-input" id="flowTextInput" placeholder="Your answer...">' +
@@ -1681,6 +1691,8 @@
 
             try {
                 var result = await submitChallenge(_flowState.challengeId, user.documento_id, _flowState.answers);
+                var rt = challengeRuntimeMap[_flowState.challengeId];
+                if (rt) rt._done = true;
                 if (!result.ok) {
                     inner.innerHTML = '<div class="challenge-complete-screen">' +
                         '<div style="font-size:48px;">\u26A0\uFE0F</div>' +

@@ -579,15 +579,15 @@ textarea::placeholder {
 }
 
 .streak-badge {
-    background: rgba(239, 68, 68, 0.15);
+    background: rgba(239, 68, 68, 0.10);
     border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #fecaca;
+    color: #b91c1c;
 }
 
 .badge-group {
-    background: rgba(16, 185, 129, 0.18);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: #bbf7d0;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #065f46;
 }
 
 .xp-bar-container {
@@ -623,9 +623,9 @@ textarea::placeholder {
 }
 
 .reward-tag {
-    background: rgba(245, 158, 11, 0.16);
-    color: #fde68a;
-    border: 1px solid rgba(245, 158, 11, 0.32);
+    background: rgba(245, 158, 11, 0.12);
+    color: #92400e;
+    border: 1px solid rgba(245, 158, 11, 0.35);
     border-radius: 999px;
     padding: 0.2rem 0.55rem;
     font-size: 0.75rem;
@@ -1175,7 +1175,7 @@ textarea::placeholder {
 }
 .challenge-progress-bar {
     height: 6px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(0, 51, 102, 0.12);
     border-radius: 3px;
     overflow: hidden;
     margin-bottom: 24px;
@@ -1409,6 +1409,18 @@ textarea::placeholder {
     width: 20px;
     height: 20px;
     accent-color: var(--gold-500);
+}
+
+.fill-blank-hint {
+    font-size: 14px;
+    color: var(--text-secondary);
+    background: rgba(0, 51, 102, 0.06);
+    border: 1px solid rgba(0, 51, 102, 0.15);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: -4px;
+    margin-bottom: 12px;
+    font-style: italic;
 }
 
 /* ========================================

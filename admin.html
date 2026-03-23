@@ -34,6 +34,8 @@
                 <button type="button" class="nav-btn" id="btnLogout">Logout</button>
             </nav>
 
+            <div class="admin-content">
+
             <div id="viewDashboard" class="admin-view active">
                 <h5 class="mb-2 section-title with-banner"><img src="assets/images/icono-trofeo.webp" class="ui-icon" loading="lazy" alt="Dashboard">Super Admin Dashboard</h5>
                 <div id="dashboardAlert"></div>
@@ -305,6 +307,8 @@
                     <div class="small text-muted mt-2">All exports are logged in the audit trail.</div>
                 </div>
             </div>
+
+            </div><!-- /.admin-content -->
         </div>
     </div>
     <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
@@ -377,25 +381,15 @@
     <script src="./modules/school_admin_teachers.js"></script>
     <script src="./modules/institutions.js"></script>
     <script>
-var preloadedUser = null;
-try {
-    preloadedUser = JSON.parse(localStorage.getItem('lingoCoins_user') || 'null');
-} catch (_) {
-    preloadedUser = null;
-}
+var user = null;
+try { user = JSON.parse(localStorage.getItem('lingoCoins_user') || 'null'); } catch (_) {}
 
-if (preloadedUser && String(preloadedUser.rol || '') === 'student') {
-    window.location.href = 'student.html';
-}
-if (preloadedUser && String(preloadedUser.rol || '') === 'teacher') {
-    window.location.href = 'teacher.html';
-}
+var role = user && String(user.rol || '');
+var institutionId = user && String(user.institution_id || '');
 
-var user = (window.Auth && typeof window.Auth.guardRole === 'function')
-    ? Auth.guardRole(['super_admin', 'admin'], 'index.html')
-    : null;
-
-if (!user || !user.id || ['super_admin', 'admin'].indexOf(String(user.rol || '')) === -1) {
+if (role === 'student') { window.location.href = 'student.html'; }
+if (role === 'teacher') { window.location.href = 'teacher.html'; }
+if (!user || !user.id || (role !== 'super_admin' && role !== 'admin')) {
     window.location.href = 'index.html';
 }
 
@@ -408,18 +402,49 @@ async function verifyRoleIntegrity(localUser) {
             .maybeSingle();
         if (res.error) {
             if (typeof isMissingColumnError === 'function' && isMissingColumnError(res.error, 'rol', CONFIG.tables.profiles)) {
-                return true;
+                return 'ok';
             }
             return false;
         }
         if (!res.data) return false;
         if (res.data.is_active === false) return false;
-        if (String(res.data.rol || '') !== String(localUser.rol || '')) return false;
-        if (String(localUser.rol || '') === 'admin' && String(res.data.institution_id || '') !== String(localUser.institution_id || '')) return false;
-        return true;
+
+        var dbRole = String(res.data.rol || '');
+        var dbInstId = res.data.institution_id || null;
+
+        // Teacher must never stay on admin.html
+        if (dbRole === 'teacher') return 'teacher';
+        // Student must never stay on admin.html
+        if (dbRole === 'student') return false;
+        // Only admin and super_admin are allowed here
+        if (dbRole !== 'admin' && dbRole !== 'super_admin') return false;
+
+        // Enforce: a user with institution_id is always admin-scoped
+        if (dbInstId && dbRole === 'super_admin') {
+            dbRole = 'admin';
+        }
+        // Enforce: super_admin must NOT have an institution_id
+        if (!dbInstId && dbRole === 'admin') {
+            // admin without institution_id cannot operate; reject
+            return false;
+        }
+
+        // Sync local session with DB truth
+        localUser.rol = dbRole;
+        localUser.institution_id = dbInstId;
+        return 'ok';
     } catch (_) {
         return false;
     }
+}
+
+function waitForSupabase() {
+    return new Promise(function(resolve) {
+        (function check() {
+            if (window.supabaseClient) { resolve(); }
+            else { setTimeout(check, 100); }
+        })();
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -432,20 +457,28 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
-    var roleOk = await verifyRoleIntegrity(user);
-    if (!roleOk) {
+    await waitForSupabase();
+    var roleResult = await verifyRoleIntegrity(user);
+    if (roleResult === 'teacher') {
+        try { localStorage.setItem('lingoCoins_user', JSON.stringify(user)); } catch (_) {}
+        window.location.href = 'teacher.html';
+        return;
+    }
+    if (roleResult !== 'ok') {
         try { localStorage.removeItem('lingoCoins_user'); } catch (_) {}
         window.location.href = 'index.html';
         return;
     }
+    // Persist DB-corrected role so future page loads are consistent
+    try { localStorage.setItem('lingoCoins_user', JSON.stringify(user)); } catch (_) {}
 
     if (document.getElementById('adminName')) {
         document.getElementById('adminName').textContent = user.nombre_completo || (user.rol === 'admin' ? 'School Admin' : 'Super Admin');
     }
 
     var roleNavVisibility = {
-        super_admin: ['navDashboard', 'navInstitutions', 'navUsers', 'navGroups', 'navEconomy', 'navAiConfig', 'navPolicies', 'navAdmins'],
-        admin: ['navAdminDashboard', 'navTeachers', 'navGroups', 'navUsers', 'navAttendance', 'navChallenges', 'navStore', 'navCobros', 'navAnnouncements', 'navFeedback']
+        super_admin: ['navDashboard', 'navInstitutions', 'navEconomy', 'navAiConfig', 'navPolicies', 'navAdmins', 'navFeedback'],
+        admin: ['navAdminDashboard', 'navTeachers', 'navUsers', 'navGroups', 'navAttendance', 'navChallenges', 'navStore', 'navCobros', 'navAnnouncements', 'navFeedback']
     };
 
     var allKnownNavIds = ['navDashboard', 'navAdminDashboard', 'navInstitutions', 'navTeachers', 'navUsers', 'navGroups', 'navAttendance', 'navChallenges', 'navStore', 'navCobros', 'navAnnouncements', 'navFeedback', 'navEconomy', 'navAiConfig', 'navPolicies', 'navAdmins'];
@@ -456,12 +489,26 @@ document.addEventListener('DOMContentLoaded', async function() {
         navEl.style.display = visibleNavIds.indexOf(navId) !== -1 ? '' : 'none';
     });
 
+    // Apply sidebar layout for super_admin
+    if (user.rol === 'super_admin') {
+        var cardEl = document.querySelector('.card.card-premium');
+        if (cardEl) cardEl.classList.add('layout-sidebar');
+        var pcEl = document.querySelector('.page-container');
+        if (pcEl) pcEl.style.maxWidth = '1200px';
+    }
+
     var roleAllowedViews = {
-        super_admin: ['dashboard', 'institutions', 'users', 'groups', 'economy', 'aiConfig', 'policies', 'admins'],
+        super_admin: ['dashboard', 'institutions', 'economy', 'aiConfig', 'policies', 'admins', 'feedback'],
         admin: ['adminDashboard', 'teachers', 'users', 'groups', 'attendance', 'challenges', 'store', 'cobros', 'announcements', 'feedback']
     };
     var allowedViews = roleAllowedViews[user.rol] || [];
     var operationalRedirectViews = [];
+
+    // Rename "Users" label to "Students" for admin role
+    if (user.rol === 'admin') {
+        var navUsersEl = document.getElementById('navUsers');
+        if (navUsersEl) navUsersEl.textContent = 'Students';
+    }
 
     var _adminSchoolGroupsCache = null;
     async function getAdminSchoolGroupCodes() {

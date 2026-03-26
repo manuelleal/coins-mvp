@@ -7,6 +7,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🪙</text></svg>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -393,19 +394,28 @@
             min-width: 0;
         }
 
-        body.engrama .eng-greeting {
-            font-family: 'Lexend', sans-serif;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--eng-text);
-            margin-right: 2px;
-            white-space: nowrap;
+        body.engrama .eng-topbar-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
         }
 
-        /* Mobile: hide avatar + greeting so pills always fit */
-        @media (max-width: 480px) {
-            body.engrama .topbar-avatar,
-            body.engrama .eng-greeting { display: none !important; }
+        body.engrama .eng-greeting-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        body.engrama .eng-greeting {
+            font-family: 'Lexend', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--eng-text2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
         }
 
         /* Top bar pills */
@@ -1024,23 +1034,49 @@
             font-weight:700 !important;
         }
 
-        /* Bottom nav SVG icon wrappers */
+        /* Phosphor Duotone icon config */
+        body.engrama .ph-duotone {
+            --ph-fill-opacity: 0.2;
+            font-size: 24px;
+            transition: color 0.2s, filter 0.2s;
+        }
+
+        /* Bottom nav icon wrappers — Phosphor Duotone */
         body.engrama .engrama-bnav a .bnav-icon-wrap {
             width:40px; height:40px; border-radius:13px;
             display:flex; align-items:center; justify-content:center;
-            transition:background 0.2s;
+            transition:background 0.2s, box-shadow 0.25s;
+        }
+        body.engrama .engrama-bnav a .ph-duotone {
+            color:#6B82A0;
         }
         body.engrama .engrama-bnav a:hover .bnav-icon-wrap { background:rgba(43,127,232,0.08); }
-        body.engrama .engrama-bnav a.active .bnav-icon-wrap { background:rgba(43,127,232,0.15); }
-        body.engrama .engrama-bnav a svg { stroke:#6B82A0; transition:stroke 0.2s; }
-        body.engrama .engrama-bnav a:hover svg { stroke:var(--eng-text); }
-        body.engrama .engrama-bnav a.active svg { stroke:#2B7FE8; }
-        body.engrama .engrama-bnav #navMe svg { stroke:#6B82A0; }
-        body.engrama .engrama-bnav #navMe.active svg { stroke:#2B7FE8; }
-        body.engrama .engrama-bnav #navMe.active .bnav-icon-wrap { background:rgba(43,127,232,0.15); }
-        body.engrama .engrama-bnav #navChallenges svg { stroke:rgba(245,166,35,0.6); }
-        body.engrama .engrama-bnav #navChallenges.active svg { stroke:var(--eng-gold); }
-        body.engrama .engrama-bnav #navChallenges.active .bnav-icon-wrap { background:rgba(245,166,35,0.12); }
+        body.engrama .engrama-bnav a:hover .ph-duotone { color:var(--eng-text); }
+
+        /* Active state — neon glow + gold label */
+        body.engrama .engrama-bnav a.active .bnav-icon-wrap {
+            background:rgba(43,127,232,0.15);
+            box-shadow:0 0 12px rgba(43,127,232,0.35), 0 0 4px rgba(43,127,232,0.2);
+        }
+        body.engrama .engrama-bnav a.active .ph-duotone {
+            color:#2B7FE8;
+            --ph-fill-opacity: 0.35;
+            filter:drop-shadow(0 0 3px rgba(43,127,232,0.4));
+        }
+        body.engrama .engrama-bnav a.active .bnav-label {
+            color:var(--eng-gold) !important;
+        }
+
+        /* Play tab (Sword) — gold accent */
+        body.engrama .engrama-bnav #navChallenges .ph-duotone { color:rgba(245,166,35,0.6); }
+        body.engrama .engrama-bnav #navChallenges.active .bnav-icon-wrap {
+            background:rgba(245,166,35,0.12);
+            box-shadow:0 0 12px rgba(245,166,35,0.3), 0 0 4px rgba(245,166,35,0.15);
+        }
+        body.engrama .engrama-bnav #navChallenges.active .ph-duotone {
+            color:var(--eng-gold);
+            filter:drop-shadow(0 0 3px rgba(245,166,35,0.4));
+        }
 
         /* Wallet card hex pattern ::before */
         body.engrama .gold-card {
@@ -1412,10 +1448,14 @@
     <div class="container-custom page-container" style="max-width: 700px;">
         <!-- Engrama Top Bar -->
         <div class="engrama-topbar">
-            <div class="eng-brand">ENGRAMA</div>
+            <div class="eng-topbar-left">
+                <div class="eng-brand">ENGRAMA</div>
+                <div class="eng-greeting-row">
+                    <span style="font-size:14px;line-height:1;">👋</span>
+                    <span class="greeting eng-greeting" id="navGreeting"></span>
+                </div>
+            </div>
             <div class="eng-topbar-right">
-                <span class="topbar-avatar" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-                <span class="greeting eng-greeting" id="navGreeting"></span>
                 <div class="eng-pill eng-pill-streak"><span id="streakBadge">🔥 0</span></div>
                 <div class="eng-pill eng-pill-coins">🪙 <span data-coins-sync>0</span></div>
             </div>
@@ -1603,11 +1643,11 @@
         <a href="#" id="navBag" style="display:none;" onclick="return showStudentView('bag')"></a>
         <!-- Engrama Bottom Nav -->
         <nav class="student-nav engrama-bnav">
-            <a href="#" id="navDashboard" class="active" onclick="return showStudentView('dashboard')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span class="bnav-label">Home</span></a>
-            <a href="#" id="navAttendance" onclick="return showStudentView('attendance')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span class="bnav-label">Attend</span></a>
-            <a href="#" id="navChallenges" onclick="return showStudentView('challenges')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><span class="bnav-label">Play</span></a>
-            <a href="#" id="navStore" onclick="return showStudentView('store')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span><span class="bnav-label">Store</span></a>
-            <a href="#" id="navMe" onclick="return showStudentView('bag')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="bnav-label">Me</span></a>
+            <a href="#" id="navDashboard" class="active" onclick="return showStudentView('dashboard')"><span class="bnav-icon-wrap"><i class="ph-duotone ph-house"></i></span><span class="bnav-label">Home</span></a>
+            <a href="#" id="navAttendance" onclick="return showStudentView('attendance')"><span class="bnav-icon-wrap"><i class="ph-duotone ph-calendar-check"></i></span><span class="bnav-label">Attend</span></a>
+            <a href="#" id="navChallenges" onclick="return showStudentView('challenges')"><span class="bnav-icon-wrap"><i class="ph-duotone ph-sword"></i></span><span class="bnav-label">Play</span></a>
+            <a href="#" id="navStore" onclick="return showStudentView('store')"><span class="bnav-icon-wrap"><i class="ph-duotone ph-storefront"></i></span><span class="bnav-label">Store</span></a>
+            <a href="#" id="navMe" onclick="return showStudentView('bag')"><span class="bnav-icon-wrap"><i class="ph-duotone ph-user"></i></span><span class="bnav-label">Me</span></a>
         </nav>
     </div>
     <div class="text-center small mt-2 mb-3" style="color:#2d3f58;">v1.0-MVP-STABLE · Engrama</div>

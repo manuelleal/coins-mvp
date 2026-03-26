@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Engrama — Student App</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css">
+<style>
+:root {
+  --bg:       #0B1221;
+  --surface:  #161F30;
+  --surface2: #1c2840;
+  --border:   rgba(43,127,232,0.1);
+  --gold:     #F5A623;
+  --gold-glow:rgba(245,166,35,0.3);
+  --blue:     #2B7FE8;
+  --teal:     #00F5D4;
+  --red:      #FF4D6D;
+  --text:     #E8EFF8;
+  --text2:    #6B82A0;
+  --text3:    #2d3f58;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: #050a14;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px 0 40px;
+}
+
+/* ── PHONE SHELL ── */
+.phone {
+  width: 390px;
+  height: 844px;
+  background: var(--bg);
+  border-radius: 48px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(43,127,232,0.15),
+    0 40px 100px rgba(0,0,0,0.7),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  flex-shrink: 0;
+}
+
+.hex-bg {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V17L28 1l28 16v33z' fill='none' stroke='%232B7FE8' stroke-width='1'/%3E%3Cpath d='M28 100L0 84V51l28-17 28 17v33z' fill='none' stroke='%232B7FE8' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute; inset: 0; z-index: 1;
+  display: none; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+  padding-bottom: 88px;
+  scrollbar-width: none;
+}
+.screen::-webkit-scrollbar { display: none; }
+.screen.active { display: flex; }
+
+/* ── TOP BAR ── */
+.topbar {
+  padding: 20px 24px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.brand {
+  font-family: 'Lexend', sans-serif; font-size: 18px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.topbar-right { display: flex; gap: 8px; align-items: center; }
+.pill {
+  display: flex; align-items: center; gap: 5px;
+  border-radius: 20px; padding: 5px 11px;
+  font-family: 'Lexend', sans-serif; font-size: 12px; font-weight: 700;
+}
+.pill-s { background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.2); color:var(--gold); }
+.pill-c { background:rgba(43,127,232,0.1); border:1px solid rgba(43,127,232,0.2); color:#7ab8f5; }
+
+/* ── SECTION TITLE ── */
+.stitle {
+  font-family: 'Lexend', sans-serif; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--text2);
+  padding: 0 22px; margin-bottom: 10px;
+}
+
+/* ── GLASS CARD ── */
+.gcard {
+  background: rgba(22,31,48,0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(43,127,232,0.1);
+  border-radius: 22px;
+  padding: 20px;
+  position: relative; overflow: hidden;
+}
+
+/* ── BOTTOM NAV ── */
+.bnav {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+  background: rgba(9,14,26,0.96);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(43,127,232,0.08);
+  padding: 10px 0 18px;
+  display: grid; grid-template-columns: repeat(4,1fr);
+}
+.ni {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; padding: 4px;
+}
+.ni-ico {
+  width: 42px; height: 42px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+  transition: background 0.2s, box-shadow 0.25s;
+}
+.ni-ico .ph-duotone {
+  --ph-fill-opacity: 0.2;
+  font-size: 24px;
+  color: var(--text3);
+  transition: color 0.2s, filter 0.2s;
+}
+.ni.active .ni-ico .ph-duotone {
+  color: var(--blue);
+  --ph-fill-opacity: 0.35;
+  filter: drop-shadow(0 0 3px rgba(43,127,232,0.4));
+}
+.ni.active .ni-ico {
+  background: rgba(43,127,232,0.15);
+  box-shadow: 0 0 12px rgba(43,127,232,0.35), 0 0 4px rgba(43,127,232,0.2);
+}
+.ni.active .ni-lbl { color: var(--gold); }
+.ni-lbl {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text3);
+  font-family: 'Lexend', sans-serif;
+}
+
+/* ══════════════════════════════════
+   SCREEN 1 — HOME / DASHBOARD
+══════════════════════════════════ */
+#home .user-row {
+  padding: 0 24px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+#home .username {
+  font-family: 'Lexend', sans-serif; font-size: 16px; font-weight: 600; color: var(--text);
+}
+
+#home .challenge-card {
+  margin: 0 18px 14px;
+}
+#home .challenge-card::before {
+  content:''; position:absolute; top:-40px; left:-40px;
+  width:150px; height:150px;
+  background:radial-gradient(circle,rgba(43,127,232,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.live-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  background:rgba(0,245,212,0.08); border:1px solid rgba(0,245,212,0.2);
+  border-radius:20px; padding:3px 10px;
+  font-size:10px; font-weight:600; color:var(--teal);
+  margin-bottom:12px; font-family:'Lexend',sans-serif; letter-spacing:0.05em;
+}
+.live-dot { width:6px; height:6px; background:var(--teal); border-radius:50%; animation:blink 1.5s infinite; box-shadow:0 0 6px var(--teal); }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.ctitle { font-family:'Lexend',sans-serif; font-size:24px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.cmeta { font-size:12px; color:var(--text2); margin-bottom:8px; }
+.creward { font-size:12px; color:var(--text2); margin-bottom:16px; display:flex; align-items:center; gap:5px; }
+.creward strong { font-family:'Lexend',sans-serif; font-size:14px; color:var(--gold); }
+
+.start-btn {
+  width:100%; padding:15px; border:none; border-radius:16px;
+  background:linear-gradient(135deg,#F5A623,#e8920f);
+  color:#1a0800; font-family:'Lexend',sans-serif; font-size:16px; font-weight:800;
+  cursor:pointer; box-shadow:0 8px 24px var(--gold-glow);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.later-link {
+  width:100%; padding:8px; background:transparent; border:none;
+  color:var(--text2); font-size:12px; font-family:'Inter',sans-serif; cursor:pointer; margin-top:4px;
+}
+
+/* stats */
+#home .stats-row {
+  margin: 0 18px 14px;
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center;
+}
+.scard {
+  background:rgba(22,31,48,0.6); border:1px solid var(--border); border-radius:16px;
+  padding:14px 10px; text-align:center; backdrop-filter:blur(10px);
+}
+.scard-lbl { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text2); margin-bottom:4px; font-family:'Lexend',sans-serif; }
+.scard-val { font-family:'Lexend',sans-serif; font-size:22px; font-weight:800; }
+
+/* ring */
+.ring-wrap { display:flex; flex-direction:column; align-items:center; }
+.rsvg { width:88px; height:88px; }
+.rbg { fill:none; stroke:rgba(43,127,232,0.1); stroke-width:7; }
+.rfill { fill:none; stroke:url(#rg); stroke-width:7; stroke-linecap:round; stroke-dasharray:226; stroke-dashoffset:81; transform:rotate(-90deg); transform-origin:44px 44px; filter:drop-shadow(0 0 4px rgba(43,127,232,0.5)); }
+
+/* attendance */
+#home .attend { margin:0 18px 14px; }
+.wk-title { font-family:'Lexend',sans-serif; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text2); margin-bottom:14px; }
+.days-row { display:flex; align-items:center; justify-content:space-between; position:relative; }
+.days-row::before {
+  content:''; position:absolute; top:50%; left:18px; right:18px; height:2px;
+  background:linear-gradient(90deg,var(--teal) 0%,var(--teal) 55%,rgba(43,127,232,0.12) 55%,rgba(43,127,232,0.12) 100%);
+  transform:translateY(-50%); z-index:0;
+}
+.di { display:flex; flex-direction:column; align-items:center; gap:5px; position:relative; z-index:1; }
+.dl { font-size:9px; font-weight:700; color:var(--text2); text-transform:uppercase; font-family:'Lexend',sans-serif; }
+.dc { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; }
+.dc.ok { background:rgba(0,245,212,0.12); border:2px solid var(--teal); color:var(--teal); box-shadow:0 0 10px rgba(0,245,212,0.2); }
+.dc.now { background:rgba(43,127,232,0.15); border:2px solid var(--blue); color:var(--blue); animation:nowPulse 2s infinite; }
+.dc.empty { background:rgba(255,255,255,0.03); border:2px solid rgba(255,255,255,0.07); }
+@keyframes nowPulse{0%,100%{box-shadow:0 0 0 0 rgba(43,127,232,0.3)}50%{box-shadow:0 0 0 5px rgba(43,127,232,0)}}
+
+/* ══════════════════════════════════
+   SCREEN 2 — CHALLENGE / QUESTION
+══════════════════════════════════ */
+#challenge .ch-header { padding: 20px 22px 12px; }
+.ch-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.ch-back { font-size:18px; cursor:pointer; color:var(--text2); }
+.ch-info { font-family:'Lexend',sans-serif; font-size:13px; font-weight:600; color:var(--text2); }
+.ch-timer { font-family:'Lexend',sans-serif; font-size:13px; font-weight:700; color:var(--gold); display:flex; align-items:center; gap:5px; }
+
+.progress-bar-wrap { padding:0 22px; margin-bottom:20px; }
+.pb-meta { display:flex; justify-content:space-between; font-size:11px; color:var(--text2); margin-bottom:6px; font-family:'Lexend',sans-serif; }
+.pb { height:6px; background:rgba(255,255,255,0.06); border-radius:10px; overflow:hidden; }
+.pb-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--teal)); border-radius:10px; width:30%; transition:width 0.4s; }
+
+.question-card { margin:0 18px 16px; }
+.q-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--blue); margin-bottom:10px; font-family:'Lexend',sans-serif; }
+.q-text { font-family:'Lexend',sans-serif; font-size:19px; font-weight:700; color:var(--text); line-height:1.35; margin-bottom:6px; }
+.q-sub { font-size:12px; color:var(--text2); line-height:1.5; }
+
+.options-wrap { padding:0 18px; display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+.opt {
+  background:rgba(22,31,48,0.6); border:1.5px solid rgba(43,127,232,0.1);
+  border-radius:16px; padding:14px 18px;
+  display:flex; align-items:center; gap:14px; cursor:pointer;
+  transition:all 0.18s;
+}
+.opt:hover { border-color:rgba(43,127,232,0.3); background:rgba(43,127,232,0.06); }
+.opt.selected { border-color:var(--blue); background:rgba(43,127,232,0.1); }
+.opt.correct { border-color:var(--teal); background:rgba(0,245,212,0.08); }
+.opt.wrong { border-color:var(--red); background:rgba(255,77,109,0.06); }
+.opt-letter {
+  width:30px; height:30px; border-radius:8px; flex-shrink:0;
+  background:rgba(43,127,232,0.1); border:1px solid rgba(43,127,232,0.15);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Lexend',sans-serif; font-size:13px; font-weight:700; color:var(--blue);
+}
+.opt.selected .opt-letter { background:var(--blue); color:#fff; border-color:var(--blue); }
+.opt.correct .opt-letter { background:var(--teal); color:#001a12; border-color:var(--teal); }
+.opt.wrong .opt-letter { background:var(--red); color:#fff; border-color:var(--red); }
+.opt-text { font-size:14px; color:var(--text); font-weight:500; line-height:1.3; }
+
+.coin-burst {
+  display:none; position:absolute; top:40%; left:50%; transform:translate(-50%,-50%);
+  font-family:'Lexend',sans-serif; font-size:36px; font-weight:800; color:var(--gold);
+  text-shadow:0 0 20px var(--gold-glow); z-index:20; pointer-events:none;
+  animation:burst 1s ease forwards;
+}
+@keyframes burst{0%{opacity:0;transform:translate(-50%,-60%) scale(0.5)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-30%) scale(0.8)}}
+
+.confirm-btn {
+  margin:0 18px; width:calc(100% - 36px); padding:15px;
+  background:linear-gradient(135deg,var(--blue),#1a5fd4);
+  border:none; border-radius:16px; color:#fff;
+  font-family:'Lexend',sans-serif; font-size:15px; font-weight:700; cursor:pointer;
+  box-shadow:0 6px 20px rgba(43,127,232,0.3);
+}
+
+/* ══════════════════════════════════
+   SCREEN 3 — LEADERBOARD
+══════════════════════════════════ */
+#leaderboard .lb-head { padding:20px 22px 16px; }
+.lb-title { font-family:'Lexend',sans-serif; font-size:22px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.lb-sub { font-size:12px; color:var(--text2); }
+
+.podium { display:flex; align-items:flex-end; justify-content:center; gap:12px; padding:0 22px 20px; }
+.podium-item { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; }
+.pod-avatar {
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:'Lexend',sans-serif; font-weight:800; color:#fff;
+}
+.pod-name { font-size:10px; font-weight:600; color:var(--text2); text-align:center; font-family:'Lexend',sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; }
+.pod-coins { font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; color:var(--gold); }
+.pod-block { border-radius:10px 10px 0 0; width:100%; display:flex; align-items:center; justify-content:center; }
+.pod-rank { font-family:'Lexend',sans-serif; font-size:18px; font-weight:800; }
+
+/* 1st */
+.p1 .pod-avatar { width:54px; height:54px; font-size:20px; background:linear-gradient(135deg,#F5A623,#e8920f); box-shadow:0 0 20px rgba(245,166,35,0.4); }
+.p1 .pod-block { height:70px; background:linear-gradient(180deg,rgba(245,166,35,0.2),rgba(245,166,35,0.05)); border:1px solid rgba(245,166,35,0.2); }
+.p1 .pod-rank { color:var(--gold); }
+
+/* 2nd */
+.p2 .pod-avatar { width:44px; height:44px; font-size:17px; background:linear-gradient(135deg,#6B82A0,#4a5e78); }
+.p2 .pod-block { height:50px; background:rgba(107,130,160,0.08); border:1px solid rgba(107,130,160,0.15); }
+.p2 .pod-rank { color:#6B82A0; }
+
+/* 3rd */
+.p3 .pod-avatar { width:40px; height:40px; font-size:15px; background:linear-gradient(135deg,#b45309,#92400e); }
+.p3 .pod-block { height:38px; background:rgba(180,83,9,0.08); border:1px solid rgba(180,83,9,0.15); }
+.p3 .pod-rank { color:#b45309; }
+
+.lb-list { padding:0 18px; display:flex; flex-direction:column; gap:8px; }
+.lb-row {
+  background:rgba(22,31,48,0.6); border:1px solid var(--border); border-radius:14px;
+  padding:12px 16px; display:flex; align-items:center; gap:12px;
+  backdrop-filter:blur(10px);
+}
+.lb-row.me { background:rgba(43,127,232,0.07); border-color:rgba(43,127,232,0.2); }
+.lb-num { font-family:'Lexend',sans-serif; font-size:13px; font-weight:700; color:var(--text2); width:20px; text-align:center; }
+.lb-av { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Lexend',sans-serif; font-size:13px; font-weight:700; color:#fff; flex-shrink:0; }
+.lb-name { flex:1; font-size:13px; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lb-name .you { font-size:9px; color:var(--blue); font-weight:700; margin-left:5px; font-family:'Lexend',sans-serif; text-transform:uppercase; }
+.lb-coins { font-family:'Lexend',sans-serif; font-size:13px; font-weight:700; color:var(--gold); flex-shrink:0; }
+
+/* ══════════════════════════════════
+   SCREEN 4 — STORE
+══════════════════════════════════ */
+#store .st-head { padding:20px 22px 16px; }
+.st-title { font-family:'Lexend',sans-serif; font-size:22px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.st-bal { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text2); }
+.st-bal strong { font-family:'Lexend',sans-serif; font-size:15px; font-weight:800; color:var(--gold); }
+
+.store-grid { padding:0 18px; display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+.store-card {
+  background:rgba(22,31,48,0.7); border:1px solid var(--border); border-radius:18px;
+  padding:16px; cursor:pointer; transition:all 0.18s; backdrop-filter:blur(10px);
+}
+.store-card:hover { border-color:rgba(245,166,35,0.3); transform:translateY(-1px); }
+.store-icon { font-size:28px; margin-bottom:10px; }
+.store-name { font-family:'Lexend',sans-serif; font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; line-height:1.3; }
+.store-desc { font-size:11px; color:var(--text2); line-height:1.4; margin-bottom:12px; }
+.store-price {
+  display:inline-flex; align-items:center; gap:4px;
+  background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.2);
+  border-radius:10px; padding:4px 10px;
+  font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; color:var(--gold);
+}
+
+.store-featured { margin:0 18px 16px; }
+.store-feat-card {
+  background:linear-gradient(135deg,rgba(43,127,232,0.15),rgba(0,245,212,0.08));
+  border:1px solid rgba(43,127,232,0.25); border-radius:20px; padding:20px;
+  display:flex; align-items:center; gap:16px;
+}
+.feat-icon { font-size:40px; flex-shrink:0; }
+.feat-info { flex:1; }
+.feat-tag { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--teal); margin-bottom:4px; font-family:'Lexend',sans-serif; }
+.feat-name { font-family:'Lexend',sans-serif; font-size:16px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.feat-desc { font-size:11px; color:var(--text2); line-height:1.4; }
+.feat-btn {
+  margin-top:10px; padding:9px 16px; background:linear-gradient(135deg,var(--blue),#1a5fd4);
+  border:none; border-radius:12px; color:#fff;
+  font-family:'Lexend',sans-serif; font-size:12px; font-weight:700; cursor:pointer;
+  box-shadow:0 4px 14px rgba(43,127,232,0.3);
+}
+
+/* ══════════════════════════════════
+   SCREEN 5 — PROFILE
+══════════════════════════════════ */
+#profile .pr-head { padding:24px 22px 16px; text-align:center; }
+.pr-avatar {
+  width:72px; height:72px; border-radius:50%; margin:0 auto 12px;
+  background:linear-gradient(135deg,var(--blue),var(--teal));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Lexend',sans-serif; font-size:28px; font-weight:800; color:#fff;
+  box-shadow:0 0 24px rgba(43,127,232,0.35);
+}
+.pr-name { font-family:'Lexend',sans-serif; font-size:20px; font-weight:800; color:var(--text); margin-bottom:2px; }
+.pr-group { font-size:12px; color:var(--text2); }
+
+.pr-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:0 18px; margin-bottom:16px; }
+.pr-stat { background:rgba(22,31,48,0.6); border:1px solid var(--border); border-radius:16px; padding:14px 8px; text-align:center; backdrop-filter:blur(10px); }
+.pr-sv { font-family:'Lexend',sans-serif; font-size:20px; font-weight:800; }
+.pr-sl { font-size:9px; color:var(--text2); text-transform:uppercase; letter-spacing:0.08em; margin-top:3px; font-family:'Lexend',sans-serif; }
+
+.skills-section { padding:0 18px; margin-bottom:16px; }
+.skill-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.skill-name { font-size:12px; font-weight:600; color:var(--text2); width:80px; flex-shrink:0; font-family:'Lexend',sans-serif; }
+.skill-bar { flex:1; height:6px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden; }
+.skill-fill { height:100%; border-radius:10px; }
+.skill-pct { font-family:'Lexend',sans-serif; font-size:11px; font-weight:700; width:36px; text-align:right; }
+
+.badges-section { padding:0 18px; margin-bottom:16px; }
+.badges-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+.badge-item { display:flex; flex-direction:column; align-items:center; gap:5px; }
+.badge-ico {
+  width:52px; height:52px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center; font-size:22px;
+}
+.badge-ico.earned { background:rgba(245,166,35,0.12); border:1.5px solid rgba(245,166,35,0.3); }
+.badge-ico.locked { background:rgba(255,255,255,0.03); border:1.5px solid rgba(255,255,255,0.07); filter:grayscale(1); opacity:0.4; }
+.badge-lbl { font-size:9px; color:var(--text2); text-align:center; font-family:'Lexend',sans-serif; font-weight:600; line-height:1.3; }
+
+/* ══════════════════════════════════
+   SCREEN 6 — BET MODE
+══════════════════════════════════ */
+#bet .bet-head { padding:24px 22px 10px; }
+.bet-title { font-family:'Lexend',sans-serif; font-size:22px; font-weight:800; color:var(--text); margin-bottom:4px; }
+.bet-sub { font-size:13px; color:var(--text2); line-height:1.5; }
+
+.bet-hero-card {
+  margin:0 18px 16px;
+  background:linear-gradient(145deg,#1a0f00,#2d1800);
+  border:1px solid rgba(245,166,35,0.2); border-radius:22px; padding:22px;
+  position:relative; overflow:hidden;
+}
+.bet-hero-card::after { content:'⚡'; position:absolute; right:16px; bottom:10px; font-size:80px; opacity:0.04; pointer-events:none; }
+
+.bet-amounts { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+.bet-amt {
+  background:rgba(255,255,255,0.04); border:1.5px solid rgba(245,166,35,0.12);
+  border-radius:14px; padding:14px 8px; text-align:center; cursor:pointer; transition:all 0.18s;
+}
+.bet-amt.sel { background:rgba(245,166,35,0.1); border-color:var(--gold); }
+.bet-amt-val { font-family:'Lexend',sans-serif; font-size:18px; font-weight:800; color:var(--gold); display:block; }
+.bet-amt-lbl { font-size:10px; color:var(--text2); margin-top:3px; display:block; }
+
+.bet-topic-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text2); margin-bottom:10px; font-family:'Lexend',sans-serif; }
+.bet-topics { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+.bet-topic {
+  padding:7px 14px; border-radius:20px; cursor:pointer;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(43,127,232,0.12);
+  font-size:12px; font-weight:600; color:var(--text2); font-family:'Lexend',sans-serif;
+  transition:all 0.15s;
+}
+.bet-topic.sel { background:rgba(43,127,232,0.12); border-color:var(--blue); color:var(--blue); }
+
+.bet-preview {
+  background:rgba(0,0,0,0.3); border-radius:14px; padding:14px;
+  margin-bottom:20px; border:1px solid rgba(255,255,255,0.05);
+}
+.bet-preview-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.bet-preview-row:last-child { margin-bottom:0; }
+.bpr-lbl { font-size:11px; color:var(--text2); font-family:'Lexend',sans-serif; }
+.bpr-val { font-family:'Lexend',sans-serif; font-size:13px; font-weight:700; color:var(--text); }
+.bpr-val.win { color:var(--teal); }
+.bpr-val.lose { color:var(--red); }
+
+.bet-cta {
+  width:100%; padding:16px; border:none; border-radius:16px;
+  background:linear-gradient(135deg,var(--gold),#e8920f);
+  color:#1a0800; font-family:'Lexend',sans-serif; font-size:16px; font-weight:800;
+  cursor:pointer; box-shadow:0 8px 24px var(--gold-glow);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+
+.bet-disclaimer { margin:0 18px; font-size:11px; color:var(--text3); text-align:center; line-height:1.5; font-family:'Lexend',sans-serif; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+.screen.active > * { animation: fadeUp 0.35s ease both; }
+.screen.active > *:nth-child(1){animation-delay:0.04s}
+.screen.active > *:nth-child(2){animation-delay:0.08s}
+.screen.active > *:nth-child(3){animation-delay:0.12s}
+.screen.active > *:nth-child(4){animation-delay:0.16s}
+.screen.active > *:nth-child(5){animation-delay:0.20s}
+.screen.active > *:nth-child(6){animation-delay:0.24s}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="hex-bg"></div>
+
+  <!-- ══ SCREEN 1: HOME ══ -->
+  <div class="screen active" id="home">
+    <div class="topbar">
+      <div class="brand">Engrama</div>
+      <div class="topbar-right">
+        <div class="pill pill-s">🔥 2</div>
+        <div class="pill pill-c">🪙 5,832</div>
+      </div>
+    </div>
+
+    <div id="home" style="display:contents">
+      <div class="user-row">
+        <div class="username">Christiam 👋</div>
+      </div>
+
+      <div class="challenge-card gcard" style="margin:0 18px 14px">
+        <div class="live-badge"><div class="live-dot"></div> Live Now</div>
+        <div class="ctitle">Tense Sprint</div>
+        <div class="cmeta">Grammar · 10 questions · Beat your class</div>
+        <div class="creward">Win up to <strong>🪙 150</strong> — 1 to 15 per answer</div>
+        <button class="start-btn" onclick="nav('challenge')">▶ &nbsp; Start Challenge</button>
+        <button class="later-link">save for later</button>
+      </div>
+
+      <div class="stats-row" style="margin:0 18px 14px">
+        <div class="scard">
+          <div class="scard-lbl">Rank</div>
+          <div class="scard-val" style="color:var(--gold)">#1</div>
+        </div>
+        <div class="ring-wrap">
+          <svg class="rsvg" viewBox="0 0 88 88">
+            <defs>
+              <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#2B7FE8"/>
+                <stop offset="100%" stop-color="#00F5D4"/>
+              </linearGradient>
+            </defs>
+            <circle class="rbg" cx="44" cy="44" r="36"/>
+            <circle class="rfill" cx="44" cy="44" r="36"/>
+            <text x="44" y="41" text-anchor="middle" font-family="Lexend" font-size="19" font-weight="800" fill="#E8EFF8">117</text>
+            <text x="44" y="55" text-anchor="middle" font-family="Lexend" font-size="8" fill="#6B82A0" letter-spacing="2">LEVEL</text>
+          </svg>
+        </div>
+        <div class="scard">
+          <div class="scard-lbl">Week</div>
+          <div class="scard-val" style="color:var(--teal)">3/5</div>
+        </div>
+      </div>
+
+      <div class="attend gcard" style="margin:0 18px 14px">
+        <div class="wk-title">This Week</div>
+        <div class="days-row">
+          <div class="di"><div class="dl">L</div><div class="dc ok">✓</div></div>
+          <div class="di"><div class="dl">M</div><div class="dc ok">✓</div></div>
+          <div class="di"><div class="dl">M</div><div class="dc ok">✓</div></div>
+          <div class="di"><div class="dl">J</div><div class="dc now">·</div></div>
+          <div class="di"><div class="dl">V</div><div class="dc empty"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bnav">
+      <div class="ni active" onclick="nav('home')"><div class="ni-ico"><i class="ph-duotone ph-house"></i></div><div class="ni-lbl">Home</div></div>
+      <div class="ni" onclick="nav('challenge')"><div class="ni-ico"><i class="ph-duotone ph-sword"></i></div><div class="ni-lbl">Play</div></div>
+      <div class="ni" onclick="nav('store')"><div class="ni-ico"><i class="ph-duotone ph-storefront"></i></div><div class="ni-lbl">Store</div></div>
+      <div class="ni" onclick="nav('profile')"><div class="ni-ico"><i class="ph-duotone ph-user"></i></div><div class="ni-lbl">Me</div></div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 2: CHALLENGE ══ -->
+  <div class="screen" id="challenge">
+    <div class="ch-header">
+      <div class="ch-top">
+        <div class="ch-back" onclick="nav('home')">← Back</div>
+        <div class="ch-info">Tense Sprint</div>
+        <div class="ch-timer">⏱ 02:34</div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="pb-meta"><span>Question 3 of 10</span><span style="color:var(--gold)">🪙 +24 earned</span></div>
+      <div class="pb"><div class="pb-fill" id="pb-fill"></div></div>
+    </div>
+
+    <div class="question-card gcard" style="position:relative">
+      <div class="q-label">Grammar · Tense Identification</div>
+      <div class="q-text">"She ___ to the market every Sunday."</div>
+      <div class="q-sub">Choose the correct verb form to complete the sentence.</div>
+      <div id="coin-burst" class="coin-burst">+🪙12</div>
+    </div>
+
+    <div class="options-wrap" id="opts">
+      <div class="opt" onclick="selectOpt(this,false)">
+        <div class="opt-letter">A</div>
+        <div class="opt-text">is going</div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,true)">
+        <div class="opt-letter">B</div>
+        <div class="opt-text">goes</div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,false)">
+        <div class="opt-letter">C</div>
+        <div class="opt-text">went</div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,false)">
+        <div class="opt-letter">D</div>
+        <div class="opt-text">has gone</div>
+      </div>
+    </div>
+
+    <button class="confirm-btn" onclick="nav('home')">Confirm Answer →</button>
+
+    <div class="bnav">
+      <div class="ni" onclick="nav('home')"><div class="ni-ico"><i class="ph-duotone ph-house"></i></div><div class="ni-lbl">Home</div></div>
+      <div class="ni active" onclick="nav('challenge')"><div class="ni-ico"><i class="ph-duotone ph-sword"></i></div><div class="ni-lbl">Play</div></div>
+      <div class="ni" onclick="nav('store')"><div class="ni-ico"><i class="ph-duotone ph-storefront"></i></div><div class="ni-lbl">Store</div></div>
+      <div class="ni" onclick="nav('profile')"><div class="ni-ico"><i class="ph-duotone ph-user"></i></div><div class="ni-lbl">Me</div></div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 3: LEADERBOARD ══ -->
+  <div class="screen" id="leaderboard">
+    <div class="lb-head">
+      <div class="lb-title">🏆 Leaderboard</div>
+      <div class="lb-sub">Foreign Language · UIS · This week</div>
+    </div>
+
+    <div class="podium">
+      <div class="podium-item p2">
+        <div class="pod-avatar" style="width:44px;height:44px;font-size:17px;background:linear-gradient(135deg,#6B82A0,#4a5e78)">Y</div>
+        <div class="pod-name">Yulieth K.</div>
+        <div class="pod-coins">🪙 195</div>
+        <div class="pod-block" style="height:50px;background:rgba(107,130,160,0.08);border:1px solid rgba(107,130,160,0.15);border-radius:10px 10px 0 0">
+          <div class="pod-rank" style="color:#6B82A0">2</div>
+        </div>
+      </div>
+      <div class="podium-item p1">
+        <div style="font-size:20px;margin-bottom:4px">👑</div>
+        <div class="pod-avatar" style="width:54px;height:54px;font-size:20px;background:linear-gradient(135deg,#F5A623,#e8920f);box-shadow:0 0 20px rgba(245,166,35,0.4)">C</div>
+        <div class="pod-name" style="font-weight:700;color:var(--text)">You</div>
+        <div class="pod-coins" style="font-size:13px">🪙 5,832</div>
+        <div class="pod-block" style="height:70px;background:linear-gradient(180deg,rgba(245,166,35,0.15),rgba(245,166,35,0.04));border:1px solid rgba(245,166,35,0.2);border-radius:10px 10px 0 0">
+          <div class="pod-rank" style="color:var(--gold)">1</div>
+        </div>
+      </div>
+      <div class="podium-item p3">
+        <div class="pod-avatar" style="width:40px;height:40px;font-size:15px;background:linear-gradient(135deg,#b45309,#92400e)">M</div>
+        <div class="pod-name">Monica A.</div>
+        <div class="pod-coins">🪙 175</div>
+        <div class="pod-block" style="height:38px;background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.15);border-radius:10px 10px 0 0">
+          <div class="pod-rank" style="color:#b45309">3</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lb-list">
+      <div class="lb-row">
+        <div class="lb-num">4</div>
+        <div class="lb-av" style="background:rgba(239,68,68,0.2);color:#ef4444">D</div>
+        <div class="lb-name">Danna G. Mayorga</div>
+        <div class="lb-coins">🪙 160</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-num">5</div>
+        <div class="lb-av" style="background:rgba(16,185,129,0.15);color:#10b981">N</div>
+        <div class="lb-name">Neira J. Mendez</div>
+        <div class="lb-coins">🪙 155</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-num">6</div>
+        <div class="lb-av" style="background:rgba(168,85,247,0.15);color:#a855f7">J</div>
+        <div class="lb-name">Juan P. Ruiz</div>
+        <div class="lb-coins">🪙 140</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-num">7</div>
+        <div class="lb-av" style="background:rgba(43,127,232,0.15);color:#7ab8f5">L</div>
+        <div class="lb-name">Laura M. Torres</div>
+        <div class="lb-coins">🪙 120</div>
+      </div>
+    </div>
+
+    <div class="bnav">
+      <div class="ni" onclick="nav('home')"><div class="ni-ico"><i class="ph-duotone ph-house"></i></div><div class="ni-lbl">Home</div></div>
+      <div class="ni active" onclick="nav('leaderboard')"><div class="ni-ico"><i class="ph-duotone ph-trophy"></i></div><div class="ni-lbl">Rank</div></div>
+      <div class="ni" onclick="nav('store')"><div class="ni-ico"><i class="ph-duotone ph-storefront"></i></div><div class="ni-lbl">Store</div></div>
+      <div class="ni" onclick="nav('profile')"><div class="ni-ico"><i class="ph-duotone ph-user"></i></div><div class="ni-lbl">Me</div></div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 4: STORE ══ -->
+  <div class="screen" id="store">
+    <div class="st-head">
+      <div class="st-title">🛍️ Store</div>
+      <div class="st-bal">Your balance: <strong>🪙 5,832</strong></div>
+    </div>
+
+    <div class="store-featured">
+      <div class="store-feat-card">
+        <div class="feat-icon">⭐</div>
+        <div class="feat-info">
+          <div class="feat-tag">⚡ Featured</div>
+          <div class="feat-name">+0.5 Exam Points</div>
+          <div class="feat-desc">Boost your next partial exam grade by half a point.</div>
+          <button class="feat-btn">🪙 500 — Buy Now</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stitle">All Items</div>
+    <div class="store-grid">
+      <div class="store-card">
+        <div class="store-icon">🔄</div>
+        <div class="store-name">Retry Failed Quiz</div>
+        <div class="store-desc">Get a second chance on a quiz you didn't pass.</div>
+        <div class="store-price">🪙 200</div>
+      </div>
+      <div class="store-card">
+        <div class="store-icon">🎒</div>
+        <div class="store-name">UIS Merch Pack</div>
+        <div class="store-desc">Exclusive UIS sticker + lanyard combo.</div>
+        <div class="store-price">🪙 1,200</div>
+      </div>
+      <div class="store-card">
+        <div class="store-icon">🛡️</div>
+        <div class="store-name">Streak Shield</div>
+        <div class="store-desc">Protect your streak for one missed day.</div>
+        <div class="store-price">🪙 800</div>
+      </div>
+      <div class="store-card">
+        <div class="store-icon">🎯</div>
+        <div class="store-name">Double XP — 1hr</div>
+        <div class="store-desc">Earn 2x XP on all challenges for 60 minutes.</div>
+        <div class="store-price">🪙 400</div>
+      </div>
+    </div>
+
+    <div class="bnav">
+      <div class="ni" onclick="nav('home')"><div class="ni-ico"><i class="ph-duotone ph-house"></i></div><div class="ni-lbl">Home</div></div>
+      <div class="ni" onclick="nav('challenge')"><div class="ni-ico"><i class="ph-duotone ph-sword"></i></div><div class="ni-lbl">Play</div></div>
+      <div class="ni active" onclick="nav('store')"><div class="ni-ico"><i class="ph-duotone ph-storefront"></i></div><div class="ni-lbl">Store</div></div>
+      <div class="ni" onclick="nav('profile')"><div class="ni-ico"><i class="ph-duotone ph-user"></i></div><div class="ni-lbl">Me</div></div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 5: PROFILE ══ -->
+  <div class="screen" id="profile">
+    <div class="pr-head">
+      <div class="pr-avatar">C</div>
+      <div class="pr-name">Christiam Puentes</div>
+      <div class="pr-group">Foreign Language · UIS · Level 117</div>
+    </div>
+
+    <div class="pr-stats">
+      <div class="pr-stat">
+        <div class="pr-sv" style="color:var(--gold)">5,832</div>
+        <div class="pr-sl">Coins</div>
+      </div>
+      <div class="pr-stat">
+        <div class="pr-sv" style="color:var(--teal)">🔥 2</div>
+        <div class="pr-sl">Streak</div>
+      </div>
+      <div class="pr-stat">
+        <div class="pr-sv" style="color:var(--blue)">#1</div>
+        <div class="pr-sl">Rank</div>
+      </div>
+    </div>
+
+    <div class="stitle">Skills</div>
+    <div class="skills-section">
+      <div class="skill-row">
+        <div class="skill-name">Grammar</div>
+        <div class="skill-bar"><div class="skill-fill" style="width:78%;background:linear-gradient(90deg,var(--blue),var(--teal))"></div></div>
+        <div class="skill-pct" style="color:var(--blue)">78%</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-name">Vocabulary</div>
+        <div class="skill-bar"><div class="skill-fill" style="width:65%;background:linear-gradient(90deg,#a855f7,#7c3aed)"></div></div>
+        <div class="skill-pct" style="color:#a855f7">65%</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-name">Reading</div>
+        <div class="skill-bar"><div class="skill-fill" style="width:52%;background:linear-gradient(90deg,var(--teal),#00d4b8)"></div></div>
+        <div class="skill-pct" style="color:var(--teal)">52%</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-name">Speaking</div>
+        <div class="skill-bar"><div class="skill-fill" style="width:40%;background:linear-gradient(90deg,var(--gold),#e8920f)"></div></div>
+        <div class="skill-pct" style="color:var(--gold)">40%</div>
+      </div>
+    </div>
+
+    <div class="stitle">Badges</div>
+    <div class="badges-section">
+      <div class="badges-grid">
+        <div class="badge-item">
+          <div class="badge-ico earned">🏆</div>
+          <div class="badge-lbl">Top 3</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-ico earned">🔥</div>
+          <div class="badge-lbl">5 Day Streak</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-ico locked">📚</div>
+          <div class="badge-lbl">10 Challenges</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-ico locked">⭐</div>
+          <div class="badge-lbl">Perfect Week</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bnav">
+      <div class="ni" onclick="nav('home')"><div class="ni-ico"><i class="ph-duotone ph-house"></i></div><div class="ni-lbl">Home</div></div>
+      <div class="ni" onclick="nav('challenge')"><div class="ni-ico"><i class="ph-duotone ph-sword"></i></div><div class="ni-lbl">Play</div></div>
+      <div class="ni" onclick="nav('store')"><div class="ni-ico"><i class="ph-duotone ph-storefront"></i></div><div class="ni-lbl">Store</div></div>
+      <div class="ni active" onclick="nav('profile')"><div class="ni-ico"><i class="ph-duotone ph-user"></i></div><div class="ni-lbl">Me</div></div>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 6: BET MODE ══ -->
+  <div class="screen" id="bet">
+    <div class="bet-head">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="cursor:pointer;color:var(--text2);font-size:16px" onclick="nav('home')">← Back</span>
+      </div>
+      <div class="bet-title">⚡ Bet Mode</div>
+      <div class="bet-sub">No active challenge from your teacher. Create your own — win double or lose it all.</div>
+    </div>
+
+    <div class="bet-hero-card">
+      <div class="bet-topic-label">How much do you bet?</div>
+      <div class="bet-amounts">
+        <div class="bet-amt sel" onclick="selectAmt(this,'50','100')">
+          <span class="bet-amt-val">50</span>
+          <span class="bet-amt-lbl">🪙 safe</span>
+        </div>
+        <div class="bet-amt" onclick="selectAmt(this,'200','400')">
+          <span class="bet-amt-val">200</span>
+          <span class="bet-amt-lbl">🪙 bold</span>
+        </div>
+        <div class="bet-amt" onclick="selectAmt(this,'500','1000')">
+          <span class="bet-amt-val">500</span>
+          <span class="bet-amt-lbl">🪙 all in</span>
+        </div>
+      </div>
+
+      <div class="bet-topic-label">Choose a topic</div>
+      <div class="bet-topics">
+        <div class="bet-topic sel" onclick="selTopic(this)">Grammar</div>
+        <div class="bet-topic" onclick="selTopic(this)">Vocabulary</div>
+        <div class="bet-topic" onclick="selTopic(this)">Reading</div>
+        <div class="bet-topic" onclick="selTopic(this)">Mixed</div>
+      </div>
+
+      <div class="bet-preview">
+        <div class="bet-preview-row">
+          <div class="bpr-lbl">Your bet</div>
+          <div class="bpr-val" id="bp-bet">🪙 50 coins</div>
+        </div>
+        <div class="bet-preview-row">
+          <div class="bpr-lbl">If you win</div>
+          <div class="bpr-val win" id="bp-win">+🪙 100 coins</div>
+        </div>
+        <div class="bet-preview-row">
+          <div class="bpr-lbl">If you lose</div>
+          <div class="bpr-val lose" id="bp-lose">−🪙 50 coins</div>
+        </div>
+      </div>
+
+      <button class="bet-cta">⚡ &nbsp; Generate & Play</button>
+    </div>
+
+    <div class="bet-disclaimer">AI generates a 10-question challenge on your chosen topic. You have one shot — no retries.</div>
+
+    <div class="bnav">
+      <div class="ni" onclick="nav('home')"><div class="ni-ico"><i class="ph-duotone ph-house"></i></div><div class="ni-lbl">Home</div></div>
+      <div class="ni active"><div class="ni-ico"><i class="ph-duotone ph-lightning"></i></div><div class="ni-lbl">Bet</div></div>
+      <div class="ni" onclick="nav('store')"><div class="ni-ico"><i class="ph-duotone ph-storefront"></i></div><div class="ni-lbl">Store</div></div>
+      <div class="ni" onclick="nav('profile')"><div class="ni-ico"><i class="ph-duotone ph-user"></i></div><div class="ni-lbl">Me</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PAGE SELECTOR -->
+<div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;justify-content:center;max-width:500px">
+  <button onclick="nav('home')"      style="padding:8px 16px;background:#161F30;border:1px solid rgba(43,127,232,0.2);border-radius:10px;color:#7ab8f5;font-family:Lexend,sans-serif;font-size:12px;font-weight:600;cursor:pointer">🏠 Home</button>
+  <button onclick="nav('challenge')" style="padding:8px 16px;background:#161F30;border:1px solid rgba(43,127,232,0.2);border-radius:10px;color:#7ab8f5;font-family:Lexend,sans-serif;font-size:12px;font-weight:600;cursor:pointer">⚔️ Challenge</button>
+  <button onclick="nav('leaderboard')" style="padding:8px 16px;background:#161F30;border:1px solid rgba(43,127,232,0.2);border-radius:10px;color:#7ab8f5;font-family:Lexend,sans-serif;font-size:12px;font-weight:600;cursor:pointer">🏆 Leaderboard</button>
+  <button onclick="nav('store')"     style="padding:8px 16px;background:#161F30;border:1px solid rgba(43,127,232,0.2);border-radius:10px;color:#7ab8f5;font-family:Lexend,sans-serif;font-size:12px;font-weight:600;cursor:pointer">🛍️ Store</button>
+  <button onclick="nav('profile')"   style="padding:8px 16px;background:#161F30;border:1px solid rgba(43,127,232,0.2);border-radius:10px;color:#7ab8f5;font-family:Lexend,sans-serif;font-size:12px;font-weight:600;cursor:pointer">👤 Profile</button>
+  <button onclick="nav('bet')"       style="padding:8px 16px;background:#161F30;border:1px solid rgba(245,166,35,0.3);border-radius:10px;color:var(--gold);font-family:Lexend,sans-serif;font-size:12px;font-weight:600;cursor:pointer">⚡ Bet Mode</button>
+</div>
+
+<script>
+function nav(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function selectOpt(el, correct) {
+  document.querySelectorAll('.opt').forEach(o => {
+    o.classList.remove('selected','correct','wrong');
+  });
+  if (correct) {
+    el.classList.add('correct');
+    const burst = document.getElementById('coin-burst');
+    burst.style.display = 'block';
+    setTimeout(() => burst.style.display = 'none', 1100);
+  } else {
+    el.classList.add('wrong');
+  }
+}
+
+function selectAmt(el, bet, win) {
+  document.querySelectorAll('.bet-amt').forEach(a => a.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('bp-bet').textContent = '🪙 ' + bet + ' coins';
+  document.getElementById('bp-win').textContent = '+🪙 ' + win + ' coins';
+  document.getElementById('bp-lose').textContent = '−🪙 ' + bet + ' coins';
+}
+
+function selTopic(el) {
+  document.querySelectorAll('.bet-topic').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+}
+</script>
+</body>
+</html>

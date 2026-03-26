@@ -25,10 +25,10 @@
         .challenge-card.active-glow { animation: glowPulse 1.8s ease-in-out infinite; }
         .challenge-active-card { animation: glowPulse 2s infinite; }
         .active-challenge-banner {
-            border: 2px solid #fbbf24;
-            box-shadow: 0 0 0 rgba(251, 191, 36, 0.45);
+            border: 2px solid #F5A623;
+            box-shadow: 0 0 0 rgba(245,166,35,0.45);
             animation: glowPulse 1.7s ease-in-out infinite;
-            background: linear-gradient(135deg, rgba(251,191,36,0.18), rgba(251,191,36,0.06));
+            background: linear-gradient(135deg, rgba(245,166,35,0.18), rgba(245,166,35,0.06));
         }
         .coins-float { position: fixed; z-index: 1200; pointer-events: none; font-weight: 900; color: var(--gold-500, #FFD700); text-shadow: 0 2px 10px rgba(0,0,0,0.35); animation: floatUp 900ms ease-out forwards; }
         .coin-float { animation: floatUp 1s ease forwards; position: absolute; color: gold; font-weight: bold; pointer-events: none; }
@@ -306,7 +306,7 @@
         body.engrama .btn-primary {
             background: linear-gradient(135deg, var(--eng-blue), #1a5fd4) !important;
             border-color: rgba(43,127,232,0.4) !important;
-            color: #FFFFFF !important;
+            color: #E8EFF8 !important;
             box-shadow: 0 4px 16px rgba(43,127,232,0.3) !important;
             font-family: 'Lexend', sans-serif;
             font-weight: 700;
@@ -334,15 +334,16 @@
         }
 
         body.engrama .btn-success {
-            background: linear-gradient(135deg, #059669, #047857) !important;
+            background: linear-gradient(135deg, #00F5D4, #00c4aa) !important;
             border-color: rgba(0,245,212,0.3) !important;
-            color: #FFFFFF !important;
+            color: #0a2e28 !important;
             box-shadow: 0 4px 16px rgba(0,245,212,0.2) !important;
         }
 
         body.engrama .btn-danger {
-            background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+            background: linear-gradient(135deg, #FF4D6D, #e63956) !important;
             border-color: rgba(255,77,109,0.3) !important;
+            color: #E8EFF8 !important;
         }
 
         body.engrama .btn-outline-primary {
@@ -1384,7 +1385,7 @@
             background:linear-gradient(135deg,#2B7FE8,#1a5fd4) !important;
             border:none !important;
             border-radius:12px !important;
-            color:#fff !important;
+            color:#E8EFF8 !important;
             font-family:'Lexend',sans-serif !important;
             font-weight:700 !important;
             box-shadow:0 4px 14px rgba(43,127,232,0.3) !important;
@@ -1487,8 +1488,8 @@
     <div id="geofenceGate" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,0.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); align-items:center; justify-content:center;">
         <div class="text-center" style="max-width:400px; padding:2rem;">
             <div style="font-size:4rem; margin-bottom:1rem;">&#x1F6AB;</div>
-            <h2 style="color:#fca5a5; font-weight:800; margin-bottom:1rem;">Access Denied</h2>
-            <p style="color:rgba(255,255,255,0.8); font-size:1.1rem;" id="geofenceMsg">You must be within 50m of the classroom to access your dashboard.</p>
+            <h2 style="color:#FF4D6D; font-weight:800; margin-bottom:1rem;">Access Denied</h2>
+            <p style="color:rgba(232,239,248,0.8); font-size:1.1rem;" id="geofenceMsg">You must be within 50m of the classroom to access your dashboard.</p>
             <button type="button" class="btn btn-primary mt-3" style="width:auto;" onclick="window.location.reload()"><i class="bi bi-arrow-clockwise"></i> Retry</button>
             <button type="button" class="btn btn-danger mt-3 ms-2" style="width:auto;" onclick="window.logout()"><i class="bi bi-box-arrow-left"></i> Logout</button>
         </div>
@@ -3130,7 +3131,7 @@
             if (reduceMotion) return;
             var container = document.createElement('div');
             container.className = 'confetti-burst';
-            var colors = ['#fbbf24', '#ef4444', '#10b981', '#3b82f6', '#a855f7', '#f97316'];
+            var colors = ['#F5A623', '#FF4D6D', '#00F5D4', '#2B7FE8', '#7ab8f5', '#e8920f'];
             for (var i = 0; i < 40; i++) {
                 var piece = document.createElement('div');
                 piece.className = 'confetti-piece';

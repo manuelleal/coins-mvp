@@ -1107,6 +1107,260 @@
             transform:translateY(-50%);
             z-index:0;
         }
+        /* ══════════════════════════════════════
+           PHASE 4 — Other Views
+        ══════════════════════════════════════ */
+
+        /* ── 4.1 Attendance View ── */
+        body.engrama #viewAttendance .glass-panel {
+            background:rgba(22,31,48,0.75) !important;
+            backdrop-filter:blur(16px) !important;
+            -webkit-backdrop-filter:blur(16px) !important;
+            border:1px solid rgba(43,127,232,0.12) !important;
+            border-radius:22px !important;
+            padding:22px !important;
+        }
+        body.engrama #attendanceRiskWarning {
+            background:rgba(245,166,35,0.08) !important;
+            border:1px solid rgba(245,166,35,0.2) !important;
+            border-radius:14px !important;
+            color:#F5A623 !important;
+        }
+        body.engrama #manualCode {
+            background:rgba(255,255,255,0.04) !important;
+            border:1px solid rgba(43,127,232,0.15) !important;
+            border-radius:12px !important;
+            color:#E8EFF8 !important;
+            font-family:'Lexend',sans-serif !important;
+            padding:12px 16px !important;
+        }
+        body.engrama #manualCode::placeholder { color:rgba(107,130,160,0.5); }
+        body.engrama #btnManualCheckin {
+            background:linear-gradient(135deg,#F5A623,#e8920f) !important;
+            border:none !important;
+            border-radius:12px !important;
+            color:#1a0800 !important;
+            font-family:'Lexend',sans-serif !important;
+            font-weight:700 !important;
+            padding:12px 24px !important;
+            box-shadow:0 6px 20px rgba(245,166,35,0.3) !important;
+        }
+        body.engrama #btnManualCheckin:hover {
+            box-shadow:0 8px 28px rgba(245,166,35,0.45) !important;
+            transform:translateY(-1px);
+        }
+        body.engrama #manualCheckinStatus {
+            font-size:12px !important;
+            color:#00F5D4 !important;
+            margin-top:8px !important;
+        }
+        body.engrama #attendanceHistory .glass-panel,
+        body.engrama #attendanceHistory > div {
+            background:rgba(22,31,48,0.6) !important;
+            border:1px solid rgba(43,127,232,0.1) !important;
+            border-radius:12px !important;
+            padding:10px 14px !important;
+            margin-bottom:6px !important;
+        }
+
+        /* ── 4.2 Challenges View ── */
+        body.engrama #viewChallenges .challenge-header {
+            margin-bottom:8px;
+        }
+        body.engrama #studentChallengeActiveList .challenge-card {
+            background:rgba(22,31,48,0.75) !important;
+            backdrop-filter:blur(16px) !important;
+            border:1px solid rgba(43,127,232,0.12) !important;
+            border-radius:18px !important;
+            padding:18px !important;
+            margin-bottom:12px !important;
+        }
+        body.engrama #studentChallengeActiveList .challenge-card.active-glow {
+            border-color:rgba(245,166,35,0.25) !important;
+        }
+        body.engrama #studentChallengeActiveList .challenge-card h6 {
+            font-family:'Lexend',sans-serif !important;
+            font-weight:700 !important;
+            color:var(--eng-text) !important;
+        }
+        body.engrama #studentChallengeActiveList .challenge-card .reward-tag,
+        body.engrama #studentChallengeActiveList .challenge-card .badge.bg-warning {
+            color:#F5A623 !important;
+            font-weight:700 !important;
+        }
+        body.engrama #studentChallengeActiveList .challenge-card .btn-warning {
+            background:linear-gradient(135deg,#F5A623,#e8920f) !important;
+            border:none !important;
+            border-radius:12px !important;
+            color:#1a0800 !important;
+            font-family:'Lexend',sans-serif !important;
+            font-weight:700 !important;
+            box-shadow:0 4px 16px rgba(245,166,35,0.3) !important;
+            width:100% !important;
+            padding:10px !important;
+            margin-top:10px !important;
+        }
+        body.engrama #studentChallengeActiveList .challenge-card .btn-warning:hover {
+            box-shadow:0 6px 24px rgba(245,166,35,0.45) !important;
+        }
+        /* Finished challenges accordion */
+        body.engrama #finishedChallengesAccordion .accordion-item {
+            background:transparent !important;
+            border:none !important;
+        }
+        body.engrama #finishedChallengesHeading .accordion-button {
+            background:rgba(22,31,48,0.6) !important;
+            color:#E8EFF8 !important;
+            font-family:'Lexend',sans-serif !important;
+            font-weight:600 !important;
+            border:1px solid rgba(43,127,232,0.1) !important;
+            border-radius:12px !important;
+            box-shadow:none !important;
+        }
+        body.engrama #finishedChallengesHeading .accordion-button::after {
+            filter:invert(0.6) sepia(1) saturate(3) hue-rotate(190deg);
+        }
+        body.engrama #finishedChallengesBody {
+            background:transparent !important;
+            border:none !important;
+        }
+        body.engrama #studentChallengeFinishedList .challenge-card {
+            background:rgba(22,31,48,0.4) !important;
+            border:1px solid rgba(255,255,255,0.05) !important;
+            border-radius:12px !important;
+            padding:12px 16px !important;
+            margin-bottom:8px !important;
+            opacity:0.7 !important;
+        }
+        /* Drako feedback panel */
+        body.engrama #drakoFeedbackPanel {
+            background:linear-gradient(135deg,rgba(43,127,232,0.1),rgba(0,245,212,0.06)) !important;
+            border:1px solid rgba(0,245,212,0.15) !important;
+            border-radius:16px !important;
+            padding:16px !important;
+        }
+
+        /* ── 4.3 Store View ── */
+        body.engrama #viewStore .store-header {
+            margin-bottom:4px;
+        }
+        body.engrama #marketplace .marketplace-card {
+            background:rgba(22,31,48,0.75) !important;
+            backdrop-filter:blur(16px) !important;
+            border:1px solid rgba(43,127,232,0.1) !important;
+            border-radius:18px !important;
+            padding:16px !important;
+            transition:all 0.18s !important;
+            margin-bottom:12px !important;
+        }
+        body.engrama #marketplace .marketplace-card:hover {
+            border-color:rgba(245,166,35,0.3) !important;
+            transform:translateY(-1px) !important;
+        }
+        body.engrama #marketplace .reward-tag {
+            background:rgba(245,166,35,0.1) !important;
+            border:1px solid rgba(245,166,35,0.2) !important;
+            border-radius:10px !important;
+            padding:3px 10px !important;
+            color:#F5A623 !important;
+            font-family:'Lexend',sans-serif !important;
+            font-weight:700 !important;
+            font-size:12px !important;
+        }
+        body.engrama #marketplace .btn-primary,
+        body.engrama #marketplace .btn-outline-primary {
+            background:linear-gradient(135deg,#2B7FE8,#1a5fd4) !important;
+            border:none !important;
+            border-radius:12px !important;
+            color:#fff !important;
+            font-family:'Lexend',sans-serif !important;
+            font-weight:700 !important;
+            box-shadow:0 4px 14px rgba(43,127,232,0.3) !important;
+        }
+        body.engrama #marketplace .btn-primary:hover,
+        body.engrama #marketplace .btn-outline-primary:hover {
+            box-shadow:0 6px 20px rgba(43,127,232,0.45) !important;
+        }
+        /* Auction card bid styles */
+        body.engrama #marketplace .marketplace-card.my-bid {
+            border-color:rgba(0,245,212,0.2) !important;
+            background:rgba(0,245,212,0.04) !important;
+        }
+        body.engrama #marketplace .btn-success,
+        body.engrama #marketplace .btn-outline-success {
+            background:linear-gradient(135deg,#00F5D4,#00c4aa) !important;
+            border:none !important;
+            border-radius:12px !important;
+            color:#0a2e28 !important;
+            font-family:'Lexend',sans-serif !important;
+            font-weight:700 !important;
+            box-shadow:0 4px 14px rgba(0,245,212,0.25) !important;
+        }
+        body.engrama #marketplace .form-control {
+            background:rgba(255,255,255,0.04) !important;
+            border:1px solid rgba(43,127,232,0.15) !important;
+            border-radius:10px !important;
+            color:#E8EFF8 !important;
+            font-family:'Lexend',sans-serif !important;
+        }
+
+        /* ── 4.4 Bag View ── */
+        body.engrama #inventoryList .glass-panel {
+            background:rgba(22,31,48,0.6) !important;
+            border:1px solid rgba(43,127,232,0.1) !important;
+            border-radius:14px !important;
+            padding:14px 16px !important;
+            margin-bottom:10px !important;
+        }
+        body.engrama #inventoryList .badge.bg-success {
+            background:rgba(0,245,212,0.12) !important;
+            border:1px solid rgba(0,245,212,0.2);
+            color:#00F5D4 !important;
+            border-radius:20px !important;
+            padding:2px 10px !important;
+            font-size:11px !important;
+            font-weight:700 !important;
+        }
+        body.engrama #inventoryList .badge.bg-dark {
+            background:rgba(255,77,109,0.1) !important;
+            border:1px solid rgba(255,77,109,0.2);
+            color:#FF4D6D !important;
+            border-radius:20px !important;
+            padding:2px 10px !important;
+            font-size:11px !important;
+            font-weight:700 !important;
+        }
+        body.engrama #inventoryList .badge.bg-warning {
+            background:rgba(245,166,35,0.12) !important;
+            border:1px solid rgba(245,166,35,0.2);
+            color:#F5A623 !important;
+            border-radius:20px !important;
+            padding:2px 10px !important;
+            font-size:11px !important;
+            font-weight:700 !important;
+        }
+        body.engrama #inventoryList .badge.bg-info {
+            background:rgba(43,127,232,0.12) !important;
+            border:1px solid rgba(43,127,232,0.2);
+            color:#7ab8f5 !important;
+            border-radius:20px !important;
+            padding:2px 10px !important;
+            font-size:11px !important;
+            font-weight:700 !important;
+        }
+        body.engrama #inventoryList .btn-success {
+            background:rgba(43,127,232,0.12) !important;
+            border:1px solid rgba(43,127,232,0.2) !important;
+            border-radius:10px !important;
+            color:#2B7FE8 !important;
+            font-family:'Lexend',sans-serif !important;
+            font-weight:600 !important;
+            font-size:12px !important;
+            padding:6px 14px !important;
+        }
+        body.engrama #inventoryList .btn-success:hover {
+            background:rgba(43,127,232,0.2) !important;
+        }
     </style>
 </head>
 <body class="bg-dashboard engrama">

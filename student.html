@@ -363,10 +363,11 @@
             border: 1px solid rgba(43,127,232,0.08);
             border-bottom: none;
             border-radius: 22px 22px 0 0;
-            padding: 14px 16px;
+            padding: 14px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            overflow: hidden;
             position: sticky;
             top: 0;
             z-index: 999;
@@ -383,6 +384,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            flex-shrink: 0;
         }
 
         body.engrama .eng-topbar-right {
@@ -394,11 +396,15 @@
 
         body.engrama .eng-greeting {
             font-family: 'Lexend', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--eng-text);
-            margin-right: 4px;
+            margin-right: 2px;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90px;
+            min-width: 0;
         }
 
         /* Top bar pills */

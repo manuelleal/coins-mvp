@@ -363,11 +363,10 @@
             border: 1px solid rgba(43,127,232,0.08);
             border-bottom: none;
             border-radius: 22px 22px 0 0;
-            padding: 14px 12px;
+            padding: 14px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            overflow: hidden;
             position: sticky;
             top: 0;
             z-index: 999;
@@ -396,15 +395,17 @@
 
         body.engrama .eng-greeting {
             font-family: 'Lexend', sans-serif;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--eng-text);
             margin-right: 2px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 70px;
-            min-width: 0;
+        }
+
+        /* Mobile: hide avatar + greeting so pills always fit */
+        @media (max-width: 480px) {
+            body.engrama .topbar-avatar,
+            body.engrama .eng-greeting { display: none !important; }
         }
 
         /* Top bar pills */

@@ -701,6 +701,14 @@
         }
 
         /* Badge item states */
+        body.engrama .badge-item {
+            border-radius: 16px !important;
+            color: var(--eng-text) !important;
+            text-align: center;
+        }
+        body.engrama .badge-item:hover {
+            box-shadow: 0 6px 22px rgba(245,166,35,0.2) !important;
+        }
         body.engrama .badge-unlocked {
             background: linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.06)) !important;
             border: 1px solid rgba(245,166,35,0.3) !important;
@@ -710,6 +718,18 @@
             opacity: 0.35 !important;
             filter: grayscale(1) !important;
             border: 1px solid rgba(255,255,255,0.06) !important;
+            background: rgba(22,31,48,0.4) !important;
+        }
+
+        /* Bulletin / Announcements section */
+        body.engrama #bulletinSection {
+            background: rgba(22,31,48,0.5);
+            border: 1px solid rgba(43,127,232,0.1);
+            border-radius: 18px;
+            padding: 16px;
+        }
+        body.engrama #bulletinSection h6 {
+            color: var(--eng-text);
         }
 
         /* UI icon emoji */

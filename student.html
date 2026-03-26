@@ -396,14 +396,14 @@
 
         body.engrama .eng-greeting {
             font-family: 'Lexend', sans-serif;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             color: var(--eng-text);
             margin-right: 2px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 90px;
+            max-width: 70px;
             min-width: 0;
         }
 
@@ -881,10 +881,10 @@
 
         /* Top bar avatar circle */
         body.engrama .topbar-avatar {
-            width:36px; height:36px; border-radius:50%;
+            width:30px; height:30px; border-radius:50%;
             background:linear-gradient(135deg,#2B7FE8,#00F5D4);
             display:inline-flex; align-items:center; justify-content:center;
-            flex-shrink:0;
+            flex-shrink:0; font-size:12px;
         }
         body.engrama .topbar-avatar svg { stroke:#fff; }
 
@@ -1012,9 +1012,10 @@
         }
         body.engrama #leaderboard li.border-primary,
         body.engrama #leaderboard li.border,
-        body.engrama #leaderboard li.border-warning {
+        body.engrama #leaderboard li.border-warning,
+        body.engrama #leaderboard li:first-child {
             background:rgba(43,127,232,0.1) !important;
-            border:1px solid rgba(43,127,232,0.3) !important;
+            border:1.5px solid rgba(43,127,232,0.4) !important;
             border-radius:14px !important;
         }
         body.engrama #leaderboard li strong {
@@ -1074,7 +1075,10 @@
         }
 
         /* Today's Status alert styling */
-        body.engrama #todayStatus {
+        body.engrama #todayStatus,
+        body.engrama #todayStatus.alert,
+        body.engrama #todayStatus.alert-secondary,
+        body.engrama #todayStatus.alert-warning {
             background:rgba(245,166,35,0.06) !important;
             border:1px solid rgba(245,166,35,0.15) !important;
             border-radius:14px !important;

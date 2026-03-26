@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Dashboard | Lingo-Coins</title>
+    <title>Engrama — Student Dashboard</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🪙</text></svg>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         @keyframes pulse { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.2) } }
         @keyframes badgeUnlock { 0% { transform: scale(0) rotate(-10deg) } 60% { transform: scale(1.2) rotate(5deg) } 100% { transform: scale(1) rotate(0deg) } }
@@ -58,9 +59,1008 @@
             #xpBarFill { transition: width 200ms ease; }
             .progress-bar { transition: width 200ms ease; }
         }
+
+        /* ══════════════════════════════════════════════
+           ENGRAMA DARK THEME — Phase 1: CSS & Theming
+           Scoped to body.engrama so other pages are safe
+        ══════════════════════════════════════════════ */
+        body.engrama {
+            --eng-bg:       #0B1221;
+            --eng-surface:  #161F30;
+            --eng-surface2: #1c2840;
+            --eng-border:   rgba(43,127,232,0.1);
+            --eng-gold:     #F5A623;
+            --eng-gold-glow:rgba(245,166,35,0.3);
+            --eng-blue:     #2B7FE8;
+            --eng-teal:     #00F5D4;
+            --eng-red:      #FF4D6D;
+            --eng-text:     #E8EFF8;
+            --eng-text2:    #6B82A0;
+            --eng-text3:    #2d3f58;
+
+            /* Override shared vars so existing rules pick up the dark palette */
+            --bg-color: #050a14;
+            --card-bg: rgba(22,31,48,0.75);
+            --primary: var(--eng-blue);
+            --primary-dark: #1a5fd4;
+            --accent: var(--eng-gold);
+            --text-primary: var(--eng-text);
+            --text-secondary: var(--eng-text2);
+            --text-white: #FFFFFF;
+            --success: var(--eng-teal);
+            --error: var(--eng-red);
+            --warning: var(--eng-gold);
+            --info: var(--eng-blue);
+            --border-color: var(--eng-border);
+            --border-light: rgba(43,127,232,0.06);
+            --bg-900: var(--eng-bg);
+            --bg-850: var(--eng-surface);
+            --bg-800: var(--eng-surface);
+            --bg-700: var(--eng-surface2);
+            --gold-500: var(--eng-gold);
+            --gold-400: var(--eng-gold);
+            --gold-600: #e8920f;
+            --gold: var(--eng-gold);
+            --text-100: var(--eng-text);
+            --text-200: #9BB0CC;
+            --text-300: var(--eng-text2);
+            --danger: var(--eng-red);
+            --shadow-soft: 0 2px 12px rgba(0,0,0,0.3);
+            --shadow-gold: 0 0 16px var(--eng-gold-glow);
+            --glass: var(--eng-surface);
+            --glass-border: var(--eng-border);
+
+            background: #050a14 !important;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            color: var(--eng-text);
+        }
+
+        /* Hex pattern background */
+        body.engrama .decor-overlay {
+            opacity: 0.022 !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V17L28 1l28 16v33z' fill='none' stroke='%232B7FE8' stroke-width='1'/%3E%3Cpath d='M28 100L0 84V51l28-17 28 17v33z' fill='none' stroke='%232B7FE8' stroke-width='1'/%3E%3C/svg%3E") !important;
+            display: block !important;
+        }
+
+        /* Background class overrides */
+        body.engrama.bg-dashboard {
+            background: linear-gradient(180deg, #050a14 0%, #0B1221 40%, #0d1525 100%) !important;
+        }
+        body.engrama.bg-challenges {
+            background: linear-gradient(180deg, #050a14 0%, #0f1a2e 40%, #111d33 100%) !important;
+        }
+        body.engrama.bg-store {
+            background: linear-gradient(180deg, #050a14 0%, #12081f 40%, #0B1221 100%) !important;
+        }
+
+        /* Typography: Lexend for headings, Inter for body */
+        body.engrama h1, body.engrama h2, body.engrama h3,
+        body.engrama h4, body.engrama h5, body.engrama h6 {
+            font-family: 'Lexend', 'Inter', sans-serif;
+            color: var(--eng-text);
+        }
+
+        body.engrama .text-muted,
+        body.engrama .small.text-muted {
+            color: var(--eng-text2) !important;
+        }
+
+        /* Container override */
+        body.engrama .container-custom {
+            max-width: 500px;
+        }
+
+        /* Card / panel dark glass effect */
+        body.engrama .card,
+        body.engrama .card-premium,
+        body.engrama .glass-panel,
+        body.engrama .glass-card,
+        body.engrama .panel,
+        body.engrama .marketplace-card,
+        body.engrama .challenge-card {
+            background: rgba(22,31,48,0.75) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(43,127,232,0.1) !important;
+            border-radius: 22px !important;
+            color: var(--eng-text);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.25) !important;
+        }
+
+        body.engrama .card-premium::after {
+            background: radial-gradient(circle, rgba(43,127,232,0.08) 0%, transparent 70%);
+        }
+
+        body.engrama .card-premium:hover,
+        body.engrama .glass-panel:hover,
+        body.engrama .marketplace-card:hover,
+        body.engrama .challenge-card:hover {
+            border-color: rgba(43,127,232,0.25) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+        }
+
+        /* Gold card (wallet) */
+        body.engrama .gold-card {
+            background: linear-gradient(135deg, rgba(245,166,35,0.12) 0%, rgba(245,166,35,0.04) 100%) !important;
+            border: 1px solid rgba(43,127,232,0.12) !important;
+            border-radius: 22px !important;
+            box-shadow: 0 4px 24px rgba(245,166,35,0.1) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            animation: none;
+        }
+
+        body.engrama .coins-num {
+            font-family: 'Lexend', sans-serif !important;
+            font-size: 48px !important;
+            font-weight: 800 !important;
+            color: #F5A623 !important;
+            text-shadow: 0 0 24px var(--eng-gold-glow);
+            -webkit-text-fill-color: #F5A623 !important;
+        }
+        body.engrama .coins-num span,
+        body.engrama .coins-num #studentCoins {
+            color: #F5A623 !important;
+            -webkit-text-fill-color: #F5A623 !important;
+            font-family: 'Lexend', sans-serif !important;
+            font-size: inherit !important;
+            font-weight: 800 !important;
+        }
+
+        /* Section titles */
+        body.engrama .section-title {
+            font-family: 'Lexend', sans-serif;
+            color: var(--eng-text);
+            letter-spacing: 0.02em;
+        }
+
+        body.engrama .section-title.with-banner {
+            background-color: rgba(22,31,48,0.6) !important;
+            border: 1px solid rgba(43,127,232,0.1);
+        }
+
+        /* Level / Streak / Group badges */
+        body.engrama .level-badge {
+            font-family: 'Lexend', sans-serif;
+            background: rgba(43,127,232,0.12);
+            border: 1px solid rgba(43,127,232,0.25);
+            color: #7ab8f5;
+            font-weight: 700;
+            animation: engLevelPulse 2.5s ease-in-out infinite;
+        }
+
+        body.engrama .streak-badge {
+            font-family: 'Lexend', sans-serif;
+            background: rgba(245,166,35,0.1);
+            border: 1px solid rgba(245,166,35,0.25);
+            color: var(--eng-gold);
+            font-weight: 700;
+            animation: engStreakGlow 2s ease-in-out infinite;
+        }
+
+        body.engrama .badge-group {
+            font-family: 'Lexend', sans-serif;
+            background: rgba(0,245,212,0.08);
+            border: 1px solid rgba(0,245,212,0.2);
+            color: var(--eng-teal);
+            font-weight: 600;
+        }
+
+        @keyframes engLevelPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(43,127,232,0); }
+            50%     { box-shadow: 0 0 0 6px rgba(43,127,232,0.2); }
+        }
+        @keyframes engStreakGlow {
+            0%,100% { box-shadow: 0 0 0 0 rgba(245,166,35,0); }
+            50%     { box-shadow: 0 0 8px 2px rgba(245,166,35,0.25); }
+        }
+
+        /* XP Bar */
+        body.engrama .xp-bar-container {
+            height: 6px;
+            background: rgba(43,127,232,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        body.engrama .xp-bar-fill {
+            background: linear-gradient(90deg, var(--eng-blue), var(--eng-teal)) !important;
+            animation: none;
+            border-radius: 10px;
+            filter: drop-shadow(0 0 4px rgba(43,127,232,0.5));
+        }
+
+        /* Progress bar override */
+        body.engrama .progress {
+            background: rgba(43,127,232,0.1) !important;
+            border-radius: 10px;
+        }
+        body.engrama .progress-bar.bg-warning {
+            background: linear-gradient(90deg, var(--eng-gold), #e8920f) !important;
+        }
+
+        /* Form controls */
+        body.engrama .form-control,
+        body.engrama .form-select {
+            background-color: rgba(22,31,48,0.8) !important;
+            color: var(--eng-text) !important;
+            border-color: rgba(43,127,232,0.15) !important;
+            border-radius: 12px;
+        }
+
+        body.engrama .form-control::placeholder,
+        body.engrama textarea::placeholder {
+            color: var(--eng-text2) !important;
+        }
+
+        body.engrama .form-control:focus,
+        body.engrama .form-select:focus {
+            border-color: var(--eng-blue) !important;
+            box-shadow: 0 0 0 0.2rem rgba(43,127,232,0.2) !important;
+        }
+
+        /* Buttons */
+        body.engrama .btn-primary {
+            background: linear-gradient(135deg, var(--eng-blue), #1a5fd4) !important;
+            border-color: rgba(43,127,232,0.4) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 16px rgba(43,127,232,0.3) !important;
+            font-family: 'Lexend', sans-serif;
+            font-weight: 700;
+        }
+
+        body.engrama .btn-primary:hover {
+            background: linear-gradient(135deg, #3389f0, #1a5fd4) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 20px rgba(43,127,232,0.4) !important;
+        }
+
+        body.engrama .btn-warning {
+            background: linear-gradient(135deg, var(--eng-gold), #e8920f) !important;
+            border-color: rgba(245,166,35,0.4) !important;
+            color: #1a0800 !important;
+            box-shadow: 0 4px 16px var(--eng-gold-glow) !important;
+            font-family: 'Lexend', sans-serif;
+            font-weight: 800;
+        }
+
+        body.engrama .btn-warning:hover {
+            background: linear-gradient(135deg, #ffb83d, #e8920f) !important;
+            color: #1a0800 !important;
+            transform: translateY(-1px) !important;
+        }
+
+        body.engrama .btn-success {
+            background: linear-gradient(135deg, #059669, #047857) !important;
+            border-color: rgba(0,245,212,0.3) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 16px rgba(0,245,212,0.2) !important;
+        }
+
+        body.engrama .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+            border-color: rgba(255,77,109,0.3) !important;
+        }
+
+        body.engrama .btn-outline-primary {
+            color: var(--eng-blue) !important;
+            border-color: rgba(43,127,232,0.35) !important;
+            background: transparent !important;
+        }
+        body.engrama .btn-outline-primary:hover {
+            background: rgba(43,127,232,0.12) !important;
+            color: #7ab8f5 !important;
+        }
+
+        /* ══════════════════════════════════════
+           ENGRAMA TOP BAR — Phase 2
+        ══════════════════════════════════════ */
+        body.engrama .engrama-topbar {
+            background: rgba(9,14,26,0.96);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(43,127,232,0.08);
+            border-bottom: none;
+            border-radius: 22px 22px 0 0;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            margin-top: 0;
+        }
+
+        body.engrama .eng-brand {
+            font-family: 'Lexend', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--eng-blue), var(--eng-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.engrama .eng-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        body.engrama .eng-greeting {
+            font-family: 'Lexend', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--eng-text);
+            margin-right: 4px;
+            white-space: nowrap;
+        }
+
+        /* Top bar pills */
+        body.engrama .eng-pill {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border-radius: 20px;
+            padding: 5px 11px;
+            font-family: 'Lexend', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        body.engrama .eng-pill-streak {
+            background: rgba(245,166,35,0.1);
+            border: 1px solid rgba(245,166,35,0.2);
+            color: var(--eng-gold);
+        }
+
+        body.engrama .eng-pill-coins {
+            background: rgba(43,127,232,0.1);
+            border: 1px solid rgba(43,127,232,0.2);
+            color: #7ab8f5;
+            font-size: 14px;
+            padding: 6px 14px;
+        }
+
+        body.engrama .eng-pill-streak {
+            font-size: 14px;
+            padding: 6px 14px;
+        }
+
+        /* ══════════════════════════════════════
+           ENGRAMA BOTTOM NAV — Phase 2
+        ══════════════════════════════════════ */
+        body.engrama .engrama-bnav {
+            background: rgba(9,14,26,0.96) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border: none !important;
+            border-top: 1px solid rgba(43,127,232,0.08) !important;
+            border-radius: 0 0 22px 22px !important;
+            padding: 10px 4px 18px !important;
+            width: 100% !important;
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr) !important;
+            flex-direction: unset !important;
+            gap: 0 !important;
+            position: sticky;
+            bottom: 0;
+            z-index: 50;
+        }
+
+        body.engrama .engrama-bnav a {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 3px !important;
+            padding: 4px 0 !important;
+            text-decoration: none !important;
+            border: none !important;
+            border-left: none !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            color: var(--eng-text3) !important;
+            transition: all 0.2s !important;
+            font-size: inherit;
+        }
+
+        body.engrama .engrama-bnav a i {
+            width: 40px;
+            height: 40px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            transition: background 0.2s, color 0.2s;
+            color: var(--eng-text2);
+        }
+
+        body.engrama .engrama-bnav a:hover i {
+            background: rgba(43,127,232,0.08);
+            color: var(--eng-text);
+        }
+
+        body.engrama .engrama-bnav a.active i {
+            background: rgba(43,127,232,0.15);
+            color: var(--eng-blue);
+        }
+
+        body.engrama .engrama-bnav .bnav-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-family: 'Lexend', sans-serif;
+            color: var(--eng-text3);
+        }
+
+        body.engrama .engrama-bnav a.active .bnav-label {
+            color: var(--eng-blue);
+        }
+
+        body.engrama .engrama-bnav a:hover .bnav-label {
+            color: var(--eng-text2);
+        }
+
+        /* Challenges nav item — gold accent */
+        body.engrama .engrama-bnav #navChallenges i {
+            color: rgba(245,166,35,0.6);
+        }
+        body.engrama .engrama-bnav #navChallenges.active i {
+            background: rgba(245,166,35,0.12);
+            color: var(--eng-gold);
+        }
+        body.engrama .engrama-bnav #navChallenges.active .bnav-label {
+            color: var(--eng-gold);
+        }
+
+        /* Add padding to views so content doesn't hide behind bottom nav */
+        body.engrama .student-view {
+            padding-bottom: 16px;
+        }
+
+        /* Page container needs bottom margin for the sticky bottom nav */
+        body.engrama .page-container {
+            margin-bottom: 20px;
+        }
+
+        /* Prevent main card-premium wrapper from hover lift */
+        body.engrama .page-container > .card-premium {
+            transform: none !important;
+            border-color: rgba(43,127,232,0.1) !important;
+        }
+        body.engrama .page-container > .card-premium:hover {
+            transform: none !important;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.25) !important;
+        }
+
+        /* Leaderboard list — dark glass rows */
+        body.engrama .leaderboard-list li {
+            background: rgba(22,31,48,0.6) !important;
+            border: 1px solid rgba(43,127,232,0.1) !important;
+            color: var(--eng-text) !important;
+            backdrop-filter: blur(10px);
+            border-radius: 14px !important;
+            margin-bottom: 6px;
+            padding: 0.7rem 1rem !important;
+            font-size: 13px;
+        }
+        body.engrama .leaderboard-list li.top {
+            border: 1px solid rgba(245,166,35,0.3) !important;
+            background: rgba(245,166,35,0.06) !important;
+        }
+        body.engrama .leaderboard-list li.border-primary,
+        body.engrama .leaderboard-list li.border {
+            border: 1.5px solid rgba(43,127,232,0.35) !important;
+            background: rgba(43,127,232,0.07) !important;
+        }
+        body.engrama .leaderboard-list li strong {
+            color: var(--eng-gold) !important;
+            font-family: 'Lexend', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Reward tag */
+        body.engrama .reward-tag {
+            background: rgba(245,166,35,0.1);
+            color: var(--eng-gold);
+            border: 1px solid rgba(245,166,35,0.25);
+        }
+
+        /* Alert overrides */
+        body.engrama .alert-secondary {
+            background: rgba(22,31,48,0.6) !important;
+            border-color: rgba(43,127,232,0.1) !important;
+            color: var(--eng-text2) !important;
+        }
+        body.engrama .alert-success {
+            background: rgba(0,245,212,0.08) !important;
+            border-color: rgba(0,245,212,0.2) !important;
+            color: var(--eng-teal) !important;
+        }
+        body.engrama .alert-warning {
+            background: rgba(245,166,35,0.08) !important;
+            border-color: rgba(245,166,35,0.2) !important;
+            color: var(--eng-gold) !important;
+        }
+        body.engrama .alert-danger {
+            background: rgba(255,77,109,0.08) !important;
+            border-color: rgba(255,77,109,0.2) !important;
+            color: var(--eng-red) !important;
+        }
+        body.engrama .alert-info {
+            background: rgba(43,127,232,0.08) !important;
+            border-color: rgba(43,127,232,0.2) !important;
+            color: #7ab8f5 !important;
+        }
+
+        /* Active challenge banner */
+        body.engrama .active-challenge-banner {
+            border: 1.5px solid rgba(245,166,35,0.3) !important;
+            background: linear-gradient(135deg, rgba(245,166,35,0.1), rgba(245,166,35,0.03)) !important;
+            box-shadow: 0 0 20px rgba(245,166,35,0.08);
+        }
+
+        /* Active challenge spotlight */
+        body.engrama .challenge-active-card {
+            background: rgba(22,31,48,0.8) !important;
+            border: 1.5px solid rgba(43,127,232,0.2) !important;
+        }
+
+        /* Accordion (finished challenges) */
+        body.engrama .accordion-item,
+        body.engrama .accordion-button {
+            background-color: rgba(22,31,48,0.7) !important;
+            color: var(--eng-text) !important;
+            border-color: rgba(43,127,232,0.1) !important;
+        }
+        body.engrama .accordion-button:not(.collapsed) {
+            background-color: rgba(43,127,232,0.08) !important;
+            color: var(--eng-text) !important;
+            box-shadow: none !important;
+        }
+        body.engrama .accordion-button::after {
+            filter: invert(0.7) sepia(0.3) hue-rotate(180deg);
+        }
+        body.engrama .accordion-body {
+            background: rgba(22,31,48,0.5) !important;
+            color: var(--eng-text) !important;
+        }
+
+        /* Coming soon cards */
+        body.engrama .coming-soon-card {
+            opacity: 0.6;
+            border: 1px solid rgba(43,127,232,0.12) !important;
+            background: linear-gradient(90deg, transparent 0%, rgba(43,127,232,0.06) 50%, transparent 100%) !important;
+            background-size: 400px 100%;
+            animation: engShimmer 2.5s infinite;
+            color: var(--eng-text2);
+            font-family: 'Lexend', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        @keyframes engShimmer {
+            0% { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+
+        /* Arena card override */
+        body.engrama .arena-card {
+            background: linear-gradient(135deg, rgba(43,127,232,0.1) 0%, rgba(0,245,212,0.05) 100%) !important;
+            border-left: 4px solid var(--eng-blue) !important;
+            border-top: 1px solid rgba(43,127,232,0.2) !important;
+            border-right: 1px solid rgba(43,127,232,0.1) !important;
+            border-bottom: 1px solid rgba(43,127,232,0.1) !important;
+            box-shadow: 0 4px 18px rgba(43,127,232,0.1) !important;
+            animation: none !important;
+        }
+
+        /* Attendance dots — !important compound selectors to override styles.css + Bootstrap */
+        body.engrama .dot-present,
+        body.engrama .attendance-dot.dot-present {
+            width: 32px !important; height: 32px !important; border-radius: 50% !important;
+            background: rgba(0,245,212,0.15) !important;
+            border: 2px solid #00F5D4 !important;
+            box-shadow: 0 0 8px rgba(0,245,212,0.25) !important;
+            display: flex !important; align-items: center !important; justify-content: center !important;
+        }
+        body.engrama .dot-absent,
+        body.engrama .attendance-dot.dot-absent {
+            width: 32px !important; height: 32px !important; border-radius: 50% !important;
+            background: rgba(255,255,255,0.03) !important;
+            border: 2px solid rgba(255,255,255,0.08) !important;
+            box-shadow: none !important;
+            display: flex !important; align-items: center !important; justify-content: center !important;
+        }
+        body.engrama .dot-noclass,
+        body.engrama .attendance-dot.dot-noclass {
+            width: 32px !important; height: 32px !important; border-radius: 50% !important;
+            background: var(--eng-text3) !important;
+            box-shadow: 0 0 0 3px rgba(45,63,88,0.18) !important;
+            display: flex !important; align-items: center !important; justify-content: center !important;
+        }
+
+        /* Attendance history */
+        body.engrama .attendance-history-item {
+            border-bottom-color: rgba(43,127,232,0.08);
+            color: var(--eng-text);
+        }
+
+        /* Badge item states */
+        body.engrama .badge-unlocked {
+            background: linear-gradient(135deg, rgba(245,166,35,0.15), rgba(245,166,35,0.06)) !important;
+            border: 1px solid rgba(245,166,35,0.3) !important;
+            box-shadow: 0 0 12px rgba(245,166,35,0.2) !important;
+        }
+        body.engrama .badge-locked {
+            opacity: 0.35 !important;
+            filter: grayscale(1) !important;
+            border: 1px solid rgba(255,255,255,0.06) !important;
+        }
+
+        /* UI icon emoji */
+        body.engrama .ui-icon-emoji {
+            background: rgba(43,127,232,0.08);
+            border: 1px solid rgba(43,127,232,0.12);
+        }
+
+        /* Bid toast overrides */
+        body.engrama .bid-toast {
+            background: rgba(22,31,48,0.95);
+            border: 1px solid rgba(43,127,232,0.15);
+            color: var(--eng-text);
+            backdrop-filter: blur(16px);
+        }
+        body.engrama .bid-toast-success { border-left: 4px solid var(--eng-teal); }
+        body.engrama .bid-toast-warning { border-left: 4px solid var(--eng-gold); }
+        body.engrama .bid-toast-danger  { border-left: 4px solid var(--eng-red); }
+        body.engrama .bid-toast-info    { border-left: 4px solid var(--eng-blue); }
+
+        /* Marketplace card override */
+        body.engrama .marketplace-card.my-bid {
+            border-color: rgba(0,245,212,0.2) !important;
+            background: rgba(0,245,212,0.04) !important;
+        }
+
+        /* Live dot */
+        body.engrama .live-dot {
+            background: var(--eng-teal);
+            box-shadow: 0 0 0 0 rgba(0,245,212,0.5);
+        }
+
+        /* Version label */
+        body.engrama + .text-center.small.text-muted {
+            color: var(--eng-text3) !important;
+        }
+
+        /* Challenge flow overlay */
+        body.engrama .challenge-flow-overlay {
+            background: var(--eng-bg) !important;
+        }
+        body.engrama .challenge-start-screen h2 {
+            color: var(--eng-text) !important;
+        }
+        body.engrama .challenge-start-screen .start-btn {
+            background: linear-gradient(135deg, var(--eng-gold), #e8920f) !important;
+            color: #1a0800 !important;
+            font-family: 'Lexend', sans-serif;
+            box-shadow: 0 8px 24px var(--eng-gold-glow) !important;
+        }
+        body.engrama .challenge-question-card {
+            background: rgba(22,31,48,0.6) !important;
+            border: 1.5px solid rgba(43,127,232,0.1) !important;
+            color: var(--eng-text) !important;
+        }
+        body.engrama .challenge-question-card:hover {
+            border-color: rgba(43,127,232,0.3) !important;
+            background: rgba(43,127,232,0.06) !important;
+        }
+        body.engrama .challenge-question-card.selected {
+            border-color: var(--eng-blue) !important;
+            background: rgba(43,127,232,0.1) !important;
+        }
+        body.engrama .challenge-question-card.correct {
+            border-color: var(--eng-teal) !important;
+            background: rgba(0,245,212,0.08) !important;
+            box-shadow: 0 0 0 3px rgba(0,245,212,0.2) !important;
+        }
+        body.engrama .challenge-question-card.wrong {
+            border-color: var(--eng-red) !important;
+            background: rgba(255,77,109,0.06) !important;
+            box-shadow: 0 0 0 3px rgba(255,77,109,0.15) !important;
+        }
+        body.engrama .challenge-flow-input {
+            background: rgba(22,31,48,0.8) !important;
+            border-color: rgba(43,127,232,0.15) !important;
+            color: var(--eng-text) !important;
+        }
+        body.engrama .challenge-flow-input:focus {
+            border-color: var(--eng-blue) !important;
+            box-shadow: 0 0 0 3px rgba(43,127,232,0.15) !important;
+        }
+        body.engrama .challenge-flow-submit {
+            background: linear-gradient(135deg, var(--eng-blue), #1a5fd4) !important;
+            font-family: 'Lexend', sans-serif;
+            box-shadow: 0 6px 20px rgba(43,127,232,0.3) !important;
+        }
+        body.engrama .challenge-tf-btn {
+            background: rgba(22,31,48,0.6) !important;
+            border-color: rgba(43,127,232,0.1) !important;
+            color: var(--eng-text) !important;
+        }
+        body.engrama .challenge-tf-btn:hover {
+            border-color: rgba(43,127,232,0.3) !important;
+        }
+        body.engrama .challenge-tf-btn.selected {
+            border-color: var(--eng-blue) !important;
+            background: rgba(43,127,232,0.1) !important;
+        }
+        body.engrama .challenge-ms-check {
+            background: rgba(22,31,48,0.6) !important;
+            border-color: rgba(43,127,232,0.1) !important;
+            color: var(--eng-text) !important;
+        }
+        body.engrama .challenge-matching-row select {
+            background: rgba(22,31,48,0.8) !important;
+            border-color: rgba(43,127,232,0.15) !important;
+            color: var(--eng-text) !important;
+        }
+        body.engrama .challenge-q-text {
+            border-left-color: var(--eng-blue) !important;
+        }
+
+        /* Fade-up animation for content */
+        @keyframes engFadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        body.engrama .student-view.active {
+            animation: engFadeUp 0.35s ease both;
+        }
+
+        /* Store decor emoji */
+        body.engrama .store-decor-emoji {
+            background: linear-gradient(135deg, rgba(245,166,35,0.1), rgba(245,166,35,0.04));
+            border: 1px solid rgba(245,166,35,0.2);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Scrollbar dark theme */
+        body.engrama ::-webkit-scrollbar { width: 6px; }
+        body.engrama ::-webkit-scrollbar-track { background: transparent; }
+        body.engrama ::-webkit-scrollbar-thumb { background: rgba(43,127,232,0.2); border-radius: 3px; }
+        body.engrama ::-webkit-scrollbar-thumb:hover { background: rgba(43,127,232,0.35); }
+
+        /* Bootstrap badge overrides */
+        body.engrama .badge.bg-success { background-color: rgba(0,245,212,0.15) !important; color: var(--eng-teal) !important; }
+        body.engrama .badge.bg-warning { background-color: rgba(245,166,35,0.15) !important; color: var(--eng-gold) !important; }
+        body.engrama .badge.bg-danger  { background-color: rgba(255,77,109,0.15) !important; color: var(--eng-red) !important; }
+        body.engrama .badge.bg-info    { background-color: rgba(43,127,232,0.15) !important; color: #7ab8f5 !important; }
+        body.engrama .badge.bg-secondary { background-color: rgba(107,130,160,0.15) !important; color: var(--eng-text2) !important; }
+
+        /* Spinner */
+        body.engrama .spinner-border { color: var(--eng-blue) !important; }
+        body.engrama .spinner-border.text-warning { color: var(--eng-gold) !important; }
+
+        /* Blink animation for green live dot */
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        /* Top bar avatar circle */
+        body.engrama .topbar-avatar {
+            width:36px; height:36px; border-radius:50%;
+            background:linear-gradient(135deg,#2B7FE8,#00F5D4);
+            display:inline-flex; align-items:center; justify-content:center;
+            flex-shrink:0;
+        }
+        body.engrama .topbar-avatar svg { stroke:#fff; }
+
+        /* Active challenge card — timer & prize lines */
+        body.engrama #activeChallengeSpotlight .challenge-timer {
+            font-family:'Lexend',sans-serif; font-size:13px; font-weight:700;
+            color:#F5A623 !important; display:flex; align-items:center; gap:5px;
+        }
+        body.engrama #activeChallengeSpotlight .challenge-prize {
+            font-family:'Lexend',sans-serif; font-size:13px; font-weight:600;
+            color:#F5A623 !important; display:flex; align-items:center; gap:5px;
+        }
+
+        /* Section labels (uppercase muted) */
+        body.engrama .section-label {
+            padding:0 4px; margin-bottom:10px;
+            font-family:'Lexend',sans-serif; font-size:11px; font-weight:700;
+            text-transform:uppercase; letter-spacing:0.1em; color:#6B82A0;
+        }
+
+        /* Stats 3-column grid */
+        body.engrama .stats-row {
+            display:grid; grid-template-columns:1fr 1fr 1fr;
+            gap:0; padding:0 16px; margin-bottom:16px;
+            text-align:center;
+        }
+        body.engrama .stats-row .stat-col {
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+        }
+        body.engrama .stats-row .stat-value {
+            font-family:'Lexend',sans-serif; font-size:28px; font-weight:800;
+            color:var(--eng-text); line-height:1.1;
+        }
+        body.engrama .stats-row .stat-label {
+            font-family:'Lexend',sans-serif; font-size:10px; font-weight:600;
+            text-transform:uppercase; letter-spacing:0.08em; color:#6B82A0;
+            margin-top:4px;
+        }
+
+        /* Language proficiency group pill */
+        body.engrama .lang-prof-pill {
+            background:rgba(0,245,212,0.08) !important; border:1px solid rgba(0,245,212,0.2) !important;
+            border-radius:20px !important; padding:5px 14px !important; font-size:12px !important; font-weight:600 !important;
+            color:#00F5D4 !important; display:inline-block !important;
+        }
+
+        /* Arena coin decorations */
+        body.engrama .arena-card { position:relative !important; overflow:hidden !important; }
+        body.engrama .arena-coins {
+            position:absolute; top:14px; right:18px;
+            display:flex; z-index:2;
+        }
+        body.engrama .arena-coin {
+            width:32px; height:32px; border-radius:50%;
+            background:linear-gradient(135deg,#F5A623,#e8920f);
+            border:2px solid rgba(22,31,48,0.8);
+            margin-left:-8px;
+            box-shadow:0 2px 8px rgba(245,166,35,0.3);
+        }
+        body.engrama .arena-coin:first-child { margin-left:0; }
+        body.engrama .arena-card .arena-title {
+            font-family:'Lexend',sans-serif; font-size:15px; font-weight:800;
+            text-transform:uppercase; letter-spacing:0.06em;
+            color:var(--eng-text);
+        }
+        body.engrama .arena-card .arena-subtitle {
+            font-size:12px; color:#8BA5C2;
+        }
+
+        /* Wallet label + number */
+        body.engrama .gold-card .wallet-label {
+            font-size:10px; text-transform:uppercase; letter-spacing:0.12em;
+            color:#6B82A0; font-family:'Lexend',sans-serif; font-weight:600;
+            margin-bottom:4px;
+        }
+        body.engrama .gold-card .coins-num {
+            font-size:52px !important; font-weight:800 !important;
+            color:#F5A623 !important; font-family:'Lexend',sans-serif !important;
+            line-height:1 !important;
+        }
+
+        /* Attendance dots — force styles with maximum specificity */
+        body.engrama #attendanceMiniWeek .attendance-dot {
+            width:32px !important; height:32px !important; border-radius:50% !important;
+            display:inline-flex !important; align-items:center !important; justify-content:center !important;
+            position:relative !important; z-index:1 !important;
+            background:rgba(22,31,48,1) !important;
+        }
+        body.engrama #attendanceMiniWeek .attendance-dot.dot-present {
+            background:rgba(0,245,212,0.15) !important;
+            border:2px solid #00F5D4 !important;
+            box-shadow:0 0 8px rgba(0,245,212,0.25) !important;
+        }
+        body.engrama #attendanceMiniWeek .attendance-dot.dot-absent,
+        body.engrama #attendanceMiniWeek .attendance-dot.dot-noclass {
+            background:rgba(255,255,255,0.03) !important;
+            border:2px solid rgba(255,255,255,0.08) !important;
+            box-shadow:none !important;
+        }
+
+        /* Challenge Arena — glassmorphism (no blue left-border) */
+        body.engrama .arena-card {
+            background:rgba(22,31,48,0.75) !important;
+            backdrop-filter:blur(16px) !important;
+            -webkit-backdrop-filter:blur(16px) !important;
+            border:1px solid rgba(43,127,232,0.12) !important;
+            border-left:1px solid rgba(43,127,232,0.12) !important;
+            border-radius:22px !important;
+            padding:20px !important;
+            box-shadow:0 4px 24px rgba(0,0,0,0.25) !important;
+        }
+
+        /* Leaderboard rows — refined */
+        body.engrama #leaderboard li {
+            background:rgba(22,31,48,0.6) !important;
+            border:1px solid rgba(43,127,232,0.1) !important;
+            border-radius:14px !important;
+            padding:12px 16px !important;
+            margin-bottom:8px !important;
+        }
+        body.engrama #leaderboard li.border-primary,
+        body.engrama #leaderboard li.border {
+            border-color:rgba(43,127,232,0.3) !important;
+            background:rgba(43,127,232,0.07) !important;
+        }
+        body.engrama #leaderboard li strong {
+            color:#F5A623 !important;
+            font-weight:700 !important;
+        }
+
+        /* Bottom nav SVG icon wrappers */
+        body.engrama .engrama-bnav a .bnav-icon-wrap {
+            width:40px; height:40px; border-radius:13px;
+            display:flex; align-items:center; justify-content:center;
+            transition:background 0.2s;
+        }
+        body.engrama .engrama-bnav a:hover .bnav-icon-wrap { background:rgba(43,127,232,0.08); }
+        body.engrama .engrama-bnav a.active .bnav-icon-wrap { background:rgba(43,127,232,0.15); }
+        body.engrama .engrama-bnav a svg { stroke:#6B82A0; transition:stroke 0.2s; }
+        body.engrama .engrama-bnav a:hover svg { stroke:var(--eng-text); }
+        body.engrama .engrama-bnav a.active svg { stroke:#2B7FE8; }
+        body.engrama .engrama-bnav #navMe svg { stroke:#6B82A0; }
+        body.engrama .engrama-bnav #navMe.active svg { stroke:#2B7FE8; }
+        body.engrama .engrama-bnav #navMe.active .bnav-icon-wrap { background:rgba(43,127,232,0.15); }
+        body.engrama .engrama-bnav #navChallenges svg { stroke:rgba(245,166,35,0.6); }
+        body.engrama .engrama-bnav #navChallenges.active svg { stroke:var(--eng-gold); }
+        body.engrama .engrama-bnav #navChallenges.active .bnav-icon-wrap { background:rgba(245,166,35,0.12); }
+
+        /* Wallet card hex pattern ::before */
+        body.engrama .gold-card {
+            position:relative !important;
+            overflow:hidden !important;
+        }
+        body.engrama .gold-card::before {
+            content:'';
+            position:absolute;
+            inset:0;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V17L28 1l28 16v33z' fill='none' stroke='%232B7FE8' stroke-width='1'/%3E%3C/svg%3E");
+            background-size:56px 100px;
+            opacity:0.04;
+            pointer-events:none;
+            z-index:0;
+        }
+        body.engrama .gold-card > * { position:relative; z-index:1; }
+
+        /* Level ring */
+        body.engrama .level-ring-wrap {
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            width:72px; height:72px;
+        }
+        body.engrama .level-ring-svg {
+            position:absolute; top:0; left:0;
+        }
+        body.engrama .level-ring-wrap .level-badge {
+            position:relative; z-index:1;
+            font-size:11px; padding:0.15rem 0.35rem;
+        }
+
+        /* Hide Progress to Top section */
+        body.engrama #progressToTop10,
+        body.engrama #progressToTop1 { display:none !important; }
+        body.engrama #topProgressBar { display:none !important; }
+        body.engrama #progressToTop10 ~ .progress,
+        body.engrama #viewDashboard > .glass-panel:has(#progressToTop10) { display:none !important; }
+
+        /* Attendance connecting line */
+        body.engrama #attendanceMiniWeek {
+            position:relative !important;
+        }
+        body.engrama #attendanceMiniWeek::before {
+            content:'';
+            position:absolute;
+            top:50%; left:16px; right:16px;
+            height:2px;
+            background:linear-gradient(90deg,#00F5D4 0%,#00F5D4 55%,rgba(43,127,232,0.12) 55%);
+            transform:translateY(-50%);
+            z-index:0;
+        }
     </style>
 </head>
-<body class="bg-dashboard">
+<body class="bg-dashboard engrama">
     <div class="decor-overlay" aria-hidden="true"></div>
     <!-- Geofence Gate: blocks entire page if student is too far -->
     <div id="geofenceGate" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,0.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); align-items:center; justify-content:center;">
@@ -74,17 +1074,19 @@
     </div>
 
     <div class="container-custom page-container" style="max-width: 700px;">
-        <div class="card card-premium" style="padding: 0; overflow: hidden;">
-            <nav class="student-nav">
-                <span class="greeting" id="navGreeting"></span>
-                <a href="#" id="navDashboard" class="active" onclick="return showStudentView('dashboard')"><i class="bi bi-house-fill"></i> Home</a>
-                <a href="#" id="navAttendance" onclick="return showStudentView('attendance')"><i class="bi bi-calendar-check"></i> Attendance</a>
-                <a href="#" id="navChallenges" onclick="return showStudentView('challenges')"><i class="bi bi-lightning-charge-fill"></i> Challenges</a>
-                <a href="#" id="navStore" onclick="return showStudentView('store')"><i class="bi bi-shop"></i> Store</a>
-                <a href="#" id="navBag" onclick="return showStudentView('bag')"><i class="bi bi-backpack-fill"></i> Bag</a>
-                <button type="button" class="nav-btn" id="btnMute" title="Mute sounds"><i class="bi bi-volume-up"></i></button>
-                <button type="button" class="nav-btn" id="btnLogoutStudent">Logout</button>
-            </nav>
+        <!-- Engrama Top Bar -->
+        <div class="engrama-topbar">
+            <div class="eng-brand">ENGRAMA</div>
+            <div class="eng-topbar-right">
+                <span class="topbar-avatar" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                <span class="greeting eng-greeting" id="navGreeting"></span>
+                <div class="eng-pill eng-pill-streak"><span id="streakBadge">🔥 0</span></div>
+                <div class="eng-pill eng-pill-coins">🪙 <span data-coins-sync>0</span></div>
+            </div>
+        </div>
+        <!-- Hidden but in DOM for JS event listeners -->
+        <button type="button" id="btnMute" title="Mute sounds" style="display:none;"><i class="bi bi-volume-up"></i></button>
+        <div class="card card-premium" style="padding: 0; overflow: hidden; border-radius: 0 !important;">
 
             <!-- VIEW: Dashboard -->
             <div id="viewDashboard" class="student-view active">
@@ -94,23 +1096,41 @@
                         <button type="button" class="btn btn-sm btn-warning" id="btnGoToChallengesBanner">Go to Challenges →</button>
                     </div>
                 </div>
+                <div class="glass-panel mb-3 challenge-active-card" id="activeChallengeSpotlight">
+                    <div class="small text-warning">🔥 ACTIVE — Waiting challenge...</div>
+                    <div class="small challenge-timer">⏱ Closes in: --:--:--</div>
+                    <div class="small challenge-prize">🪙 Win up to <strong>40</strong> coins</div>
+                    <button type="button" class="btn btn-sm btn-warning mt-2" onclick="return showStudentView('challenges')">Start Now →</button>
+                </div>
                 <div class="glass-panel card-premium mb-3 leaderboard-wrap arena-card">
-                    <h4 class="mb-1 section-title with-banner">Challenge Arena</h4>
-                    <p class="small mb-0 text-muted">Compete • Earn • Win</p>
+                    <div class="arena-coins" aria-hidden="true"><span class="arena-coin"></span><span class="arena-coin"></span><span class="arena-coin"></span></div>
+                    <h4 class="mb-1 arena-title"><span style="width:8px;height:8px;background:#00F5D4;border-radius:50%;display:inline-block;margin-right:8px;box-shadow:0 0 6px #00F5D4;animation:blink 1.5s infinite"></span>The Challenge Arena</h4>
+                    <p class="small mb-0 arena-subtitle">Compete • Earn • Win</p>
                 </div>
                 <div class="gold-card text-center">
-                    <p class="text-muted mb-1 section-title" style="justify-content:center;">
-                        <span class="ui-icon-emoji coin-pulse">🪙</span>
-                        Your Wallet
-                    </p>
+                    <div class="wallet-label">Your Wallet</div>
                     <div class="coins-num"><span id="studentCoins">0</span></div>
                 </div>
-                <div class="d-flex flex-wrap gap-2 justify-content-center mb-3">
-                    <span class="level-badge" id="levelBadge"><i class="bi bi-star-fill"></i> Level 1 <i class="bi bi-crown-fill"></i></span>
-                    <span class="streak-badge" id="streakBadge">&#x1F525; 0 day streak</span>
-                    <span class="badge-group" id="studentGroup"></span>
+                <div class="section-label">Your Stats</div>
+                <div class="stats-row mb-3">
+                    <div class="stat-col">
+                        <div class="stat-value" id="studentRankDisplay">#--</div>
+                        <div class="stat-label">Rank</div>
+                    </div>
+                    <div class="stat-col">
+                        <span class="level-ring-wrap"><svg class="level-ring-svg" width="72" height="72" viewBox="0 0 80 80"><defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2B7FE8"/><stop offset="100%" stop-color="#00F5D4"/></linearGradient></defs><circle cx="40" cy="40" r="36" fill="none" stroke="rgba(43,127,232,0.1)" stroke-width="4"/><circle cx="40" cy="40" r="36" fill="none" stroke="url(#ringGrad)" stroke-width="4" stroke-linecap="round" stroke-dasharray="226" stroke-dashoffset="81" transform="rotate(-90 40 40)"/></svg><span class="level-badge" id="levelBadge">Level 1</span></span>
+                        <div class="stat-label">Level</div>
+                    </div>
+                    <div class="stat-col">
+                        <div class="stat-value"><span class="streak-badge streak-mirror">🔥 0</span></div>
+                        <div class="stat-label">Week</div>
+                    </div>
                 </div>
-                <div class="mb-3">
+                <div class="section-label">Language Proficiencies</div>
+                <div class="mb-2" style="padding:0 4px;">
+                    <span class="lang-prof-pill" id="studentGroup"></span>
+                </div>
+                <div class="mb-3" style="padding:0 4px;">
                     <div class="d-flex justify-content-between small mb-1">
                         <span id="xpLabel">XP: 0 / 50</span>
                         <span id="xpPercLabel">0%</span>
@@ -135,12 +1155,6 @@
                     <h6 class="mb-2">Badges</h6>
                     <div class="row g-2" id="studentBadgesGrid"></div>
                 </div>
-                <div class="glass-panel mb-3 challenge-active-card" id="activeChallengeSpotlight">
-                    <div class="small text-warning">🔥 ACTIVE — Waiting challenge...</div>
-                    <div class="small text-muted">⏱️ Closes in: --:--:--</div>
-                    <div class="small text-muted">🪙 Win up to 40 coins</div>
-                    <button type="button" class="btn btn-sm btn-warning mt-2" onclick="return showStudentView('challenges')">Start Now →</button>
-                </div>
                 <div class="mb-3">
                     <h6 class="mb-2">Today's Status</h6>
                     <div id="todayStatus" class="alert alert-secondary mb-0">
@@ -155,20 +1169,27 @@
                     <h6 class="mb-2 section-title"><span class="ui-icon-emoji">🏆</span>Top 5 in your group</h6>
                     <ul class="leaderboard-list" id="leaderboard"><li class="text-muted">Loading...</li></ul>
                 </div>
-                <div class="glass-panel">
-                    <h6 class="mb-2"><i class="bi bi-chat-dots"></i> Contact / Feedback</h6>
-                    <p class="small text-muted mb-2">Need help or want to report a bug? Send quick feedback.</p>
-                    <form id="feedbackForm" class="d-flex flex-column gap-2">
-                        <input type="email" id="feedbackEmail" class="form-control form-control-sm" placeholder="Your email (optional)">
-                        <textarea id="feedbackMessage" class="form-control form-control-sm" rows="2" placeholder="Write your feedback" required></textarea>
-                        <button type="submit" class="btn btn-outline-primary btn-sm" style="width:auto;">Send feedback</button>
-                    </form>
+                <!-- Feedback & Coming Soon — hidden until Phase 3 -->
+                <div style="display:none;">
+                    <div class="glass-panel">
+                        <h6 class="mb-2"><i class="bi bi-chat-dots"></i> Contact / Feedback</h6>
+                        <p class="small text-muted mb-2">Need help or want to report a bug? Send quick feedback.</p>
+                        <form id="feedbackForm" class="d-flex flex-column gap-2">
+                            <input type="email" id="feedbackEmail" class="form-control form-control-sm" placeholder="Your email (optional)">
+                            <textarea id="feedbackMessage" class="form-control form-control-sm" rows="2" placeholder="Write your feedback" required></textarea>
+                            <button type="submit" class="btn btn-outline-primary btn-sm" style="width:auto;">Send feedback</button>
+                        </form>
+                    </div>
+                    <div class="row g-2 mt-2">
+                        <div class="col-6"><div class="glass-panel coming-soon-card p-2">🎯 Exam Prep</div></div>
+                        <div class="col-6"><div class="glass-panel coming-soon-card p-2">💼 Business English</div></div>
+                        <div class="col-6"><div class="glass-panel coming-soon-card p-2">🎤 Speaking AI</div></div>
+                        <div class="col-6"><div class="glass-panel coming-soon-card p-2">🏅 School Tournaments</div></div>
+                    </div>
                 </div>
-                <div class="row g-2 mt-2">
-                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">🎯 Exam Prep</div></div>
-                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">💼 Business English</div></div>
-                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">🎤 Speaking AI</div></div>
-                    <div class="col-6"><div class="glass-panel coming-soon-card p-2">🏅 School Tournaments</div></div>
+                <!-- Logout link -->
+                <div class="text-center mt-3 mb-1">
+                    <button type="button" id="btnLogoutStudent" style="background:none;border:none;color:#2d3f58;font-size:12px;font-family:'Lexend',sans-serif;cursor:pointer;padding:6px 12px;">Log out</button>
                 </div>
             </div>
 
@@ -242,8 +1263,18 @@
                 <div id="inventoryList"><p class="text-muted small">Loading...</p></div>
             </div>
         </div>
+        <!-- Hidden nav targets for JS compatibility -->
+        <a href="#" id="navBag" style="display:none;" onclick="return showStudentView('bag')"></a>
+        <!-- Engrama Bottom Nav -->
+        <nav class="student-nav engrama-bnav">
+            <a href="#" id="navDashboard" class="active" onclick="return showStudentView('dashboard')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span class="bnav-label">Home</span></a>
+            <a href="#" id="navAttendance" onclick="return showStudentView('attendance')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span class="bnav-label">Attend</span></a>
+            <a href="#" id="navChallenges" onclick="return showStudentView('challenges')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></span><span class="bnav-label">Play</span></a>
+            <a href="#" id="navStore" onclick="return showStudentView('store')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span><span class="bnav-label">Store</span></a>
+            <a href="#" id="navMe" onclick="return showStudentView('bag')"><span class="bnav-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="bnav-label">Me</span></a>
+        </nav>
     </div>
-    <div class="text-center small text-muted mt-2 mb-3">v1.0-MVP-STABLE</div>
+    <div class="text-center small mt-2 mb-3" style="color:#2d3f58;">v1.0-MVP-STABLE · Engrama</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./config.js"></script>
@@ -2236,6 +3267,17 @@
             
             console.log('[INIT] Dashboard initialization complete!');
         })();
+    })();
+    </script>
+    <script>
+    // Sync wallet coins → top bar pill
+    (function(){
+        var src = document.getElementById('studentCoins');
+        var dst = document.querySelector('[data-coins-sync]');
+        if (!src || !dst) return;
+        dst.textContent = src.textContent;
+        new MutationObserver(function(){ dst.textContent = src.textContent; })
+            .observe(src, { childList: true, characterData: true, subtree: true });
     })();
     </script>
 </body>

@@ -1,6 +1,9 @@
 {
   "scripts": {
-    "test:credenciales": "node --test tests/credenciales.test.js"
+    "test:credenciales": "node --test tests/credenciales.test.js",
+    "test:arnes": "node --test \"tests/exploits/*.test.js\"",
+    "arnes:humo": "node tests/exploits/humo.js",
+    "arnes:esquema": "node tools/armar_esquema.js"
   },
   "devDependencies": {
     "playwright": "^1.58.2"

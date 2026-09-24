@@ -23,3 +23,8 @@ QA_E2E_REPORT_*.md
 # Credenciales de QA fuera del repo (ESPEC_credenciales_fuera.md): solo se versiona .env.qa.example
 .env.qa
 resultados/
+
+# Arnés de regresión (generados)
+supabase/migrations/
+supabase/.branches
+supabase/.temp

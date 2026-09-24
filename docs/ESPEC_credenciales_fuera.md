@@ -32,14 +32,18 @@ Todo par se trata como **posiblemente vivo**: con Supabase pausado no se puede c
 | Regla | Detecta | Por qué |
 |---|---|---|
 | R1 · estructura | Un PIN literal (4 a 12 dígitos entre comillas) en contexto de credencial: `login(`, `verify_login(`, claves `pin`/`p_pin`/`$PIN`, `fill('#loginPin'…)`, columna `pin` en un `INSERT` a `profiles`, o `pin=` en un comentario. Falla salvo que haya un documento `synth_*` a menos de 300 caracteres o que el PIN esté en la lista de inválidos a propósito. | Capa principal: atrapa cualquier par nuevo. |
-| R2 · cédula | Un literal entre comillas con forma de cédula colombiana: empieza por 1-9 y tiene de 6 a 10 dígitos, después de quitar puntos, espacios y guiones. | Medido hoy: solo lo cumplen credenciales, con 0 falsos positivos. |
+| R2 · cédula | Un literal entre comillas con forma de cédula colombiana: empieza por 1-9 y tiene de 6 a 10 dígitos, después de quitar puntos, espacios y guiones. | ~~Medido hoy: 0 falsos positivos.~~ **Corregido por ERR-5 (2026-09-24):** al implementarlo aparecieron falsos positivos (la fecha `anthropic-version` en `app.js:3196`). Criterio nuevo: R2 solo marca literales que **no** estén en la lista de excepciones documentada, y el detector sale en 0 sobre el árbol del encargo. |
 | R3 · lista negra | Todo número de 6 a 10 dígitos (con o sin comillas, normalizado) se compara contra hashes **scrypt** de los documentos ya filtrados, con `crypto.scryptSync`, N=2^15, r=8, p=1 y sal pública. | Atrapa el documento suelto o con puntos. **SHA-256 no sirve**: unas 10^10 cédulas se recorren en segundos con GPU; scrypt cuesta unos 100 ms y 32 MB por intento. Los PIN **nunca** se hashean: con 10^4 valores, su hash equivale a publicarlos. |
 | R4 · JWT | `eyJ…` solo se admite en `app.js`. Si el payload es `service_role`, falla en cualquier archivo. | Cubre H-11 en parte. |
 | R5 · higiene | `git check-ignore -q .env.qa` da 0, `.env.qa.example` no trae valores y no hay ningún `__tmp_*` versionado. | Cierra la puerta de regreso. |
 
 - **Qué recorre:** `git ls-files --cached --others --exclude-standard` (incluye lo no commiteado), sin binarios ni `package-lock.json`.
 - **Qué reporta:** `archivo:línea:regla` con el valor **enmascarado**. Ni el test ni sus logs lo imprimen.
-- **Excepciones:** una lista en `credscan.js`, cada una con su motivo. La única prevista hoy es el ejemplo comentado en `MIGRATION_AUTH_PIN_HASH_VERIFY_LOGIN.sql:124`, porque las migraciones no se tocan.
+- **Excepciones:** una lista en `credscan.js`, cada una con su motivo. Hoy son dos:
+  - el ejemplo comentado en `MIGRATION_AUTH_PIN_HASH_VERIFY_LOGIN.sql:124`, porque las migraciones no se tocan;
+  - la fecha `anthropic-version` en `app.js:3196` (ERR-5), porque `app.js` está fuera de este encargo.
+
+  Toda excepción nueva exige un ERR.
 - **Hash nuevo:** `node tools/credscan.js --hash-desde-env QA_SUPERADMIN_DOC` imprime solo el hash.
 - **El test no se delata a sí mismo:** arma sus literales por concatenación en tiempo de ejecución.
 

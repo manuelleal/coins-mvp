@@ -1,6 +1,10 @@
 const { chromium } = require('playwright');
+const { requireEnv, optionalEnv } = require('./tools/load_env_qa');
 
-const BASE = process.env.QA_BASE_URL || 'http://127.0.0.1:8080';
+const BASE = optionalEnv('QA_BASE_URL', 'http://127.0.0.1:8080');
+const CRED_SCHOOLADMIN = { doc: requireEnv('QA_SCHOOLADMIN_DOC'), pin: requireEnv('QA_SCHOOLADMIN_PIN') };
+const CRED_TEACHER = { doc: requireEnv('QA_TEACHER_DOC'), pin: requireEnv('QA_TEACHER_PIN') };
+const CRED_STUDENT = { doc: requireEnv('QA_STUDENT_DOC'), pin: requireEnv('QA_STUDENT_PIN') };
 
 async function login(page, doc, pin) {
   await page.goto(`${BASE}/index.html`, { waitUntil: 'domcontentloaded' });
@@ -21,7 +25,7 @@ async function login(page, doc, pin) {
   let adminUrl = '';
   let teacherNames = [];
   try {
-    adminUrl = await login(pA, 'admin_uis', '1111');
+    adminUrl = await login(pA, CRED_SCHOOLADMIN.doc, CRED_SCHOOLADMIN.pin);
     if (/admin\.html/.test(adminUrl)) {
       // School admin now lands on TEACHERS view
       await pA.waitForSelector('#teachersList table', { timeout: 12000 });
@@ -46,7 +50,7 @@ async function login(page, doc, pin) {
   let groups = [];
   let teacherSeen = {};
   try {
-    teacherUrl = await login(pT, 'teacher_uis', '2222');
+    teacherUrl = await login(pT, CRED_TEACHER.doc, CRED_TEACHER.pin);
     if (/teacher\.html/.test(teacherUrl)) {
       await pT.waitForSelector('#contentUsers', { timeout: 12000 });
       await pT.waitForTimeout(1200);
@@ -76,9 +80,9 @@ async function login(page, doc, pin) {
   const ctxS = await browser.newContext();
   const pS = await ctxS.newPage();
   let studentUrl = '';
-  let pickedStudent = '1113';
+  let pickedStudent = CRED_STUDENT.doc;
   try {
-    studentUrl = await login(pS, '1113', '2009');
+    studentUrl = await login(pS, CRED_STUDENT.doc, CRED_STUDENT.pin);
     if (/student\.html/.test(studentUrl)) {
       await pS.waitForSelector('#viewDashboard', { timeout: 12000 });
       await pS.waitForTimeout(1200);

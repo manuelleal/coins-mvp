@@ -5,8 +5,21 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $baseUrl = $BaseUrl
-$supaUrl = 'https://uggkivypfugdchvjurlo.supabase.co'
-$apiKey  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnZ2tpdnlwZnVnZGNodmp1cmxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1ODkxMTMsImV4cCI6MjA4NjE2NTExM30.gCoe4SF3Ye7YcEWLfUpL1rnA5SwZ06FvJoqi0zpbxbE'
+
+# Credenciales fuera del código: ESPEC_credenciales_fuera.md. Se leen de variables de entorno
+# ($env:), nunca hardcodeadas aquí. Sin .env.qa cargado, exporta las variables antes de correr
+# este script (o cárgalas tú mismo desde .env.qa en la shell). Sin valor por defecto: si falta
+# una, el script aborta en vez de arriesgarse a pegarle a producción.
+function Get-RequiredEnv([string]$Nombre) {
+    $valor = [System.Environment]::GetEnvironmentVariable($Nombre)
+    if ([string]::IsNullOrEmpty($valor)) {
+        throw "[QA_ENV] Falta `$env:$Nombre. Copia .env.qa.example a .env.qa y complétala, o expórtala en la shell."
+    }
+    return $valor
+}
+
+$supaUrl = Get-RequiredEnv 'SUPABASE_URL'
+$apiKey  = Get-RequiredEnv 'SUPABASE_ANON_KEY'
 
 $stamp = Get-Date -Format 'yyyyMMddHHmmss'
 
@@ -17,7 +30,7 @@ $STU_A     = "qafull_stu_a_$stamp"
 $STU_B     = "qafull_stu_b_$stamp"
 $STU_C     = "qafull_stu_c_$stamp"
 $ADM_NEW   = "qafull_adm_$stamp"
-$PIN       = '5678'
+$PIN       = Get-RequiredEnv 'QA_NEWACCOUNT_PIN'
 
 # ===== RESULT COLLECTION =====
 $results = New-Object System.Collections.Generic.List[object]

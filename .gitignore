@@ -19,3 +19,7 @@ QA_E2E_REPORT_*.md
 # Documentos internos con credenciales: no se versionan
 *.docx
 ~$*
+
+# Credenciales de QA fuera del repo (ESPEC_credenciales_fuera.md): solo se versiona .env.qa.example
+.env.qa
+resultados/

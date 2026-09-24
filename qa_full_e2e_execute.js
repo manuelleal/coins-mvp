@@ -1,14 +1,17 @@
 const { chromium } = require('playwright');
+const { requireEnv, optionalEnv } = require('./tools/load_env_qa');
 
-const BASE = 'http://127.0.0.1:5500';
-const SUPA_URL = 'https://uggkivypfugdchvjurlo.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnZ2tpdnlwZnVnZGNodmp1cmxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1ODkxMTMsImV4cCI6MjA4NjE2NTExM30.gCoe4SF3Ye7YcEWLfUpL1rnA5SwZ06FvJoqi0zpbxbE';
+// Credenciales fuera del código: ESPEC_credenciales_fuera.md. Se leen de .env.qa
+// (copia .env.qa.example) o de variables ya exportadas en la shell.
+const BASE = optionalEnv('QA_BASE_URL', 'http://127.0.0.1:5500');
+const SUPA_URL = requireEnv('SUPABASE_URL');
+const SUPA_KEY = requireEnv('SUPABASE_ANON_KEY');
 
 const TEST = {
-  super_admin: { doc: '1052499107', pin: '2992' },
-  school_admin: { doc: 'admin_uis', pin: '1111' },
-  teacher: { doc: 'qa_teacher', pin: '9002' },
-  student: { doc: 'qa_student', pin: '9003' }
+  super_admin: { doc: requireEnv('QA_SUPERADMIN_DOC'), pin: requireEnv('QA_SUPERADMIN_PIN') },
+  school_admin: { doc: requireEnv('QA_SCHOOLADMIN_DOC'), pin: requireEnv('QA_SCHOOLADMIN_PIN') },
+  teacher: { doc: requireEnv('QA_E2E_TEACHER_DOC'), pin: requireEnv('QA_E2E_TEACHER_PIN') },
+  student: { doc: requireEnv('QA_E2E_STUDENT_DOC'), pin: requireEnv('QA_E2E_STUDENT_PIN') }
 };
 
 function s(v) { return String(v == null ? '' : v).trim(); }

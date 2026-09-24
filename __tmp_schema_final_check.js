@@ -1,5 +1,7 @@
-const URL='https://uggkivypfugdchvjurlo.supabase.co';
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnZ2tpdnlwZnVnZGNodmp1cmxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1ODkxMTMsImV4cCI6MjA4NjE2NTExM30.gCoe4SF3Ye7YcEWLfUpL1rnA5SwZ06FvJoqi0zpbxbE';
+const { requireEnv } = require('./tools/load_env_qa');
+// Credenciales fuera del código: ESPEC_credenciales_fuera.md.
+const URL = requireEnv('SUPABASE_URL');
+const KEY = requireEnv('SUPABASE_ANON_KEY');
 const H={apikey:KEY,Authorization:`Bearer ${KEY}`};
 async function q(label,path){const r=await fetch(`${URL}/rest/v1/${path}`,{headers:H});console.log(label,r.status); if(!r.ok){console.log(await r.text())}}
 (async()=>{

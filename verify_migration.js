@@ -1,8 +1,11 @@
 // Verify MIGRATION_SAAS_AI_ANALYTICS.sql was applied correctly
 // Usage: node verify_migration.js
 
-const SUPABASE_URL = 'https://uggkivypfugdchvjurlo.supabase.co';
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnZ2tpdnlwZnVnZGNodmp1cmxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1ODkxMTMsImV4cCI6MjA4NjE2NTExM30.gCoe4SF3Ye7YcEWLfUpL1rnA5SwZ06FvJoqi0zpbxbE';
+const { requireEnv } = require('./tools/load_env_qa');
+
+// Credenciales fuera del código: ESPEC_credenciales_fuera.md.
+const SUPABASE_URL = requireEnv('SUPABASE_URL');
+const ANON_KEY = requireEnv('SUPABASE_ANON_KEY');
 
 const H = { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY };
 const HJ = { ...H, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };

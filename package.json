@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "test:credenciales": "node --test tests/credenciales.test.js"
+  },
   "devDependencies": {
     "playwright": "^1.58.2"
   }

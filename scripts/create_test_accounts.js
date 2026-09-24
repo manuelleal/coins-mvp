@@ -1,5 +1,9 @@
-const SUPABASE_URL = 'https://uggkivypfugdchvjurlo.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVnZ2tpdnlwZnVnZGNodmp1cmxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1ODkxMTMsImV4cCI6MjA4NjE2NTExM30.gCoe4SF3Ye7YcEWLfUpL1rnA5SwZ06FvJoqi0zpbxbE';
+const { requireEnv } = require('../tools/load_env_qa');
+
+// Credenciales fuera del código: ESPEC_credenciales_fuera.md. Se leen de .env.qa
+// (copia .env.qa.example) o de variables ya exportadas en la shell.
+const SUPABASE_URL = requireEnv('SUPABASE_URL');
+const SUPABASE_ANON_KEY = requireEnv('SUPABASE_ANON_KEY');
 
 async function sb(path, opts = {}) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -85,13 +89,26 @@ async function ensureRequestedAccount(profile) {
   return { mode: 'updated_existing_name', profile: row };
 }
 
+// Guarda (ESPEC_credenciales_fuera.md, entregable 4): si ya hay documento_id que no
+// empiezan por synth_, esto no es un entorno de semillas limpio (posible producción con
+// estudiantes reales) y el script aborta en vez de mezclarse con datos reales.
+// Best-effort: revisa hasta 1000 perfiles, suficiente para local/dev.
+async function assertSyntheticOnly() {
+  const rows = await sb('profiles?select=documento_id&limit=1000');
+  const reales = (Array.isArray(rows) ? rows : []).filter((p) => !String(p.documento_id || '').startsWith('synth_'));
+  if (reales.length) {
+    throw new Error(`[GUARD] Hay ${reales.length} documento_id que no empiezan por synth_ (posible producción). Abortado.`);
+  }
+}
+
 async function main() {
+  await assertSyntheticOnly();
   const institutionId = await getFirstInstitutionId();
   const firstGroup = await getFirstGroupCode();
 
   const accounts = [
     {
-      documento_id: '99999991',
+      documento_id: 'synth_99999991',
       pin: '1111',
       nombre_completo: 'Super Admin Test',
       rol: 'super_admin',
@@ -100,7 +117,7 @@ async function main() {
       grupo: null
     },
     {
-      documento_id: '99999992',
+      documento_id: 'synth_99999992',
       pin: '2222',
       nombre_completo: 'School Admin Test',
       rol: 'admin',
@@ -109,7 +126,7 @@ async function main() {
       grupo: null
     },
     {
-      documento_id: '99999993',
+      documento_id: 'synth_99999993',
       pin: '3333',
       nombre_completo: 'Teacher Test',
       rol: 'teacher',
@@ -118,7 +135,7 @@ async function main() {
       grupo: null
     },
     {
-      documento_id: '99999994',
+      documento_id: 'synth_99999994',
       pin: '4444',
       nombre_completo: 'Student Test',
       rol: 'student',
@@ -133,7 +150,7 @@ async function main() {
     outcomes.push({ documento_id: account.documento_id, nombre_completo: account.nombre_completo, mode: out.mode });
   }
 
-  const verify = await sb('profiles?select=documento_id,nombre_completo,rol,grupo,institution_id&documento_id=in.(99999991,99999992,99999993,99999994)&order=documento_id.asc');
+  const verify = await sb('profiles?select=documento_id,nombre_completo,rol,grupo,institution_id&documento_id=in.(synth_99999991,synth_99999992,synth_99999993,synth_99999994)&order=documento_id.asc');
   console.log(JSON.stringify({ ok: true, institutionId, firstGroup, outcomes, accounts: verify }, null, 2));
 }
 

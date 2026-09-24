@@ -1,6 +1,12 @@
 const { chromium } = require('playwright');
+const { requireEnv, optionalEnv } = require('./tools/load_env_qa');
 
-const BASE = 'http://127.0.0.1:5500';
+// Credenciales fuera del código: ESPEC_credenciales_fuera.md. Se leen de .env.qa
+// (copia .env.qa.example) o de variables ya exportadas en la shell.
+const BASE = optionalEnv('QA_BASE_URL', 'http://127.0.0.1:5500');
+const CRED_SUPERADMIN = { doc: requireEnv('QA_SUPERADMIN_DOC'), pin: requireEnv('QA_SUPERADMIN_PIN') };
+const CRED_SCHOOLADMIN = { doc: requireEnv('QA_SCHOOLADMIN_DOC'), pin: requireEnv('QA_SCHOOLADMIN_PIN') };
+const CRED_TEACHER = { doc: requireEnv('QA_TEACHER_DOC'), pin: requireEnv('QA_TEACHER_PIN') };
 
 function s(v) { return String(v == null ? '' : v).trim(); }
 function short(v, n = 1500) { const t = s(v); return t.length > n ? t.slice(0, n) + '...' : t; }
@@ -50,7 +56,7 @@ async function testSuperAdmin(browser, report, stash) {
   const out = {};
 
   try {
-    const url = await login(page, '1052499107', '2992');
+    const url = await login(page, CRED_SUPERADMIN.doc, CRED_SUPERADMIN.pin);
     out.login_redirect = { status: 'PASS', seen: url };
 
     // Dashboard
@@ -161,7 +167,7 @@ async function testSchoolAdmin(browser, report) {
   const out = {};
 
   try {
-    const url = await login(page, 'admin_uis', '1111');
+    const url = await login(page, CRED_SCHOOLADMIN.doc, CRED_SCHOOLADMIN.pin);
     out.login_redirect = { status: 'PASS', seen: url };
 
     await page.waitForSelector('#ovStatStudents', { timeout: 20000 });
@@ -229,7 +235,7 @@ async function testTeacher(browser, report) {
   const out = {};
 
   try {
-    const url = await login(page, 'teacher_uis', '2222');
+    const url = await login(page, CRED_TEACHER.doc, CRED_TEACHER.pin);
     out.login_redirect = { status: 'PASS', seen: url };
 
     await page.waitForSelector('#teacherGroupTabs', { timeout: 20000 });
